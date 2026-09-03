@@ -1,0 +1,30 @@
+/* 모바일 퍼스트 기본값. 데스크톱은 breakpoint에서 확장. */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color-scheme: light dark;
+}
+
+body {
+  min-height: 100dvh;
+  line-height: 1.5;
+}
+
+.app {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.status { opacity: 0.75; }
+
+/* 태블릿/데스크톱 */
+@media (min-width: 768px) {
+  .app { gap: 1.5rem; }
+}
