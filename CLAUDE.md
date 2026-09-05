@@ -19,16 +19,7 @@
 
 ## 폴더 구조
 
-```
-crewfit/
-├── client/          # React 프론트엔드
-├── server/          # Express 백엔드
-│   ├── routes/
-│   ├── middleware/  # requireAuth 등
-│   ├── config/      # supabase.js, profiles.sql
-│   └── index.js
-└── CLAUDE.md
-```
+폴더 경계·규칙은 [`docs/architecture/overview.md`](docs/architecture/overview.md) 3절 참조 (클라 `src/features/<기능>/` + `shared/`, 서버 `routes/` + `services/`).
 
 ## MVP 기능 범위 (포함)
 
@@ -67,7 +58,7 @@ crewfit/
 ### Claude Code 협업 규칙 (커밋/브랜치)
 
 - **커밋·푸시는 사용자 승인 후에만.** Claude Code가 임의로 커밋/푸시하지 않는다.
-- 커밋 전 항상 **① 브랜치 이름 ② 커밋 메시지(초안)** 를 사용자에게 먼저 보여주고 확인받는다.
+- 커밋 전 항상 **① 브랜치 이름 ② 커밋 메시지(전문)** 를 사용자에게 먼저 보여주고, **사용자가 명시적으로 승인한 뒤에만** `git commit`을 실행한다. 승인 전에 커밋 명령을 먼저 실행하지 않으며, 메시지를 고치면 고친 전문을 다시 보여주고 재승인받는다. 포함할 파일 목록도 함께 보여준다.
 - 브랜치 이름은 위 컨벤션에 맞춰 **제안**하되, 최종 결정은 사용자가 한다.
 - **커밋 메시지에는 AI/Claude/도구 이름·`Co-Authored-By`·세션 링크 등 어떤 AI 관련 표기도 넣지 않는다.**
 
@@ -92,15 +83,6 @@ cd client && npm install
 cp .env.example .env          # VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY 채우기
 ```
 
-개발 실행 (터미널 2개):
-
-```bash
-cd server && npm run dev      # http://localhost:4000  (node --watch, 저장 시 자동 재시작)
-cd client && npm run dev      # http://localhost:5173  (vite, /api → 4000 프록시)
-```
-
-- 빌드: `cd client && npm run build`
-- 헬스체크: `GET http://localhost:4000/health` → `{"ok":true}`
 - 스택 메모: 백엔드 ESM. DB/인증은 Supabase. 로그인은 클라가 supabase-js로 처리, 서버는 `requireAuth` 미들웨어로 토큰 검증만. 서버는 service_role 키로 Supabase 접근(RLS 우회) — 키는 서버 `.env`에만.
 
 ## 아직 정해지지 않은 것
