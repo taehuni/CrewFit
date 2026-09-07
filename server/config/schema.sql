@@ -5,7 +5,7 @@
 -- ═══════════════════════════════════════════
 -- ⓪ 리셋  (개발 초기용 — 다시 실행해도 되게 전부 지우고 새로 만듦)
 -- ═══════════════════════════════════════════
--- ⚠ public 스키마의 앱 테이블 데이터가 전부 삭제됨 (auth.users 계정은 유지, 가입 트리거로 profiles 는 재생성 안 되므로 테스트 계정은 다시 가입).
+-- ⚠ public 스키마의 앱 테이블 데이터가 전부 삭제됨 (auth.users 계정은 유지되고, ② 트리거 아래 백필 문장이 그 계정들의 profiles·user_settings 를 다시 만듦 — 같은 이메일은 재가입이 안 되므로).
 --   실데이터가 쌓인 뒤에는 이 블록을 지우고 ALTER 마이그레이션으로 전환할 것.
 drop table if exists public.comments, public.post_likes, public.posts, public.ai_feedbacks,
   public.goals, public.meals, public.exercise_sets, public.activity_routes, public.activities,
@@ -251,6 +251,12 @@ end $$;
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created after insert on auth.users
   for each row execute function public.handle_new_user();
+
+-- schema.sql 재실행(⓪ 리셋)으로 profiles가 비었을 때 기존 auth.users 계정을 복구. 같은 이메일은 재가입이 안 되므로 필수.
+insert into public.profiles (id, nickname)
+  select id, coalesce(raw_user_meta_data->>'nickname', split_part(email, '@', 1)) from auth.users
+  on conflict (id) do nothing;
+insert into public.user_settings (user_id) select id from public.profiles on conflict (user_id) do nothing;
 
 -- 헬퍼 (security definer: 정책 안에서 crew_members 자기참조 재귀 방지)
 create or replace function public.is_crew_owner(p_crew_id bigint) returns boolean
