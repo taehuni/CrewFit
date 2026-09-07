@@ -168,6 +168,5 @@
 ---
 
 ## 미결 (아직 결정 아님)
-- 구현 일정 재배치 — [`overview.md` 6절](overview.md#6-구현-순서와-일정-제안--미결-일정-재배치-답)에 제안(5.5주, 운영·보완에서 0.5주). `개발계획.md` 갱신 시 확정
-- 기존 문서(`요구사항분석.md` FR-02/03/04/05/06, `CLAUDE.md` MVP·폴더 구조)가 러닝 중심·구버전 → 단계 4 이후 갱신 필요
-- 기존 코드: `profiles.sql`(with check 없음, auth.uid 미래핑), `server/config/supabase.js`(admin 단일) → 구현 시 교체
+- 기존 코드: `server/config/supabase.js`(admin 단일) → D-15 분리, `server/middleware/auth.js` → RLS 클라이언트 부착. 구현 ⓪에서 교체
+- (해결) 일정 재배치 → `개발계획.md` 3·4절 확정 (구현 5.5주, 운영·보완 1.5주). 기존 문서 갱신 → `CLAUDE.md`·`요구사항분석.md` 반영. `profiles.sql` → `schema.sql`·`seed_regions.sql`로 교체

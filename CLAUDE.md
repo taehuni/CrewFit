@@ -1,6 +1,8 @@
 # 크루핏 (CrewFit) — AI 코칭 기반 운동 크루 플랫폼
 
-2인 캡스톤 프로젝트 (15주). 네이티브 앱 없이 웹만으로 실시간 러닝 트래킹 + AI 코칭 + 크루 소셜 기능을 제공하는 웹 서비스.
+2인 캡스톤 프로젝트 (15주). 네이티브 앱 없이 웹만으로 다종목 운동 기록(헬스 세트·야외 GPS 트래킹) + 식단·목표 + AI 코칭 + 크루 소셜 기능을 제공하는 웹 서비스.
+
+> 설계 확정본은 `docs/architecture/` (개요 `overview.md` → 결정 `decisions.md` → 스키마 `schema.md` → API `api.md`). 이 파일과 어긋나면 **설계 문서가 우선**, 여기를 고친다.
 
 ## 팀 / 역할
 
@@ -13,7 +15,9 @@
 - Backend: Node.js + Express (`server/`) — AI 코칭·크루 매칭 등 서버측 로직/API 담당
 - DB: Supabase(PostgreSQL) — 로컬 DB 설치 없이 클라우드 관리형 사용
 - 인증: Supabase Auth — 클라(supabase-js)가 로그인, 서버는 `supabase.auth.getUser(token)`로 토큰 검증. bcrypt/JWT 직접 구현 안 함
-- AI 코칭: LLM API(Claude/ChatGPT) — 운동 기록 기반 피드백 생성
+- 권한: **Supabase RLS가 유일한 권한선** (D-15). 서버도 요청의 사용자 JWT로 RLS 적용 클라이언트를 씀. service_role(`supabaseAdmin`)은 `services/crewStats.js`·`services/feedback.js` 두 파일만
+- 클라 상태: TanStack Query(서버 데이터) + `AuthContext`(세션) + react-router — 구현 ①에서 추가 (D-13)
+- AI 코칭: LLM API(Claude/ChatGPT) — 기록·식단·목표를 종합한 일/주/월 피드백. 입력 해시 같으면 재호출 없음, 재생성 기간당 3회 (D-06)
 - GPS 트래킹: 브라우저 `Geolocation API` + `Wake Lock API` (네이티브 앱 없음)
 - 지도 표시: 카카오맵 JS SDK
 
@@ -21,21 +25,25 @@
 
 폴더 경계·규칙은 [`docs/architecture/overview.md`](docs/architecture/overview.md) 3절 참조 (클라 `src/features/<기능>/` + `shared/`, 서버 `routes/` + `services/`).
 
-## MVP 기능 범위 (포함)
+## MVP 기능 범위 (포함) — 10개 (D-14, 상세 `overview.md` 2절)
 
-- 회원가입/로그인 (JWT)
-- 운동 기록 CRUD (거리·시간·종류)
-- 브라우저 실시간 GPS 러닝 트래킹 (경로는 카카오맵에 폴리라인으로 표시)
-- AI 코칭 피드백 생성 (기록 기반)
-- 크루 생성/가입 (규칙 기반 매칭 — 임베딩/추천 알고리즘 아님)
-- 크루 피드 (게시/좋아요/댓글)
-- 마이페이지 대시보드 (통계, 스트릭)
+- 인증: 이메일 가입/로그인, 비밀번호 재설정 (Supabase Auth)
+- 운동 기록: 6종목(러닝·걷기·자전거·수영·헬스·기타). 공통(종목·날짜·시간) + 헬스는 `exercise_sets`(운동명 자동완성·이름 합치기), 야외 3종목만 거리·GPS 경로
+- GPS 트래킹: 러닝·걷기·자전거만. 브라우저 위치 → 종료 후 카카오맵 폴리라인
+- 식단 기록 (본인만, 칼로리 DB 없음)
+- 목표(횟수/거리/시간 × 종목 × 주/월) + 스트릭
+- AI 코칭 피드백: 일/주/월 단위 종합 피드백 (기록·식단·목표)
+- 대시보드: 통계, 스트릭, 목표 달성률
+- 크루: 종목·지역(고정 목록)·요일·레벨 규칙 매칭(임베딩 아님), 즉시가입/승인제, 리더가 `can_post` 부여, 크루 합계 통계
+- 피드: 전체 피드 + 크루 피드, 글 종류(기록/모집/자유), 기록·경로 첨부, 사진 1장(비공개 버킷), 좋아요/댓글, 리더 고정글
+- 프로필: 공개 카드 + 비공개 설정, 기록 공개 범위(public/crew/private, 기본 crew), 회원 페이지 `/users/:id`
 
 ## 제외 범위 (하지 않는 것)
 
 - iOS/Android 네이티브 앱 개발
 - 애플워치/갤럭시워치 자동 실시간 연동 (HealthKit·Health Connect는 네이티브 앱 전용이라 스코프 밖)
 - 결제, 다국어, 실시간 화상/음성 기능
+- Post-MVP 후보(일정 여유 시): 카카오 로그인, 코스 추천, 리더 양도, 고아 사진 정리
 
 ## 웹 GPS 트래킹 제약 (중요 — 매번 기억할 것)
 
@@ -64,7 +72,7 @@
 
 ## 15주 일정 (요약)
 
-개발계획(1주) → 요구사항분석(2주) → 설계(2주) → 구현(5주: 인증→기록/AI피드백→크루매칭→피드/GPS트래킹) → 테스트(2주) → 배포(1주) → 운영지원/보완(2주)
+개발계획(1주) → 요구사항분석(2주) → 설계(2주) → 구현(5.5주: ⓪스키마 → ①인증 → ②기록·식단·목표·AI → ③크루 → ④피드·GPS·프로필) → 테스트(2주) → 배포(1주) → 운영지원/보완(1.5주). 상세 표는 `docs/개발계획.md` 4절.
 
 ## 실행 방법
 
@@ -72,7 +80,9 @@
 
 ```bash
 # 0. Supabase 프로젝트 생성 (supabase.com) → Settings > API 에서 URL / anon / service_role 키 확보
-#    SQL Editor 에 server/config/profiles.sql 붙여넣어 실행 (profiles 테이블 + RLS)
+#    SQL Editor 에서 순서대로 실행:
+#      server/config/schema.sql        # 테이블·함수·RLS·트리거·storage 버킷 (재실행 시 앱 데이터 전부 리셋됨)
+#      server/config/seed_regions.sql  # 지역 목록 229행 — 없으면 크루 생성·지역 설정이 FK 에서 실패
 
 # 서버
 cd server && npm install
@@ -83,7 +93,7 @@ cd client && npm install
 cp .env.example .env          # VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY 채우기
 ```
 
-- 스택 메모: 백엔드 ESM. DB/인증은 Supabase. 로그인은 클라가 supabase-js로 처리, 서버는 `requireAuth` 미들웨어로 토큰 검증만. 서버는 service_role 키로 Supabase 접근(RLS 우회) — 키는 서버 `.env`에만.
+- 스택 메모: 백엔드 ESM. DB/인증은 Supabase. 로그인은 클라가 supabase-js로 처리, 서버는 `requireAuth`가 토큰 검증 후 **사용자 JWT로 만든 RLS 클라이언트를 `req.db`에 부착**. service_role 키는 서버 `.env`에만, 사용처는 services 2파일(위 "권한").
 
 ## 아직 정해지지 않은 것
 

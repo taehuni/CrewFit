@@ -55,7 +55,7 @@ server/
 ├── routes/            요청 파싱·응답만. supabaseAdmin import 금지
 ├── services/          Express와 분리된 앱 로직 (llm, matching, crewStats, dashboard, feedback). 순수 계산은 그 안에서 함수로 분리
 ├── middleware/        requireAuth (사용자 JWT → RLS 클라이언트 생성해 req에 부착)
-├── config/            supabase.js (사용자 클라이언트 팩토리 + supabaseAdmin), profiles.sql → schema 적용 SQL, seed_regions.sql
+├── config/            supabase.js (사용자 클라이언트 팩토리 + supabaseAdmin), schema.sql (schema.md 적용본), seed_regions.sql
 └── index.js
 ```
 
@@ -94,11 +94,12 @@ server/
 | ③ 크루 | 1.5주 | `/api/crews/match`·`join`·`approve`·`reject`·`stats` | 탐색·매칭·생성·상세·멤버 관리·통계 카드 | 승인제 크루 신청→리더 승인→can_post 부여 |
 | ④ 피드·GPS·프로필 | 2주 | (클라 직접이 대부분) 사진 정책 검증 | 전체/크루 피드·글쓰기·사진·좋아요·댓글, GPS 트래킹+카카오맵, 회원 페이지·설정 | 러닝→경로→글에 첨부(include_route)→크루원만 경로 보임 |
 
-- 합계 5.5주 (6~11주차 중반). 테스트 11.5~12, 배포 13, 운영·보완 14~15(1.5주).
+- 합계 5.5주 (6~11주차 중반). 테스트 11.5~13.5(2주), 배포 13.5~14.5(1주), 운영·보완 14.5~15(1.5주). → `개발계획.md` 3·4절에 확정 반영.
 - ⓪은 문서 SQL을 실제로 돌려보는 첫 검증 — 순서·문법 오류는 여기서 전부 잡힘.
 
 ## 7. 기존 문서·코드 갱신 목록 (설계 세션 밖, 구현 시작 전)
 
-- `CLAUDE.md`: MVP 범위(러닝→다종목·식단·목표·승인제), 폴더 구조(3절), 실행 방법(seed_regions), "서버는 service_role로 접근" 문구 → D-15
-- `docs/요구사항분석.md` FR-02~07, 화면 목록 · `docs/개발계획.md` 4절 → 6절 표로
-- `server/config/profiles.sql` → schema.md ①~⑤로 교체 · `server/config/supabase.js` → D-15 분리 · `server/middleware/auth.js` → RLS 클라이언트 부착
+- ✅ `CLAUDE.md`: MVP 범위 10개, 권한(D-15), 실행 방법(schema.sql·seed_regions.sql), 일정
+- ✅ `docs/요구사항분석.md` FR-01~10, 화면 목록, EXT-02~04 · `docs/개발계획.md` 3·4절 확정
+- ✅ `server/config/profiles.sql` → `schema.sql`(schema.md SQL + ⓪리셋 블록 + auth 트리거 + 버킷 생성) · `seed_regions.sql`(229행)
+- ⬜ `server/config/supabase.js` → D-15 분리 · `server/middleware/auth.js` → RLS 클라이언트 부착 (구현 ⓪)

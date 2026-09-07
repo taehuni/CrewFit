@@ -1,38 +1,21 @@
-# CrewFit 스키마·RLS 초안
+-- CrewFit 스키마 · RLS · storage  (원본: docs/architecture/schema.md — 문서를 먼저 고치고 여기 반영)
+-- 적용: Supabase SQL Editor 에 이 파일 전체 붙여넣어 실행 → 이어서 seed_regions.sql 실행.
+-- 실행 순서: ⓪ 리셋 → ① 테이블 → ② 함수 → ③ 정책 → ④ 트리거·컬럼 권한 → ⑤ storage
 
-> 단계 3 산출물. **문서이지 마이그레이션 파일이 아님** — 적용본은 [`server/config/schema.sql`](../../server/config/schema.sql) (이 문서 SQL + ⓪리셋 블록 + auth 트리거 생성 + 버킷 생성). 문서를 먼저 고치고 schema.sql에 반영한다.
-> 결정 근거는 [`decisions.md`](decisions.md) D-16 ~ D-26. 원칙: text+CHECK · 모든 테이블 RLS · `with check` 필수 · `(select auth.uid())` · security definer 헬퍼 · 식별 컬럼 불변(컬럼 GRANT) · 정책마다 "막는 것" 1줄.
-> SQL은 **위에서부터 그대로 실행되는 순서**로 배치: ① 테이블 → ② 함수 → ③ 정책 → ④ 트리거·컬럼 권한 → ⑤ storage. 그 뒤 `server/config/seed_regions.sql`(지역 시드) 실행 — 이게 없으면 크루 생성·지역 설정이 FK에서 실패.
+-- ═══════════════════════════════════════════
+-- ⓪ 리셋  (개발 초기용 — 다시 실행해도 되게 전부 지우고 새로 만듦)
+-- ═══════════════════════════════════════════
+-- ⚠ public 스키마의 앱 테이블 데이터가 전부 삭제됨 (auth.users 계정은 유지, 가입 트리거로 profiles 는 재생성 안 되므로 테스트 계정은 다시 가입).
+--   실데이터가 쌓인 뒤에는 이 블록을 지우고 ALTER 마이그레이션으로 전환할 것.
+drop table if exists public.comments, public.post_likes, public.posts, public.ai_feedbacks,
+  public.goals, public.meals, public.exercise_sets, public.activity_routes, public.activities,
+  public.crew_members, public.crews, public.user_settings, public.profiles, public.regions cascade;
+drop function if exists public.save_gym_activity(date, integer, text, jsonb);
+drop function if exists public.save_tracked_activity(text, date, timestamptz, integer, integer, jsonb, text, jsonb);
+drop policy if exists "images_select"     on storage.objects;
+drop policy if exists "images_insert_own" on storage.objects;
+drop policy if exists "images_delete_own" on storage.objects;
 
-## 테이블 지도
-
-| 테이블 | 접근 경로 | 비고 |
-|---|---|---|
-| profiles | 클라 직접 | 공개 카드(닉네임·주종목·레벨·공개설정). 로그인 전원 읽기 |
-| user_settings | 클라 직접 | 비공개(지역·요일·목표 메모). **본인만** (D-25) |
-| activities · activity_routes · exercise_sets | 클라 직접 | 다중 테이블 저장은 함수로 트랜잭션: 헬스(기록 1 + 세트 N) `save_gym_activity`, GPS(기록 1 + 경로 1) `save_tracked_activity` |
-| meals · goals | 클라 직접 | 본인만 |
-| ai_feedbacks | 읽기 클라 / **쓰기 서버 admin** | D-15 예외 ② |
-| regions | 클라 직접 (읽기만) | 지역 고정 목록. 시드 `server/config/seed_regions.sql`, 스키마 적용 직후 실행 |
-| crews | 클라 직접 | INSERT 시 트리거가 리더 멤버십 자동 생성. 인원수는 `crew_member_count()` (개인 행 노출 없이 숫자만) |
-| crew_members | 읽기·탈퇴·강퇴·**can_post 토글** 클라 / **가입·승인·거절 서버** | 서버도 사용자 JWT. can_post는 리더의 단일 행 UPDATE라 D-10 규칙상 클라 직접 |
-| posts · post_likes · comments | 클라 직접 | |
-| storage `post-images` | 클라 직접 | **비공개 버킷**, 사진 가시성 = 글 가시성 (D-26). 클라는 `createSignedUrls`로 URL 발급 |
-
-## 서버 액션 ↔ 접근 키 (D-11 · D-15)
-
-| 액션 | 접근 키 | 이유 |
-|---|---|---|
-| `POST /api/crews/:id/join` · `approve` · `reject` | 사용자 JWT | join_mode 분기, RLS가 self-approve 차단 |
-| `GET /api/crews/match` | 사용자 JWT | 크루 전원 조회 + 내 user_settings |
-| `GET /api/crews/:id/stats` | **admin** | private 제외·crew 공개 기록 합산, 합계만. 기여 멤버 3명 미만이면 비표시 (D-20) |
-| `POST /api/feedback/generate` | 읽기 JWT / **쓰기 admin** | LLM 키, 위조 방지 |
-| `GET /api/dashboard` | 사용자 JWT | 본인 집계 (스트릭·목표 달성률) |
-| `POST /api/exercises/merge` | 사용자 JWT | RLS가 본인 범위로 자름 |
-
-## SQL
-
-```sql
 -- ═══════════════════════════════════════════
 -- ① 테이블  (FK 순서: profiles → crews → crew_members → activities … → posts → likes/comments)
 -- ═══════════════════════════════════════════
@@ -265,8 +248,9 @@ begin
   insert into user_settings (user_id) values (new.id);
   return new;
 end $$;
--- create trigger on_auth_user_created after insert on auth.users
---   for each row execute function public.handle_new_user();   (기존 트리거 있으면 함수만 교체)
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created after insert on auth.users
+  for each row execute function public.handle_new_user();
 
 -- 헬퍼 (security definer: 정책 안에서 crew_members 자기참조 재귀 방지)
 create or replace function public.is_crew_owner(p_crew_id bigint) returns boolean
@@ -612,6 +596,9 @@ grant update (content)                                                        on
 -- 사진 가시성 = 글 가시성 (D-26). 객체 이름 = posts.image_path = {author_id}/{uuid}.jpg
 -- 클라는 <img src>에 인증 헤더를 못 실으므로 createSignedUrls(경로 배열, 만료초)로 URL을 받음 — 서명 시점에 아래 select 정책이 평가됨
 
+insert into storage.buckets (id, name, public) values ('post-images', 'post-images', false)
+  on conflict (id) do nothing;
+
 -- 막는 것: 크루 밖 사용자가 크루 전용 글 사진 열람. 내 폴더이거나, 내가 볼 수 있는 글(posts RLS 상속)이 참조하는 객체만
 create policy "images_select" on storage.objects for select
   to authenticated using (
@@ -628,11 +615,3 @@ create policy "images_delete_own" on storage.objects for delete
   to authenticated using (
     bucket_id = 'post-images' and (storage.foldername(name))[1] = (select auth.uid())::text);
 -- 글 저장 전 업로드만 하고 버린 고아 객체는 본인만 봄. 정리는 Post-MVP
-```
-
-## 기존 코드와의 차이 (구현 시 교체)
-- ✅ `server/config/profiles.sql` → `schema.sql`로 교체됨 (⓪ 리셋 블록이 기존 profiles를 drop하고 전부 새로 생성)
-- ⬜ `server/config/supabase.js`: admin 단일 → D-15대로 사용자 JWT 클라이언트 + `supabaseAdmin` 분리
-
-## 미결
-- 없음. 스키마 갈림은 전부 D-16 ~ D-26에서 확정. 남은 미결(일정·기존 문서/코드 갱신)은 decisions.md 참조.
