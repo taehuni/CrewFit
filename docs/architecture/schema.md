@@ -267,6 +267,7 @@ begin
 end $$;
 -- create trigger on_auth_user_created after insert on auth.users
 --   for each row execute function public.handle_new_user();   (기존 트리거 있으면 함수만 교체)
+-- 적용본(schema.sql)은 트리거 생성 직후 auth.users → profiles·user_settings 백필을 함께 실행 (리셋 재실행 시 기존 계정 복구, 같은 이메일 재가입 불가하므로)
 
 -- 헬퍼 (security definer: 정책 안에서 crew_members 자기참조 재귀 방지)
 create or replace function public.is_crew_owner(p_crew_id bigint) returns boolean
@@ -632,7 +633,7 @@ create policy "images_delete_own" on storage.objects for delete
 
 ## 기존 코드와의 차이 (구현 시 교체)
 - ✅ `server/config/profiles.sql` → `schema.sql`로 교체됨 (⓪ 리셋 블록이 기존 profiles를 drop하고 전부 새로 생성)
-- ⬜ `server/config/supabase.js`: admin 단일 → D-15대로 사용자 JWT 클라이언트 + `supabaseAdmin` 분리
+- ✅ `server/config/supabase.js`: `createUserClient(token)` + `supabaseAdmin` 분리 (구현 ⓪)
 
 ## 미결
 - 없음. 스키마 갈림은 전부 D-16 ~ D-26에서 확정. 남은 미결(일정·기존 문서/코드 갱신)은 decisions.md 참조.

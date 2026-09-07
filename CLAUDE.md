@@ -6,8 +6,8 @@
 
 ## 팀 / 역할
 
-- **민태훈**: PM, 백엔드 개발(API/DB/AI 연동/크루 매칭 로직), DB 설계
-- **김민규**: 요구사항 분석, UI/UX 디자인, 프론트엔드 개발(GPS 트래킹 UI 포함)
+- **민태훈**: PM, 백엔드 개발(API/DB/AI 연동/크루 매칭 로직), DB 설계. 경험이 많아 **프론트 뼈대·디자인 시스템도 먼저 잡아준 뒤** 화면 단위로 넘김 (D-27)
+- **김민규**: 요구사항 분석, UI/UX 디자인, 프론트엔드 개발(GPS 트래킹 UI 포함) — 태훈이 깐 뼈대 위에서 화면 구현
 
 ## 기술 스택
 
@@ -15,7 +15,7 @@
 - Backend: Node.js + Express (`server/`) — AI 코칭·크루 매칭 등 서버측 로직/API 담당
 - DB: Supabase(PostgreSQL) — 로컬 DB 설치 없이 클라우드 관리형 사용
 - 인증: Supabase Auth — 클라(supabase-js)가 로그인, 서버는 `supabase.auth.getUser(token)`로 토큰 검증. bcrypt/JWT 직접 구현 안 함
-- 권한: **Supabase RLS가 유일한 권한선** (D-15). 서버도 요청의 사용자 JWT로 RLS 적용 클라이언트를 씀. service_role(`supabaseAdmin`)은 `services/crewStats.js`·`services/feedback.js` 두 파일만
+- 권한: **기본 권한선은 Supabase RLS** (D-15). 서버도 요청의 사용자 JWT로 RLS 적용 클라이언트를 씀. service_role(`supabaseAdmin`)은 `services/crewStats.js`·`services/feedback.js` 두 파일만 — 이 두 경로에서는 RLS가 아니라 **서버 코드가 권한선**이므로 열거·최소화
 - 클라 상태: TanStack Query(서버 데이터) + `AuthContext`(세션) + react-router — 구현 ①에서 추가 (D-13)
 - AI 코칭: LLM API(Claude/ChatGPT) — 기록·식단·목표를 종합한 일/주/월 피드백. 입력 해시 같으면 재호출 없음, 재생성 기간당 3회 (D-06)
 - GPS 트래킹: 브라우저 `Geolocation API` + `Wake Lock API` (네이티브 앱 없음)
@@ -86,7 +86,7 @@
 
 # 서버
 cd server && npm install
-cp .env.example .env          # SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY 채우기
+cp .env.example .env          # SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY 채우기
 
 # 클라이언트
 cd client && npm install

@@ -9,11 +9,11 @@
 브라우저 (React + supabase-js)
  │
  ├─ ① 클라 직접 ──────────────► Supabase (Postgres + Auth + Storage)
- │    단일 테이블 · 내 범위 CRUD           RLS가 유일한 권한선
+ │    단일 테이블 · 내 범위 CRUD           RLS가 기본 권한선
  │    rpc: save_gym_activity
  │
  └─ ② Express /api/* ─┬─ 사용자 JWT ──► Supabase (RLS 적용)   ← 기본
-      "서버만 할 수 있는 동작"  └─ service_role ► Supabase (RLS 우회)  ← services/ 열거 파일 2곳만
+      "서버만 할 수 있는 동작"  └─ service_role ► Supabase (RLS 우회)  ← services/ 열거 파일 2곳만, 여기선 서버 코드가 권한선
                                           + LLM API (비밀키)
 ```
 
@@ -82,24 +82,25 @@ server/
 - 사진: 비공개 버킷, storage 정책이 posts 가시성 상속.
 - 서버: 라우트마다 `requireAuth`, `supabaseAdmin`은 services 2파일만.
 
-## 6. 구현 순서와 일정 (제안 — 미결 "일정 재배치" 답)
+## 6. 구현 순서와 일정 (확정 — `개발계획.md` 3·4절과 동일)
 
-기존 개발계획 구현 5주(6~10주차)를 설계 반영해 재배치. 승인제·권한·회원 페이지·통계·regions가 추가돼 **0.5주 초과** → 운영·보완(14~15주차) 2주에서 0.5주 당겨옴.
+기존 개발계획 구현 5주(6~10주차)를 설계 반영해 재배치. 승인제·권한·회원 페이지·통계·regions가 추가돼 **0.5주 초과** → 운영·보완(14~15주차) 2주에서 0.5주 당겨옴. 2인 병렬 기준, 구현 ① 끝에 속도 재확인(D-27).
 
-| 순서 | 기간 | 백엔드(태훈) | 프론트(민규) | Done 기준 |
+| 순서 | 기간 | 백엔드(태훈) | 프론트(민규, ①은 태훈 선행) | Done 기준 |
 |---|---|---|---|---|
-| ⓪ 스키마 | 구현 ① 첫날 | schema.md 전체 + seed_regions 적용, `supabase.js` 분리, `requireAuth` 교체 | — | SQL Editor에서 통째로 무오류 실행, `/api/me` 동작 |
-| ① 인증 | 0.5주 | `/api/me` | 가입·로그인·비밀번호 재설정, AuthContext, 보호 라우트, Query·Router 세팅 | 가입→로그인→새로고침 유지→재설정 메일 |
+| ⓪ 스키마 | 첫날 | schema.sql + seed_regions 적용, `supabase.js` 분리, `requireAuth` 교체 | — | SQL Editor에서 통째로 무오류 실행, `/api/me` 동작 |
+| ① 인증 | 0.5주 | `/api/me` | 태훈: 뼈대(Query·Router·AuthContext·보호 라우트) + 디자인 시스템 + 로그인 화면 완성본 / 민규: 가입·비밀번호 재설정 | 가입→로그인→새로고침 유지→재설정 메일 |
 | ② 기록·식단·목표·AI | 1.5주 | `/api/feedback/generate`, `/api/dashboard`, `/api/exercises/merge`, 프롬프트 튜닝 | 종목별 입력 폼(헬스 세트·자동완성), 식단, 목표, 대시보드, 피드백 화면 | 헬스+러닝 기록→주간 피드백 생성→대시보드 달성률 |
 | ③ 크루 | 1.5주 | `/api/crews/match`·`join`·`approve`·`reject`·`stats` | 탐색·매칭·생성·상세·멤버 관리·통계 카드 | 승인제 크루 신청→리더 승인→can_post 부여 |
 | ④ 피드·GPS·프로필 | 2주 | (클라 직접이 대부분) 사진 정책 검증 | 전체/크루 피드·글쓰기·사진·좋아요·댓글, GPS 트래킹+카카오맵, 회원 페이지·설정 | 러닝→경로→글에 첨부(include_route)→크루원만 경로 보임 |
 
 - 합계 5.5주 (6~11주차 중반). 테스트 11.5~13.5(2주), 배포 13.5~14.5(1주), 운영·보완 14.5~15(1.5주). → `개발계획.md` 3·4절에 확정 반영.
-- ⓪은 문서 SQL을 실제로 돌려보는 첫 검증 — 순서·문법 오류는 여기서 전부 잡힘.
+- ⓪은 문서 SQL을 실제로 돌려보는 첫 검증 — 순서·문법 오류는 여기서 전부 잡힘. → 2026-09-07 SQL 적용 완료(무오류), 서버 코드 교체 완료. **`/api/me` 실토큰 검증이 남아 ⓪은 아직 Done 아님** (진행 상황: `decisions.md` 맨 아래).
+- D-27: 구현 ①은 태훈이 프론트 뼈대·디자인 시스템·로그인 화면 1개까지 먼저 깔고, 민규는 그 위에서 화면 단위로 구현.
 
 ## 7. 기존 문서·코드 갱신 목록 (설계 세션 밖, 구현 시작 전)
 
 - ✅ `CLAUDE.md`: MVP 범위 10개, 권한(D-15), 실행 방법(schema.sql·seed_regions.sql), 일정
 - ✅ `docs/요구사항분석.md` FR-01~10, 화면 목록, EXT-02~04 · `docs/개발계획.md` 3·4절 확정
 - ✅ `server/config/profiles.sql` → `schema.sql`(schema.md SQL + ⓪리셋 블록 + auth 트리거 + 버킷 생성) · `seed_regions.sql`(229행)
-- ⬜ `server/config/supabase.js` → D-15 분리 · `server/middleware/auth.js` → RLS 클라이언트 부착 (구현 ⓪)
+- 🔶 `server/config/supabase.js` → D-15 분리(`createUserClient`·`supabaseAdmin`) · `server/middleware/auth.js` → `req.db` 부착 · `routes/me.js` — 코드 완료, **실토큰 `/api/me` 검증 남음**
