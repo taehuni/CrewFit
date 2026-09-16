@@ -9,7 +9,7 @@
 | 테이블 | 접근 경로 | 비고 |
 |---|---|---|
 | profiles | 클라 직접 | 공개 카드(닉네임·주종목·레벨·공개설정). 로그인 전원 읽기 |
-| user_settings | 클라 직접 | 비공개(지역·요일·목표 메모). **본인만** (D-25) |
+| user_settings | 클라 직접 | 비공개(실명·지역·요일·목표 메모). **본인만**. 실명만 크루장 전용 `crew_member_names` RPC로 제한 제공 (D-25·D-28) |
 | activities · activity_routes · exercise_sets | 클라 직접 | 다중 테이블 저장은 함수로 트랜잭션: 헬스(기록 1 + 세트 N) `save_gym_activity`, GPS(기록 1 + 경로 1) `save_tracked_activity` |
 | meals · goals | 클라 직접 | 본인만 |
 | ai_feedbacks | 읽기 클라 / **쓰기 서버 admin** | D-15 예외 ② |
@@ -31,6 +31,16 @@
 | `POST /api/exercises/merge` | 사용자 JWT | RLS가 본인 범위로 자름 |
 
 ## SQL
+
+### 기존 DB의 기록 수정·삭제 지원
+
+`server/config/migrations/20260914_update_gym_activity.sql`만 실행한다. 테이블 초기화 없이 `update_gym_activity` 함수와 authenticated 실행 권한을 추가한다. 함수는 본인 헬스 기록을 잠근 뒤 공통 정보 갱신·기존 세트 삭제·새 세트 입력을 한 트랜잭션으로 수행한다. 세트 입력이 실패하면 기존 기록과 세트도 복원된다. 종목·소유자·활동 ID는 바꾸지 않는다.
+
+같은 파일은 `posts_clear_detached_route` 트리거도 추가한다. 기록 삭제에 따른 FK SET NULL 또는 작성자의 첨부 해제 시 `include_route`를 false로 바꿔 게시글의 경로 CHECK를 유지한다. 게시글 본문·공개 범위는 바꾸지 않는다. 적용 후 테스트 DB에서 `server/config/tests/activity_mutations.sql`로 롤백·소유권·연쇄 삭제를 검증한다.
+
+### 기존 DB의 실명 기능 추가
+
+보존할 데이터가 있는 DB에는 `server/config/migrations/20260909_member_real_name.sql`을 적용한다. `schema.sql` 전체 실행은 초기화 가능한 개발 DB에서만 사용한다. 실명 필수는 가입 폼에서 적용하며 트리거는 누락·NULL·공백을 NULL로 저장한다. 값이 있으면 trim 후 길이·제어문자 제약으로 검사한다. 적용 후 `server/config/tests/member_real_name.sql`로 입력 경계와 조회·수정 권한을 검증한다. 실행 결과는 [진행 상황](decisions.md#진행-상황-설계-이후-최신이-위)에 기록한다.
 
 ```sql
 -- ═══════════════════════════════════════════
@@ -68,6 +78,10 @@ create table public.profiles (
 -- 2. user_settings — 비공개 1:1 (D-25). 매칭·AI 프롬프트용
 create table public.user_settings (
   user_id        uuid primary key references public.profiles(id) on delete cascade,
+  real_name      text constraint user_settings_real_name_check check (
+                   real_name is null or (real_name = btrim(real_name)
+                     and char_length(real_name) between 1 and 50
+                     and real_name !~ '[[:cntrl:]]')),
   region_sido    text,
   region_sigungu text,
   preferred_days smallint[] not null default '{}'
@@ -262,7 +276,9 @@ language plpgsql security definer set search_path = public as $$
 begin
   insert into profiles (id, nickname)
     values (new.id, coalesce(new.raw_user_meta_data->>'nickname', split_part(new.email, '@', 1)));
-  insert into user_settings (user_id) values (new.id);
+  -- 가입 폼은 필수. 메타데이터가 없는 관리자 생성 등은 NULL 허용 (D-28).
+  insert into user_settings (user_id, real_name)
+    values (new.id, nullif(btrim(new.raw_user_meta_data->>'real_name'), ''));
   return new;
 end $$;
 -- create trigger on_auth_user_created after insert on auth.users
@@ -270,6 +286,26 @@ end $$;
 -- 적용본(schema.sql)은 트리거 생성 직후 auth.users → profiles·user_settings 백필을 함께 실행 (리셋 재실행 시 기존 계정 복구, 같은 이메일 재가입 불가하므로)
 
 -- 헬퍼 (security definer: 정책 안에서 crew_members 자기참조 재귀 방지)
+-- 크루장 전용 실명 조회. user_settings의 다른 비공개 컬럼은 반환하지 않는다 (D-28).
+create or replace function public.crew_member_names(p_crew_id bigint)
+returns table (user_id uuid, real_name text)
+language plpgsql stable security definer set search_path = '' as $$
+begin
+  if not exists (
+    select 1 from public.crews c
+    where c.id = p_crew_id and c.owner_id = (select auth.uid())
+  ) then
+    raise exception '크루장만 실명을 조회할 수 있습니다' using errcode = '42501';
+  end if;
+  return query
+    select m.user_id, s.real_name
+    from public.crew_members m
+    join public.user_settings s on s.user_id = m.user_id
+    where m.crew_id = p_crew_id and m.status = 'approved';
+end $$;
+revoke all on function public.crew_member_names(bigint) from public, anon, authenticated;
+grant execute on function public.crew_member_names(bigint) to authenticated;
+
 create or replace function public.is_crew_owner(p_crew_id bigint) returns boolean
 language sql stable security definer set search_path = public as $$
   select exists (select 1 from crews where id = p_crew_id and owner_id = (select auth.uid()));
@@ -314,6 +350,55 @@ begin
     from jsonb_array_elements(p_sets) s;
   return v_id;
 end $$;
+
+-- D-22: 헬스 수정은 기록과 세트를 한 트랜잭션으로 교체한다.
+-- 부모 행 잠금으로 같은 기록의 동시 수정이 서로의 세트를 섞지 않게 한다.
+create or replace function public.update_gym_activity(
+  p_activity_id bigint, p_performed_on date, p_duration_sec integer, p_note text, p_sets jsonb
+) returns bigint
+language plpgsql security invoker set search_path = '' as $$
+begin
+  if p_sets is null or jsonb_typeof(p_sets) <> 'array' then
+    raise exception 'sets must be an array' using errcode = '22023';
+  end if;
+  if jsonb_array_length(p_sets) < 1 or jsonb_array_length(p_sets) > 100 then
+    raise exception 'sets must contain 1 to 100 entries' using errcode = '22023';
+  end if;
+  perform 1 from public.activities
+    where id = p_activity_id and user_id = (select auth.uid()) and sport = 'gym'
+    for update;
+  if not found then
+    raise exception 'activity not found' using errcode = 'P0002';
+  end if;
+
+  update public.activities
+    set performed_on = p_performed_on, duration_sec = p_duration_sec, note = p_note
+    where id = p_activity_id and user_id = (select auth.uid()) and sport = 'gym';
+  delete from public.exercise_sets
+    where activity_id = p_activity_id and user_id = (select auth.uid());
+  insert into public.exercise_sets (activity_id, user_id, exercise_name, set_no, reps, weight_kg)
+    select p_activity_id, (select auth.uid()), trim(s->>'exercise_name'), (s->>'set_no')::smallint,
+           (s->>'reps')::smallint, (s->>'weight_kg')::numeric
+    from jsonb_array_elements(p_sets) s;
+  return p_activity_id;
+end $$;
+
+revoke execute on function public.update_gym_activity(bigint, date, integer, text, jsonb) from public, anon;
+grant execute on function public.update_gym_activity(bigint, date, integer, text, jsonb) to authenticated;
+
+-- 기록 첨부 해제(FK SET NULL 포함) 시 경로 공개도 함께 해제한다.
+create or replace function public.clear_detached_post_route()
+returns trigger language plpgsql security invoker set search_path = '' as $$
+begin
+  if new.activity_id is null then
+    new.include_route := false;
+  end if;
+  return new;
+end $$;
+revoke execute on function public.clear_detached_post_route() from public, anon, authenticated;
+drop trigger if exists posts_clear_detached_route on public.posts;
+create trigger posts_clear_detached_route before update of activity_id on public.posts
+  for each row execute function public.clear_detached_post_route();
 
 -- GPS 저장: 기록 1행 + 경로 1행 한 트랜잭션 (D-23·D-24). security INVOKER → RLS 적용. 경로 저장 실패 시 기록도 남지 않음
 create or replace function public.save_tracked_activity(
@@ -591,7 +676,7 @@ create trigger set_updated_at before update on public.comments      for each row
 -- 막는 것: 리더가 crew_members.user_id를 남으로 바꿔 강제 가입 / 글 author_id·crew_id 변조 / id·user_id·created_at 변경
 revoke update on all tables in schema public from authenticated;
 grant update (nickname, main_sport, level, activity_visibility, show_crews)   on public.profiles      to authenticated;
-grant update (region_sido, region_sigungu, preferred_days, goal_note)        on public.user_settings to authenticated;
+grant update (real_name, region_sido, region_sigungu, preferred_days, goal_note) on public.user_settings to authenticated;
 grant update (name, description, sport, level, region_sido, region_sigungu, activity_days, join_mode)
                                                                               on public.crews         to authenticated;
 grant update (status, can_post)                                               on public.crew_members  to authenticated;

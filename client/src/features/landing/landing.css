@@ -1,0 +1,197 @@
+/* 랜딩 전용. 색면으로 장면을 바꾼다:
+   히어로(아스팔트) → 사실 띠 → 01 기록(웜그레이) → 02 AI(차콜) → 03 크루(베이지) → 이용 방법(종이) → CTA(주황).
+   형태 규칙: 데이터(표·지도·패널)는 각지게(2px), 사람(배번표·크루·게시물)은 부드럽게(12px).
+   트랙 레인은 히어로·AI·CTA에 반복해 페이지를 잇는 선. */
+.lp { --lp-max: 1120px; --char: #262b34; --char-2: #3a404b; --dim: #b8bec9; --warm: #f7e9dd; --warmgrey: #efece8; --r-data: 2px; --r-people: 12px; }
+.lp-wrap { width: 100%; max-width: var(--lp-max); margin: 0 auto; padding-left: 20px; padding-right: 20px; }
+.lp section { scroll-margin-top: 64px; }
+.lp h2 { font-size: 2rem; line-height: 1.15; letter-spacing: -0.02em; }
+.lp h3 { font-size: 1.125rem; }
+.lp-lead { font-size: 1.0625rem; line-height: 1.6; }
+.dim { color: var(--dim); }
+
+/* 내비 */
+.lp-nav { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--ink) 88%, transparent); backdrop-filter: blur(8px); color: var(--paper); }
+.lp-nav .row { height: 60px; justify-content: space-between; }
+.lp-nav .wordmark { font-size: 1.625rem; }
+.lp-nav-links { display: none; gap: 24px; font-weight: 500; color: var(--dim); }
+.lp-nav-links a:hover { color: var(--paper); }
+.lp-nav-cta { display: flex; gap: 8px; }
+.lp-nav-cta .btn-ghost { display: none; border-color: var(--char-2); color: var(--paper); }
+.lp-nav-cta .btn-ghost:hover { background: var(--char); border-color: var(--dim); }
+
+/* 트랙 레인 */
+.lp-lanes { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; fill: none; stroke: #fff; stroke-opacity: 0.07; stroke-width: 2; pointer-events: none; }
+.lp-lanes-low { stroke-opacity: 0.05; }
+
+/* 히어로 */
+.lp-hero { position: relative; overflow: hidden; background: var(--ink); color: var(--paper); padding-top: 40px; }
+.lp-hero-grid { position: relative; display: grid; gap: 40px; padding-bottom: 40px; }
+.lp-hero h1 { font-size: 2.25rem; line-height: 1.15; letter-spacing: -0.025em; }
+.lp-hero h1 br { display: none; }
+.lp-hero .lp-lead { margin-top: 18px; color: var(--dim); max-width: 36ch; }
+.lp-cta-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+.btn-ghost-dark { background: transparent; border-color: var(--char-2); color: var(--paper); }
+.btn-ghost-dark:hover { border-color: var(--dim); background: var(--char); }
+
+/* 폰(앞) + 통계 패널(뒤) */
+.lp-devices { position: relative; display: grid; gap: 14px; }
+.lp-wide { background: var(--char); border-radius: var(--r-data); padding: 16px; display: grid; gap: 14px; min-width: 0; }
+.lp-phone {
+  background: var(--ink); border: 6px solid var(--char-2); border-radius: 28px; overflow: hidden; max-width: 300px; width: 100%;
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.7);
+}
+.lp-phone-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 18px 4px; font-size: 0.8125rem; color: var(--dim); }
+.lp-phone-bar span:last-child { width: 18px; height: 9px; border: 1.5px solid var(--dim); border-radius: 2px; }
+.lp-phone-body { padding: 10px 12px 14px; display: grid; gap: 10px; }
+.lp-phone .bib { padding: 10px 14px 18px; }
+.lp-phone .bib-name { font-size: 2.25rem; margin-top: 8px; }
+.lp-phone .bib-meta { font-size: 0.8125rem; }
+.lp-phone .btn { height: 44px; pointer-events: none; }
+.lp-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.lp-stats > div { min-width: 0; }
+.lp-stats .num { display: block; font-size: 1.75rem; }
+.lp-stats .small { display: block; margin-top: 2px; color: var(--dim); }
+.lp-fire { color: var(--accent); }
+.lp-bars { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; height: 72px; align-items: end; }
+.lp-bars > div { display: grid; grid-template-rows: 1fr auto; height: 100%; gap: 4px; }
+.lp-bars > div > span { align-self: end; background: var(--accent); border-radius: 1px; min-height: 2px; }
+.lp-bars > div > span[data-gym] { background: var(--paper); }
+.lp-bars b { font-weight: 500; font-size: 0.6875rem; color: var(--dim); text-align: center; }
+.lp-map { background: var(--char); border-radius: var(--r-data); overflow: hidden; }
+.lp-map svg { width: 100%; height: auto; display: block; }
+.lp-map-grid { stroke: #fff; stroke-opacity: 0.07; stroke-width: 1; }
+.lp-map-route { fill: none; stroke: var(--accent); stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
+.lp-map circle { fill: var(--accent); }
+.lp-map-cap { padding: 8px 12px 10px; display: grid; gap: 4px; border-top: 1px solid var(--char-2); }
+.lp-map-cap .row { gap: 12px; }
+.lp-map-cap .num { font-size: 1.125rem; white-space: nowrap; }
+.lp-recent { list-style: none; }
+.lp-recent li { gap: 10px; padding: 10px 0; border-top: 1px solid var(--char-2); font-size: 0.9375rem; }
+.lp-recent .num { font-size: 1.0625rem; white-space: nowrap; }
+.lp-sport { flex: none; font-size: 0.75rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--char-2); }
+.lp-warmgrey .lp-sport, .lp-warm .lp-sport { background: var(--paper); color: var(--ink); }
+
+/* 사실 띠 */
+.lp-facts { position: relative; list-style: none; display: flex; flex-wrap: wrap; gap: 8px 24px; padding-top: 18px; padding-bottom: 18px; border-top: 1px solid var(--char-2); font-size: 0.9375rem; color: var(--dim); }
+.lp-facts li::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-right: 8px; vertical-align: 2px; }
+.lp-facts .num { font-size: 1.125rem; color: var(--paper); }
+
+/* 섹션 공통 + 대형 번호 */
+.lp-sec { position: relative; overflow: hidden; padding: 56px 0; }
+.lp-bignum {
+  position: absolute; top: -8px; right: -6px; font-family: var(--font-num); font-weight: 600; font-size: 8rem; line-height: 1;
+  color: currentColor; opacity: 0.12; pointer-events: none; user-select: none;
+}
+.lp-warmgrey { background: var(--warmgrey); }
+.lp-warm { background: var(--warm); }
+.lp-dark { background: var(--ink); color: var(--paper); }
+.lp-dark .lp-bignum { opacity: 0.16; }
+.lp-bgroute { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke: var(--accent); stroke-opacity: 0.35; stroke-width: 5; stroke-linecap: round; pointer-events: none; }
+.lp-detail { position: relative; display: grid; gap: 28px; }
+.lp-kicker { font-family: var(--font-num); font-weight: 600; font-size: 1rem; letter-spacing: 0.06em; color: var(--accent-ink); margin-bottom: 10px; }
+.lp-dark .lp-kicker { color: var(--accent); }
+.lp-detail-copy .lp-lead { margin-top: 14px; color: var(--ink-2); max-width: 40ch; }
+.lp-dark .lp-detail-copy .lp-lead { color: var(--dim); }
+.lp-detail-ui { display: grid; gap: 12px; min-width: 0; }
+.lp-panel { background: #fff; border-radius: var(--r-data); padding: 16px 20px; min-width: 0; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04); }
+
+/* 01 기록 UI */
+.lp-sets table { width: 100%; margin-top: 10px; border-collapse: collapse; font-size: 0.9375rem; }
+.lp-sets th { text-align: left; font-weight: 500; color: var(--ink-2); font-size: 0.8125rem; padding: 6px 0; border-bottom: 1px solid var(--ink); }
+.lp-sets td { padding: 8px 0; border-bottom: 1px solid var(--line-soft); }
+.lp-sets td.num, .lp-sets th:not(:first-child) { text-align: right; }
+.lp-sets td.num { font-size: 1.125rem; }
+.lp-run .row { gap: 20px; align-items: flex-end; }
+.lp-run .num { font-size: 1.5rem; }
+.lp-run .num-lg { font-size: 2.5rem; }
+.lp-unit { font-size: 1rem; font-weight: 500; color: var(--ink-2); }
+
+/* 02 AI */
+.lp-feedback { position: relative; background: var(--char); border-radius: var(--r-data); padding: 20px; }
+.lp-feedback .lp-stats { grid-template-columns: repeat(3, 1fr); margin-top: 12px; }
+.lp-feedback .lp-stats .num { font-size: 2rem; }
+.lp-feedback-text { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--char-2); line-height: 1.7; font-size: 1.0625rem; }
+
+/* 03 크루 — 사람 카드는 부드럽게 */
+.lp-crew-copy { position: relative; }
+.lp-crews { position: relative; list-style: none; display: grid; gap: 12px; margin-top: 28px; }
+.lp-crew { background: #fff; border-radius: var(--r-people); padding: 16px 18px; min-width: 0; }
+.lp-crew h3 { margin-top: 12px; font-size: 1.25rem; }
+.lp-crew .row { gap: 10px; }
+.lp-match { flex: none; font-size: 0.75rem; font-weight: 600; color: var(--green); background: #e6f2ea; border-radius: 999px; padding: 3px 9px; }
+.lp-bibs { display: inline-flex; gap: 4px; margin-top: 10px; }
+.lp-bibs .num {
+  display: inline-block; padding: 3px 6px 2px; background: #fff; color: var(--ink); font-size: 0.8125rem; letter-spacing: 0.04em;
+  border-radius: 2px; border-bottom: 3px solid var(--accent); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+.lp-bibs .num:nth-child(2) { border-bottom-color: var(--ink); }
+.lp-bibs .num:nth-child(3) { border-bottom-color: var(--green); }
+.lp-bibs .num:nth-child(4) { border-bottom-color: var(--blue); }
+.lp-crew .row .num { font-size: 1.125rem; color: var(--ink); margin-right: 1px; }
+.lp-crew-meta { margin-top: 4px; color: var(--ink-2); font-size: 0.9375rem; }
+.lp-crew-next { margin-top: 12px; font-size: 0.9375rem; }
+.lp-crew-next .muted { margin-right: 6px; }
+.lp-crew-week { margin-top: 4px; font-size: 0.9375rem; font-weight: 600; color: var(--accent-ink); }
+.lp-post { position: relative; background: #fff; border-radius: var(--r-people); padding: 16px 18px; margin-top: 12px; display: grid; gap: 10px; }
+.lp-post .lp-bibs { margin-top: 0; }
+.lp-post-run { gap: 10px; padding: 10px 12px; background: var(--paper); border-radius: var(--r-data); font-size: 0.9375rem; }
+.lp-post-run .num { white-space: nowrap; }
+
+/* 이용 방법 */
+.lp-how { padding: 48px 0 56px; }
+.lp-how ol { list-style: none; display: grid; gap: 24px; margin-top: 24px; }
+.lp-how li { display: grid; grid-template-columns: auto 1fr; column-gap: 14px; }
+.lp-how li .num { grid-row: 1 / 3; font-size: 3rem; color: var(--accent); }
+.lp-how li p { color: var(--ink-2); margin-top: 4px; }
+
+/* 최종 CTA — 결승선 체커 + 거대한 START */
+.lp-final { position: relative; overflow: hidden; background: var(--accent); color: #fff; padding: 64px 0 56px; }
+.lp-finish {
+  position: absolute; top: 0; left: 0; right: 0; height: 16px;
+  background: repeating-conic-gradient(var(--ink) 0 25%, #fff 0 50%) 0 0 / 16px 16px;
+}
+.lp-start {
+  position: absolute; right: -4px; bottom: -0.18em; font-family: var(--font-num); font-weight: 600; font-size: 9rem; line-height: 1;
+  color: #fff; opacity: 0.18; letter-spacing: 0.02em; pointer-events: none; user-select: none;
+}
+.lp-final-grid { position: relative; }
+.lp-final h2 br { display: none; }
+.lp-final .lp-lead { margin-top: 12px; opacity: 0.92; max-width: 36ch; }
+.lp-final .btn { margin-top: 24px; }
+.btn-paper { background: var(--paper); color: var(--ink); }
+.btn-paper:hover:not(:disabled) { background: #fff; }
+.lp-final .btn-paper:focus-visible { outline-color: #fff; }
+
+/* 푸터 */
+.lp-foot { border-top: 1px solid var(--line); padding: 32px 0 calc(32px + env(safe-area-inset-bottom)); }
+.lp-foot nav { display: flex; flex-wrap: wrap; gap: 16px; margin: 14px 0; }
+.lp-foot nav a { text-decoration: underline; text-underline-offset: 3px; }
+.lp-foot nav a:hover { color: var(--accent-ink); }
+
+@media (min-width: 768px) {
+  .lp h2 { font-size: 3rem; }
+  .lp-lead { font-size: 1.125rem; }
+  .lp-nav-links { display: flex; }
+  .lp-nav-cta .btn-ghost { display: inline-flex; }
+  .lp-hero { padding-top: 64px; }
+  .lp-hero-grid { grid-template-columns: 1fr 1.1fr; align-items: center; gap: 48px; padding-bottom: 64px; }
+  .lp-hero h1 { font-size: 3.5rem; }
+  .lp-hero h1 br { display: inline; }
+  .lp-hero .lp-lead { font-size: 1.25rem; }
+  /* 폰이 통계 패널 왼쪽 위에 살짝 겹치되, 패널 내용은 폰 뒤로 숨지 않게 */
+  .lp-devices { display: grid; grid-template-columns: 264px 1fr; gap: 0; align-items: start; }
+  .lp-phone { grid-column: 1; grid-row: 1; position: relative; z-index: 1; width: 264px; }
+  .lp-wide { grid-column: 2; grid-row: 1; margin-left: -48px; padding-left: 64px; margin-top: 28px; }
+  .lp-facts { gap: 8px 32px; padding-top: 20px; padding-bottom: 20px; }
+  .lp-sec { padding: 72px 0; }
+  .lp-bignum { font-size: 14rem; top: -16px; right: 0; }
+  .lp-detail { grid-template-columns: 1fr 1.2fr; align-items: center; gap: 72px; }
+  .lp-detail-rev .lp-detail-copy { order: 2; }
+  .lp-crews { grid-template-columns: repeat(3, 1fr); }
+  .lp-post { max-width: 560px; }
+  .lp-how ol { grid-template-columns: repeat(3, 1fr); gap: 32px; }
+  .lp-final { padding: 96px 0 88px; }
+  .lp-final h2 br { display: inline; }
+  .lp-start { font-size: 20rem; }
+}

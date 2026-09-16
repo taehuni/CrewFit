@@ -14,6 +14,6 @@ export default function RequireAuth() {
 export function GuestOnly() {
   const { loading, session } = useAuth();
   if (loading) return <div className="center">불러오는 중…</div>;
-  if (session) return <Navigate to="/" replace />;
+  if (session) return <Navigate to="/home" replace />;
   return <Outlet />;
 }

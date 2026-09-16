@@ -3,6 +3,8 @@
 > 설계 세션(단계 1~4) 산출물의 입구. 결정 근거는 [`decisions.md`](decisions.md), 스키마·RLS 전문은 [`schema.md`](schema.md), 서버 API는 [`api.md`](api.md).
 > 구현 중 여기와 어긋나는 게 생기면 **코드가 아니라 문서를 먼저 고친다** (ADR 항목 수정 + 확신도 조정).
 
+관련 설계 도식: [순차 다이어그램](sequence-diagrams.md) · [클래스 다이어그램](class-diagrams.md). 구현 기준과 설계 기준을 각 문서에서 구분한다.
+
 ## 1. 한 장 그림
 
 ```
@@ -95,12 +97,7 @@ server/
 | ④ 피드·GPS·프로필 | 2주 | (클라 직접이 대부분) 사진 정책 검증 | 전체/크루 피드·글쓰기·사진·좋아요·댓글, GPS 트래킹+카카오맵, 회원 페이지·설정 | 러닝→경로→글에 첨부(include_route)→크루원만 경로 보임 |
 
 - 합계 5.5주 (6~11주차 중반). 테스트 11.5~13.5(2주), 배포 13.5~14.5(1주), 운영·보완 14.5~15(1.5주). → `개발계획.md` 3·4절에 확정 반영.
-- ⓪은 문서 SQL을 실제로 돌려보는 첫 검증 — 순서·문법 오류는 여기서 전부 잡힘. → 2026-09-07 SQL 적용 완료(무오류), 서버 코드 교체 완료. **`/api/me` 실토큰 검증이 남아 ⓪은 아직 Done 아님** (진행 상황: `decisions.md` 맨 아래).
+- ⓪은 문서 SQL의 실행 순서·문법과 `/api/me`를 검증하는 단계다.
 - D-27: 구현 ①은 태훈이 프론트 뼈대·디자인 시스템·로그인 화면 1개까지 먼저 깔고, 민규는 그 위에서 화면 단위로 구현.
 
-## 7. 기존 문서·코드 갱신 목록 (설계 세션 밖, 구현 시작 전)
-
-- ✅ `CLAUDE.md`: MVP 범위 10개, 권한(D-15), 실행 방법(schema.sql·seed_regions.sql), 일정
-- ✅ `docs/요구사항분석.md` FR-01~10, 화면 목록, EXT-02~04 · `docs/개발계획.md` 3·4절 확정
-- ✅ `server/config/profiles.sql` → `schema.sql`(schema.md SQL + ⓪리셋 블록 + auth 트리거 + 버킷 생성) · `seed_regions.sql`(229행)
-- 🔶 `server/config/supabase.js` → D-15 분리(`createUserClient`·`supabaseAdmin`) · `server/middleware/auth.js` → `req.db` 부착 · `routes/me.js` — 코드 완료, **실토큰 `/api/me` 검증 남음**
+진행 상태와 다음 행동은 [설계 결정 기록의 진행 상황](decisions.md#진행-상황-설계-이후-최신이-위)에서 관리한다.

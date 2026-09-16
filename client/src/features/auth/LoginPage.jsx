@@ -8,7 +8,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
-  const from = useLocation().state?.from || '/';
+  const from = useLocation().state?.from || '/home';
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -22,15 +22,17 @@ export default function LoginPage() {
 
   return (
     <AuthLayout
-      tagline="기록하고, 크루와 같이 뛰자."
-      footer={<><Link to="/signup">처음이면 가입하기</Link><Link to="/forgot">비밀번호를 잊었어요</Link></>}
+      title={<>다시 운동할<br />시간이에요.</>}
+      heading="로그인"
+      description="가입한 이메일로 로그인해 기록을 이어가세요."
     >
-      <form className="form" onSubmit={onSubmit} noValidate={false}>
+      <form className="form" onSubmit={onSubmit}>
         <Field id="email" name="email" type="email" label="이메일" autoComplete="email" inputMode="email" spellCheck={false} placeholder="name@example.com" required />
-        <Field id="password" name="password" type="password" label="비밀번호" autoComplete="current-password" required />
+        <Field id="password" name="password" type="password" label="비밀번호" labelAction={<Link to="/forgot">비밀번호 찾기</Link>} autoComplete="current-password" required />
         <FormMessage>{error}</FormMessage>
         <Button type="submit" block disabled={busy}>{busy ? '로그인 중…' : '로그인'}</Button>
       </form>
+      <Link to="/signup" className="btn btn-ghost btn-block auth-secondary">무료로 시작하기</Link>
     </AuthLayout>
   );
 }

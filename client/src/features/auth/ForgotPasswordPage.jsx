@@ -23,7 +23,13 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <AuthLayout tagline="가입한 이메일로 재설정 링크를 보내 드려요." footer={<Link to="/login">로그인으로 돌아가기</Link>}>
+    <AuthLayout
+      title={<>멈춘 기록도,<br />다시 이어갈 수 있어요.</>}
+      tagline="가입한 이메일로 안전하게 재설정 링크를 보내 드립니다."
+      heading="비밀번호 재설정"
+      description="가입할 때 사용한 이메일을 입력하세요."
+      footer={<p><Link to="/login">로그인으로 돌아가기</Link></p>}
+    >
       {sent ? (
         <FormMessage tone="ok">메일을 보냈어요. 받은 편지함에서 링크를 열어 새 비밀번호를 정해 주세요.</FormMessage>
       ) : (

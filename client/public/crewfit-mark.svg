@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240" fill="none" color="#1E2229">
+  <title>CrewFit</title>
+  <style>@media (prefers-color-scheme: dark) { svg { color: #F4F5F7; } }</style>
+  <g id="crewfit-symbol">
+    <path d="M168 62.9996C135 29.9996 81.0001 34.4996 51.0001 73.4996C24.0001 109.5 33.0001 162 70.5001 190.5C94.5001 210 126 213 156 198" stroke="#FF4F0F" stroke-width="31.3043" stroke-linecap="round"/>
+    <path d="M148.5 56.9997C159.27 56.9997 168 48.2693 168 37.4997C168 26.7302 159.27 17.9997 148.5 17.9997C137.73 17.9997 129 26.7302 129 37.4997C129 48.2693 137.73 56.9997 148.5 56.9997Z" fill="currentColor"/>
+    <path d="M117 64.5003H208.5V100.5H157.5L151.5 123H192V157.5H142.5L126 214.5H85.5001L117 64.5003Z" fill="currentColor"/>
+  </g>
+</svg>

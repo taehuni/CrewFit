@@ -1,0 +1,31 @@
+.workspace { min-height: 100dvh; background: var(--paper); color: var(--ink); }
+.ws-header { height: 72px; padding: 0 max(24px, calc((100% - 1160px) / 2)); display: flex; align-items: center; gap: 48px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.ws-brand { flex-shrink: 0; }
+.ws-nav { align-self: stretch; display: flex; }
+.ws-nav-links { display: flex; gap: 28px; }
+.ws-nav-item { position: relative; min-width: 40px; display: flex; align-items: center; justify-content: center; color: var(--ink-2); font-weight: 650; }
+.ws-nav-item[aria-current="page"] { color: var(--ink); }
+.ws-nav-item[aria-current="page"]::after { content: ''; position: absolute; inset: auto 0 -1px; height: 3px; background: var(--accent); }
+.ws-nav-item svg { display: none; width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.ws-account { margin-left: auto; display: flex; align-items: center; gap: 10px; min-width: 0; font-size: .875rem; font-weight: 650; }
+.ws-account-name { max-width: 132px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ws-bib { border: 1px solid var(--ink); padding: 3px 8px; font: 600 1.5rem/1 var(--font-num); font-variant-numeric: tabular-nums; }
+.ws-main { max-width: 1208px; margin: auto; padding: 44px 24px 64px; }
+.workspace .btn-primary { color: var(--ink); background: var(--accent); border-color: var(--accent); font-weight: 750; }
+.workspace .btn-primary:hover { background: var(--accent-ink); border-color: var(--accent-ink); color: var(--surface); }
+.workspace button:focus-visible, .workspace a:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+@media (max-width: 959px) {
+  .ws-header { height: 72px; padding: 0 24px; gap: 16px; }
+  .ws-nav { position: fixed; z-index: 20; inset: auto 0 0; background: var(--surface); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
+  .ws-nav-links { width: 100%; gap: 0; }
+  .ws-nav-item { flex: 1; min-height: 64px; flex-direction: column; gap: 3px; font-size: .75rem; }
+  .ws-nav-item svg { display: block; }
+  .ws-nav-item[aria-current="page"]::after { inset: 0 25% auto; height: 3px; }
+  .ws-main { padding: 28px 24px calc(96px + env(safe-area-inset-bottom)); }
+}
+@media (max-width: 479px) {
+  .ws-header { padding: 0 20px; }
+  .ws-header .wordmark { font-size: 1.25rem; }
+  .ws-account-name { max-width: 80px; }
+  .ws-main { padding: 24px 20px calc(92px + env(safe-area-inset-bottom)); }
+}

@@ -13,6 +13,7 @@
   --accent-ink: #c73a05;
   --green: #2f7d4f;
   --danger: #c8321f;
+  --blue: #2b6cb0;
 
   --font-body: 'Pretendard Variable', Pretendard, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-num: 'Barlow Condensed', 'Pretendard Variable', system-ui, sans-serif;
@@ -28,6 +29,7 @@
   line-height: 1.5;
   color: var(--ink);
   background: var(--paper);
+  word-break: keep-all; /* 한글은 어절 단위로 줄바꿈 */
   -webkit-tap-highlight-color: transparent;
   -webkit-text-size-adjust: 100%;
 }
@@ -70,10 +72,15 @@ h2 { font-size: 1.125rem; }
   border-bottom: 1px solid var(--line-soft); background: var(--paper);
 }
 .wordmark {
-  font-family: var(--font-num); font-weight: 600; font-size: 1.5rem; line-height: 1;
-  letter-spacing: 0.02em; text-transform: uppercase;
+  display: inline-flex; align-items: center; gap: 0.38em;
+  font-size: 1.5rem; line-height: 1; color: inherit;
 }
-.wordmark em { font-style: normal; color: var(--accent); }
+.brand-mark {
+  width: 1.4em; height: 1.4em; flex: none;
+}
+.brand-word {
+  font-family: var(--font-body); font-weight: 800; letter-spacing: -0.035em;
+}
 .shell-main { width: 100%; max-width: var(--shell-w); margin: 0 auto; padding: 20px 16px 32px; min-width: 0; }
 .shell-nav {
   position: sticky; bottom: 0; z-index: 10;
@@ -100,30 +107,21 @@ h2 { font-size: 1.125rem; }
     display: flex; flex-direction: column; gap: 4px; padding: 24px 12px;
     border-top: 0; border-right: 1px solid var(--line);
   }
-  .shell-nav .wordmark { display: block; padding: 4px 12px 20px; }
+  .shell-nav .wordmark { display: inline-flex; padding: 4px 12px 20px; }
   .tab { flex-direction: row; justify-content: flex-start; gap: 10px; padding: 10px 12px; font-size: 0.9375rem; border-radius: var(--radius); }
   .tab:hover { background: var(--paper); }
   .tab[aria-current='page'] { background: var(--paper); }
 }
 .shell-nav .wordmark { display: none; }
 
-/* ── 인증 화면: 셸 없음, 좁은 한 열, 좌측 정렬 ────────── */
-.auth {
-  max-width: 400px; margin: 0 auto;
-  padding: 24px 20px; padding-top: calc(48px + env(safe-area-inset-top)); padding-bottom: calc(24px + env(safe-area-inset-bottom));
-}
-@media (min-width: 768px) { .auth { padding-top: 96px; } }
-.auth-hero { margin-bottom: 32px; }
-.auth-hero .wordmark { font-size: 3rem; }
-.auth-hero p { margin-top: 8px; color: var(--ink-2); }
-.auth-foot { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 24px; font-size: 0.9375rem; color: var(--ink-2); }
-.auth-foot a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
-.auth-foot a:hover { color: var(--accent-ink); }
-
 /* ── 폼 ──────────────────────────────────────────── */
 .form { display: grid; gap: 16px; }
 .field { display: grid; gap: 6px; }
 .field label { font-size: 0.875rem; font-weight: 600; }
+.field-label-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.field-label-action { font-size: 0.8125rem; font-weight: 500; color: var(--ink-2); }
+.field-label-action a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.field-label-action a:hover { color: var(--accent-ink); }
 .field input {
   height: 48px; padding: 0 14px; border: 1px solid var(--line); border-radius: var(--radius);
   background: var(--surface); transition: border-color 0.15s;
@@ -155,23 +153,35 @@ h2 { font-size: 1.125rem; }
 .btn-block { width: 100%; }
 .btn-sm { height: 36px; padding: 0 12px; font-size: 0.875rem; }
 
-/* ── 배번표 카드: 이 앱에서 유일하게 과감한 요소 ──────── */
+/* ── 프로필 카드: 레이스 배번표. 이 앱에서 유일하게 과감한 요소 ─────── */
 .bib {
-  position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
-  padding: 20px 20px 16px; overflow: hidden;
+  position: relative; background: #fff; color: var(--ink); border-radius: 3px; overflow: hidden;
+  padding: 14px 20px 22px; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 8px 24px -12px rgba(0, 0, 0, 0.25);
 }
 .bib::before, .bib::after {
-  content: ''; position: absolute; top: 12px; width: 6px; height: 6px; border-radius: 50%;
-  background: var(--paper); border: 1px solid var(--line);
+  content: ''; position: absolute; top: 10px; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--paper); box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
 }
-.bib::before { left: 12px; }
-.bib::after { right: 12px; }
+.bib::before { left: 10px; }
+.bib::after { right: 10px; }
+.bib-head { display: flex; justify-content: space-between; align-items: baseline; padding: 0 8px; font-family: var(--font-num); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.8125rem; color: var(--ink-2); }
+.bib-head .num { font-size: 1.25rem; color: var(--ink); letter-spacing: 0.04em; }
 .bib-name {
   font-family: var(--font-num); font-weight: 600; font-size: 3rem; line-height: 1; letter-spacing: 0.01em;
-  overflow-wrap: anywhere; margin-top: 8px;
+  overflow-wrap: anywhere; margin-top: 12px; text-align: center;
 }
-.bib-meta { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 10px; font-size: 0.875rem; color: var(--ink-2); }
-.bib-stripe { position: absolute; left: 0; right: 0; bottom: 0; height: 5px; background: var(--accent); }
+.bib-meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 12px; margin-top: 8px; font-size: 0.875rem; color: var(--ink-2); }
+.bib-stripe { position: absolute; left: 0; right: 0; bottom: 0; height: 8px; background: var(--accent); }
+.bib[data-sport='cycling'] .bib-stripe { background: var(--green); }
+.bib[data-sport='swimming'] .bib-stripe { background: var(--blue); }
+.bib[data-sport='gym'] .bib-stripe { background: var(--ink); }
+.bib[data-sport='other'] .bib-stripe, .bib[data-sport='none'] .bib-stripe { background: var(--line); }
+
+/* ── 카드·유틸 ───────────────────────────────── */
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 20px; min-width: 0; }
+.actions { display: grid; gap: 10px; }
+.grow { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* ── 페이지 공통 ─────────────────────────────────── */
 .page-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 20px; }

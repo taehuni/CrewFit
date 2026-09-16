@@ -1,0 +1,45 @@
+.activity-detail { max-width: 760px; margin: 0 auto; }
+.activity-back { display: inline-block; padding: 8px 0; color: var(--ink-2); font-size: .875rem; text-decoration: underline; text-underline-offset: 4px; }
+.activity-detail-heading { margin-bottom: 24px; }
+.activity-detail-actions { display: flex; gap: 8px; margin-top: 20px; }
+.activity-delete-open { color: var(--danger); }
+.activity-delete-dialog { margin: auto; width: min(440px, calc(100% - 40px)); max-height: calc(100dvh - 48px); overflow: auto; padding: 28px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink); }
+.activity-delete-dialog::backdrop { background: rgb(0 0 0 / .5); }
+.activity-delete-dialog h2 { font-size: 1.25rem; margin-bottom: 12px; }
+.activity-delete-dialog > p { line-height: 1.65; color: var(--ink-2); font-size: .9375rem; }
+.activity-delete-dialog .form-msg:not(:empty) { margin-top: 16px; }
+.activity-delete-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+.workspace .activity-delete-confirm { color: var(--surface); background: var(--danger); border-color: var(--danger); }
+.workspace .activity-delete-confirm:hover { color: var(--surface); background: var(--danger); border-color: var(--danger); }
+.activity-detail-heading h1 { margin-top: 12px; font-size: 2rem; letter-spacing: -.04em; }
+.activity-detail-heading time { display: block; margin-top: 8px; color: var(--ink-2); font-size: .875rem; font-variant-numeric: tabular-nums; }
+.activity-detail h2 { font-size: 1.125rem; margin-bottom: 16px; }
+.activity-detail-summary { display: flex; gap: 32px; padding: 24px 28px; border: 1px solid var(--line); border-top: 3px solid var(--accent); background: var(--surface); }
+.activity-detail-summary > div { flex: 1; min-width: 0; }
+.activity-detail-summary dt { color: var(--ink-2); font-size: .8125rem; }
+.activity-detail-summary dd { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; margin-top: 8px; font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.activity-detail-summary small { font-size: .8125rem; font-weight: 400; color: var(--ink-2); }
+.activity-detail-sets, .activity-detail-note { margin-top: 32px; }
+.exercise-detail { margin-top: 20px; border: 1px solid var(--line); background: var(--surface); }
+.exercise-detail h3 { padding: 16px 20px; font-size: 1rem; border-bottom: 1px solid var(--line-soft); overflow-wrap: anywhere; }
+.exercise-detail table { width: 100%; table-layout: fixed; border-collapse: collapse; text-align: right; }
+.exercise-detail th, .exercise-detail td { padding: 12px 20px; font-variant-numeric: tabular-nums; }
+.exercise-detail thead th { font-size: .75rem; font-weight: 500; color: var(--ink-2); background: var(--paper); }
+.exercise-detail th:first-child { text-align: left; }
+.exercise-detail tbody th { font-weight: 500; color: var(--ink-2); }
+.exercise-detail tbody td { font-weight: 650; }
+.exercise-detail tbody tr + tr { border-top: 1px solid var(--line-soft); }
+.exercise-detail td small { margin-left: 5px; font-size: .75rem; font-weight: 400; color: var(--ink-2); }
+.detail-missing { font-size: .875rem; font-weight: 400; color: var(--ink-2); }
+.activity-detail-note > p { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.7; padding: 20px; background: var(--surface); border: 1px solid var(--line); }
+.activity-detail-state { padding: 24px; border: 1px solid var(--line); background: var(--surface); }
+.activity-detail-state p { color: var(--ink-2); }
+.activity-detail-state button { margin-top: 16px; }
+@media (max-width: 639px) {
+  .activity-detail-heading h1 { font-size: 1.75rem; }
+  .activity-detail-summary { padding: 20px 16px; gap: 16px; }
+  .activity-detail-summary dd { font-size: 1.25rem; }
+  .activity-detail-summary small { font-size: .75rem; }
+  .exercise-detail h3 { padding: 14px 16px; }
+  .exercise-detail th, .exercise-detail td { padding: 12px; }
+}

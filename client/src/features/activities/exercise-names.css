@@ -1,0 +1,14 @@
+.exercise-name { position: relative; }
+.exercise-suggestions { position: absolute; top: 76px; left: 0; right: 0; z-index: 5; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 6px 18px rgb(0 0 0 / .12); }
+.exercise-suggestions ul { list-style: none; max-height: 240px; overflow-y: auto; overscroll-behavior: contain; }
+.exercise-suggestions button { display: flex; width: 100%; min-height: 44px; gap: 8px; align-items: center; justify-content: space-between; padding: 10px 12px; border: 0; background: none; text-align: left; cursor: pointer; }
+.exercise-suggestions button:hover, .exercise-suggestions button[aria-selected="true"] { background: var(--paper); box-shadow: inset 3px 0 var(--accent); }
+.exercise-suggestions button > span { min-width: 0; overflow-wrap: anywhere; }
+.exercise-suggestions small { flex-shrink: 0; font-size: .6875rem; color: var(--ink-2); }
+.exercise-suggestions > p { padding: 12px; font-size: .8125rem; color: var(--ink-2); }
+.exercise-history-status { margin-bottom: 12px; font-size: .8125rem; color: var(--ink-2); }
+.exercise-history-status:empty { display: none; }
+.exercise-history-status button { margin-left: 8px; border: 0; background: none; text-decoration: underline; color: var(--ink); cursor: pointer; }
+.activity-duration { min-width: 0; margin: 0; padding: 0; border: 0; }
+.activity-duration > legend { margin-bottom: 8px; font-weight: 650; font-size: .875rem; }
+.activity-duration-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }

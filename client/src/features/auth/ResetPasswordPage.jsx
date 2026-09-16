@@ -21,13 +21,19 @@ export default function ResetPasswordPage() {
     const { error } = await supabase.auth.updateUser({ password: f.get('password') });
     setBusy(false);
     if (error) return setError(authMessage(error));
-    navigate('/', { replace: true });
+    navigate('/home', { replace: true });
   }
 
   if (loading) return <div className="center">링크 확인 중…</div>;
 
   return (
-    <AuthLayout tagline="새 비밀번호를 정해 주세요." footer={<Link to="/forgot">재설정 메일 다시 받기</Link>}>
+    <AuthLayout
+      title={<>새 비밀번호로,<br />기록을 이어가세요.</>}
+      tagline="계정만 다시 확인하면 기존 운동 기록은 그대로 이어집니다."
+      heading="새 비밀번호 설정"
+      description="앞으로 사용할 비밀번호를 입력하세요."
+      footer={<p><Link to="/forgot">재설정 메일 다시 받기</Link></p>}
+    >
       {!session ? (
         <FormMessage>링크가 만료됐거나 잘못됐어요. 재설정 메일을 다시 요청해 주세요.</FormMessage>
       ) : (

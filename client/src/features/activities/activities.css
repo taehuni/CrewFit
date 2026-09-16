@@ -1,0 +1,36 @@
+.activity-page { max-width: 760px; margin: 0 auto; }
+.activity-heading { margin-bottom: 28px; }
+.activity-heading > a { font-size: .875rem; color: var(--ink-2); text-decoration: underline; text-underline-offset: 4px; }
+.activity-heading h1 { margin: 12px 0 0; font-size: 2rem; letter-spacing: -.04em; }
+.activity-fields { margin: 0; padding: 28px; border: 1px solid var(--line); background: var(--surface); min-width: 0; }
+.activity-sports { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0 0 24px; padding: 0; border: 0; }
+.activity-sports legend { margin-bottom: 8px; font-weight: 650; font-size: .875rem; }
+.activity-sports label { display: flex; align-items: center; gap: 8px; justify-content: center; padding: 10px 8px; min-height: 48px; border: 1px solid var(--line); border-radius: var(--radius); cursor: pointer; }
+.activity-sports label[data-selected="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.activity-sports input { accent-color: var(--ink); }
+.activity-basics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; gap: 20px; margin-bottom: 24px; }
+.activity-page .field { margin: 0; min-width: 0; }
+.activity-page input, .activity-page textarea { width: 100%; min-width: 0; }
+.activity-page input[type="radio"] { width: auto; }
+.activity-page textarea { display: block; margin-top: 8px; border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; font: inherit; background: var(--surface); color: var(--ink); resize: vertical; }
+.activity-optional { margin-left: 6px; color: var(--ink-2); font-size: .75rem; font-weight: 400; }
+.activity-sets { margin: 0 0 24px; }
+.activity-sets-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+.activity-sets-head h2 { margin: 0; font-size: 1rem; }
+.activity-sets-head > span { font-size: .75rem; color: var(--ink-2); }
+.activity-set { min-width: 0; display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 12px; margin: 0 0 16px; padding: 16px; border: 1px solid var(--line); }
+.activity-set legend { padding: 0 6px; font-size: .8125rem; color: var(--ink-2); }
+.activity-set > .btn { align-self: start; margin-top: 28px; padding: 0 10px; }
+.activity-actions { display: flex; align-items: center; gap: 24px; margin-top: 24px; }
+.activity-actions > .btn { min-width: 180px; }
+.activity-actions > a { color: var(--ink-2); font-size: .875rem; }
+@media (max-width: 639px) {
+  .activity-sports { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .activity-heading h1 { font-size: 1.75rem; }
+  .activity-fields { padding: 20px 16px; }
+  .activity-basics { grid-template-columns: 1fr; gap: 16px; }
+  .activity-set { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 12px; }
+  .activity-set > .field:first-of-type { grid-column: 1 / -1; }
+  .activity-set > .btn { margin: 0; min-height: 40px; grid-column: 2; }
+  .activity-actions > .btn { flex: 1; min-width: 0; }
+}
