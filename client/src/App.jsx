@@ -9,7 +9,7 @@ import {
   LoginPage, SignupPage, ForgotPasswordPage, ResetPasswordPage,
 } from './features/auth/index.js';
 import HomePage from './features/dashboard/HomePage.jsx';
-import { ActivitiesPage, ActivityCreatePage, ActivityDetailPage, ActivityEditPage } from './features/activities/index.js';
+import { ActivitiesPage, ActivityCreatePage, ActivityDetailPage, ActivityEditPage, ExerciseNamesPage } from './features/activities/index.js';
 import { MePage } from './features/profile/index.js';
 import { LandingPage } from './features/landing/index.js';
 
@@ -34,6 +34,7 @@ export default function App() {
                 <Route path="/home" element={<HomePage />} />
                 <Route path="/activities" element={<Suspense fallback={<p role="status">기록 화면을 불러오고 있어요.</p>}><ActivitiesPage /></Suspense>} />
                 <Route path="/activities/new" element={<ActivityCreatePage />} />
+                <Route path="/activities/exercises" element={<Suspense fallback={<p role="status">운동 이름을 불러오고 있어요.</p>}><ExerciseNamesPage /></Suspense>} />
                 <Route path="/activities/:activityId" element={<ActivityDetailPage />} />
                 <Route path="/activities/:activityId/edit" element={<ActivityEditPage />} />
                 <Route path="/crews" element={<ComingSoon title="크루" step="③" />} />

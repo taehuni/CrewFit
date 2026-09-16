@@ -4,6 +4,7 @@ export const queryKeys = {
   activities: (userId, filters = {}) => ['activities', userId, filters],
   activityList: (userId, filters) => ['activities', userId, 'list', filters],
   exerciseNames: (userId) => ['activities', userId, 'exerciseNames'],
+  exerciseCatalog: (userId) => ['activities', userId, 'exerciseCatalog'],
   activity: (userId, activityId) => ['activities', userId, 'detail', activityId],
   meals: (userId, date) => ['meals', userId, date],
   goals: (userId) => ['goals', userId],

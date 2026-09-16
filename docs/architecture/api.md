@@ -111,8 +111,13 @@ res  { "streak": { "current": 6, "best": 14, "today_done": false },
 req  { "from": "벤치프레스", "to": "Bench Press" }
 res  { "updated": 37 }
 ```
-- `update exercise_sets set exercise_name = :to where lower(exercise_name) = lower(:from)` — JWT라 RLS가 본인 행으로 자름(D-15 시나리오). `to`는 trim 후 CHECK 통과해야 함.
+- 서버는 사용자 JWT의 `req.db.rpc('merge_exercise_names', { p_from, p_to })`를 호출한다. DB 함수는 `security invoker`, 빈 search_path, 완전 수식 테이블명, `auth.uid()` 필터로 본인 이름만 단일 UPDATE한다. service_role은 사용하지 않는다.
+- from/to는 앞뒤 공백 제거 후 1~100자. 대소문자를 무시한 같은 이름은 400 `INVALID_NAMES`. SQL `lower()`로 원본 이름을 비교하며 `%`, `_`, `*`도 패턴이 아닌 문자 그대로 취급한다. 날짜·중량·횟수·세트 번호는 유지한다.
 - 같은 activity에 `(to, set_no)`가 이미 있으면 유니크 충돌 → 409 `CONFLICT`, 클라가 안내.
+- 충돌은 전체 UPDATE를 롤백한다. 성공 응답 `updated`는 반환 행 제한과 무관한 실제 변경 세트 수다. 대상 없음은 404 `NOT_FOUND`, 권한 거부 403, 함수 미적용 503 `MIGRATION_REQUIRED`, 그 외 실패 500이다.
+- 화면 `/activities/exercises`는 본인 `exercise_sets`를 커서 조회해 기존 이름·기록 수·세트 수를 표시한다. 대상 이름 선택/입력 → 영향 건수 확인 → 명시적 실행 순서. 건수는 조회 시점 기준이며 실행 시점의 해당 이름 전체에 적용한다. 실패 시 자동 재전송하지 않고, 결과 불명 시 재조회부터 안내한다.
+- 목록 캐시 `['activities', userId, 'exerciseCatalog']`. 성공 후 본인 활동 루트를 무효화해 목록·상세·자동완성·관리 목록을 갱신한다. 별도 되돌리기는 없으며 다른 이름과 합친 뒤에는 원래 구분을 복구할 수 없음을 확인 화면에 안내한다.
+- 기존 DB 적용 파일: `server/config/migrations/20260916_merge_exercise_names.sql`. 테스트 DB 회귀 검증: `server/config/tests/exercise_merge.sql`(ROLLBACK).
 
 ## 2. 클라 직접 접근 매핑 (supabase-js)
 

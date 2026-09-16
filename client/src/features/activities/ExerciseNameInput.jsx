@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { exerciseSuggestions } from './exerciseNames.js';
 import './exercise-names.css';
 
-export default function ExerciseNameInput({ id, value, onChange, error, history = [], onHistoryRequest }) {
+export default function ExerciseNameInput({ id, value, onChange, error, history = [], onHistoryRequest, label = '운동 이름' }) {
   const input = useRef(null);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
@@ -42,7 +42,7 @@ export default function ExerciseNameInput({ id, value, onChange, error, history 
   return <div className="field exercise-name" onBlur={event => {
     if (!event.currentTarget.contains(event.relatedTarget)) { setOpen(false); setActive(-1); }
   }}>
-    <div className="field-label-row"><label htmlFor={id}>운동 이름</label></div>
+    <div className="field-label-row"><label htmlFor={id}>{label}</label></div>
     <input ref={input} id={id} required maxLength={100} placeholder="스쿼트" value={value}
       role="combobox" aria-autocomplete="list" aria-expanded={expanded} aria-controls={expanded ? listId : undefined}
       aria-activedescendant={activeOption} aria-invalid={error ? true : undefined}

@@ -1,0 +1,32 @@
+.exercise-manager { max-width: 720px; margin: 0 auto; }
+.exercise-manager-heading { margin-bottom: 28px; }
+.exercise-manager-heading > a { color: var(--ink-2); font-size: .875rem; text-decoration: underline; text-underline-offset: 4px; }
+.exercise-manager-heading h1 { margin-top: 12px; font-size: 1.75rem; letter-spacing: -.04em; }
+.exercise-manager-heading p { margin-top: 12px; color: var(--ink-2); }
+.exercise-manager-panel { padding: 24px; background: var(--surface); border: 1px solid var(--line); }
+.exercise-manager > .form-msg:not(:empty) { margin-bottom: 20px; }
+.exercise-manager-panel form { display: grid; gap: 20px; }
+.exercise-manager-panel .field { min-width: 0; }
+.exercise-manager-panel input, .exercise-manager-panel select { width: 100%; min-width: 0; }
+.exercise-manager-panel select { min-height: 48px; padding: 0 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.exercise-manager-panel form > .btn { justify-self: start; }
+.exercise-manager-hint { color: var(--ink-2); font-size: .8125rem; }
+.exercise-manager-state { padding: 24px 0; }
+.exercise-manager-state p { margin-bottom: 16px; }
+.exercise-manager-state h2 { margin-bottom: 12px; font-size: 1.125rem; }
+.exercise-merge-confirm { display: grid; gap: 20px; }
+.exercise-merge-confirm h2 { font-size: 1.25rem; }
+.exercise-merge-names { display: grid; gap: 16px; border-block: 1px solid var(--line); padding: 20px 0; }
+.exercise-merge-names dt { color: var(--ink-2); font-size: .8125rem; }
+.exercise-merge-names dd { margin-top: 4px; font-weight: 650; overflow-wrap: anywhere; }
+.exercise-merge-warning { padding-left: 12px; border-left: 3px solid var(--accent); font-size: .875rem; }
+.exercise-merge-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.exercise-merge-refresh { justify-self: start; }
+.activity-library-tools { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; }
+.activity-library-tools > a:not(.btn) { color: var(--ink-2); font-size: .875rem; text-decoration: underline; text-underline-offset: 4px; }
+@media (min-width: 640px) {
+  .exercise-manager-heading h1 { font-size: 2rem; }
+  .exercise-manager-panel { padding: 32px; }
+  .exercise-merge-names { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 374px) { .exercise-manager-panel { padding: 20px 16px; } }
