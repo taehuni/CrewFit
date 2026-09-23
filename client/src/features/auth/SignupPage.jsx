@@ -1,18 +1,21 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { supabase } from '../../shared/supabaseClient.js';
 import { Button, Field, FormMessage } from '../../shared/ui.jsx';
 import AuthLayout, { authMessage } from './AuthLayout.jsx';
 import { normalizeMemberName } from '../../shared/memberName.js';
+import { signupWithEmail } from './authLinks.js';
 
 // 가입 트리거가 닉네임은 profiles, 실명은 본인 전용 user_settings에 저장한다 (D-28).
 export default function SignupPage() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
+  const submitting = useRef(false);
 
   async function onSubmit(e) {
     e.preventDefault();
+    if (submitting.current) return;
     const f = new FormData(e.currentTarget);
     const nickname = f.get('nickname').trim();
     let real_name;
@@ -22,16 +25,18 @@ export default function SignupPage() {
       return setError(err.message);
     }
     if (nickname.length < 2) return setError('닉네임은 공백을 제외하고 2자 이상 입력해 주세요.');
+    submitting.current = true;
     setBusy(true); setError('');
-    const { data, error } = await supabase.auth.signUp({
-      email: f.get('email'),
-      password: f.get('password'),
-      options: { data: { nickname, real_name } },
-    });
-    setBusy(false);
-    if (error) return setError(authMessage(error));
-    if (!data.session) return setError('가입은 됐지만 로그인 세션이 없어요. 로그인 화면에서 다시 시도해 주세요.');
-    navigate('/home', { replace: true });
+    const email = f.get('email').trim();
+    try {
+      const status = await signupWithEmail(supabase.auth, {
+        email, password: f.get('password'), nickname, real_name,
+      }, window.location.origin);
+      navigate(status === 'signed-in' ? '/home' : '/verify-email', {
+        replace: true, state: { email, sent: true },
+      });
+    } catch (err) { setError(authMessage(err)); }
+    finally { submitting.current = false; setBusy(false); }
   }
 
   return (

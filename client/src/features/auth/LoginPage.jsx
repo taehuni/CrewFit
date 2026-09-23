@@ -7,16 +7,20 @@ import AuthLayout, { authMessage } from './AuthLayout.jsx';
 export default function LoginPage() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [unconfirmedEmail, setUnconfirmedEmail] = useState('');
   const navigate = useNavigate();
   const from = useLocation().state?.from || '/home';
 
   async function onSubmit(e) {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
-    setBusy(true); setError('');
+    setBusy(true); setError(''); setUnconfirmedEmail('');
     const { error } = await supabase.auth.signInWithPassword({ email: f.get('email'), password: f.get('password') });
     setBusy(false);
-    if (error) return setError(authMessage(error));
+    if (error) {
+      if (error.code === 'email_not_confirmed' || /email not confirmed/i.test(error.message)) setUnconfirmedEmail(f.get('email').trim());
+      return setError(authMessage(error));
+    }
     navigate(from, { replace: true });
   }
 
@@ -30,6 +34,7 @@ export default function LoginPage() {
         <Field id="email" name="email" type="email" label="이메일" autoComplete="email" inputMode="email" spellCheck={false} placeholder="name@example.com" required />
         <Field id="password" name="password" type="password" label="비밀번호" labelAction={<Link to="/forgot">비밀번호 찾기</Link>} autoComplete="current-password" required />
         <FormMessage>{error}</FormMessage>
+        {unconfirmedEmail && <Link to="/verify-email" state={{ email: unconfirmedEmail }}>인증 메일 다시 받기</Link>}
         <Button type="submit" block disabled={busy}>{busy ? '로그인 중…' : '로그인'}</Button>
       </form>
       <Link to="/signup" className="btn btn-ghost btn-block auth-secondary">무료로 시작하기</Link>
