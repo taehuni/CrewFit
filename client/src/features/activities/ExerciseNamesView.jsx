@@ -39,7 +39,7 @@ export default function ExerciseNamesView({ catalog, onMerge, returnTo = '/activ
     }
   }
   return <div className="exercise-manager">
-    <header className="exercise-manager-heading"><Link to={returnTo}>운동 기록으로</Link><h1>운동 이름 정리</h1><p>다르게 적었던 이름을 하나로 통일합니다. 중량·횟수·날짜는 그대로 유지돼요.</p></header>
+    <header className="exercise-manager-heading"><Link to={returnTo}>운동 기록으로</Link><h1>운동명 관리</h1><p>헬스 운동 이름을 변경하거나 하나로 합칩니다. 중량·횟수·날짜는 그대로 유지돼요.</p></header>
     <FormMessage tone="ok">{success}</FormMessage>
     {catalog.isPending ? <p className="exercise-manager-state" role="status">내 운동 이름을 불러오고 있어요.</p>
       : catalog.isError ? <div className="exercise-manager-state" role="alert"><p>최신 운동 이름을 불러오지 못했어요.</p><Button variant="ghost" onClick={() => catalog.refetch()}>다시 불러오기</Button></div>

@@ -1,6 +1,6 @@
 # CrewFit 순차 다이어그램
 
-기준일: 2026-09-16. [설계 결정](decisions.md), [API 명세](api.md), 현재 소스 코드를 근거로 작성한 주요 유스케이스의 상호작용이다. 전체 화면·예외를 나열한 문서는 아니다.
+기준일: 2026-09-21. [설계 결정](decisions.md), [API 명세](api.md), 현재 소스 코드를 근거로 작성한 주요 유스케이스의 상호작용이다. 전체 화면·예외를 나열한 문서는 아니다.
 
 - **구현 기준**: 저장소에서 호출 경로를 확인한 흐름. 실제 배포 환경의 검증 완료를 뜻하지 않는다.
 - **설계 기준**: 확정된 ADR·API 계약에 따른 흐름. 해당 화면·Express API는 아직 미구현이다.
@@ -10,18 +10,18 @@
 
 ## 1. 회원가입 — 구현 기준
 
-참여자: 사용자, 가입 화면, Supabase Auth, PostgreSQL. D-12의 이메일 확인 OFF가 적용되어 가입 직후 세션을 받는 정상 경로다. 이 설정을 현재 원격 환경에서 확인했다는 의미는 아니다.
+참여자: 사용자, 가입·인증 화면, Supabase Auth, PostgreSQL. D-12의 이메일 확인 ON에 따라 가입 요청 후 메일 링크로 인증하는 경로다.
 
 ```mermaid
 sequenceDiagram
     participant user as 사용자
-    participant signupPage as 가입 화면
+    participant signupPage as 가입·인증 화면
     participant supabaseAuth as Supabase Auth
     participant database as PostgreSQL
 
     user->>signupPage: 이메일·비밀번호·닉네임·실명 입력
     signupPage->>signupPage: 닉네임·실명 검증 및 정규화
-    signupPage->>supabaseAuth: signUp(email, password, metadata)
+    signupPage->>supabaseAuth: signUp(email, password, metadata, emailRedirectTo)
     supabaseAuth->>database: auth.users 생성
     database->>database: handle_new_user 트리거 실행
     database->>database: profiles와 user_settings 생성
@@ -29,8 +29,16 @@ sequenceDiagram
     supabaseAuth-->>signupPage: 사용자·세션 또는 오류
     alt 오류 없이 세션 반환
         signupPage-->>user: /home으로 이동
-    else 가입 오류 또는 세션 없음
-        signupPage-->>user: 오류 또는 세션 없음 안내
+    else 오류 없이 세션 없음
+        signupPage-->>user: /verify-email에서 메일 확인 안내
+        supabaseAuth-->>user: 인증 메일
+        user->>supabaseAuth: 인증 링크 열기
+        supabaseAuth-->>signupPage: /auth/callback으로 복귀
+        signupPage->>supabaseAuth: SDK 초기화·링크 세션 확인
+        supabaseAuth-->>signupPage: 세션 또는 인증 오류
+        signupPage-->>user: 완료·홈 진입 또는 만료·재발송 안내
+    else 가입 오류
+        signupPage-->>user: 입력 유지·오류 안내
     end
 ```
 
@@ -262,9 +270,9 @@ sequenceDiagram
 - 거절은 `/reject`를 통해 신청 행을 삭제한다. 권한 거부는 API 계약상 403이다.
 - 근거: [api.md](api.md)의 멤버십 계약, [decisions.md](decisions.md) D-17, [schema.sql](../../server/config/schema.sql)의 `crew_members` 정책. 크루 라우트 구현 완료를 뜻하지 않는다.
 
-## 8. 기간별 AI 피드백 — 설계 기준
+## 8. 기간별 AI 피드백 — 구현 기준
 
-D-06·D-07·D-15의 예정 흐름이다. 인증 성공 이후부터 표현한다. 읽기는 사용자 JWT, 결과 쓰기만 서버 전용 admin 권한이다.
+D-06·D-07·D-15·D-29의 구현 흐름이다. 인증 성공 이후부터 표현한다. 읽기는 사용자 JWT, 결과 쓰기만 서버 전용 admin 권한이다.
 
 ```mermaid
 sequenceDiagram
@@ -273,9 +281,13 @@ sequenceDiagram
     participant feedbackApi as Express 피드백 API
     participant feedbackService as 피드백 서비스
     participant database as Supabase DB
-    participant llmApi as 외부 LLM API
+    participant llmApi as OpenAI Responses API
 
     user->>feedbackPage: 기간별 피드백 열기
+    feedbackPage->>database: JWT/RLS로 본인·기간의 저장된 피드백 조회
+    database-->>feedbackPage: 저장된 결과 또는 없음
+    feedbackPage-->>user: 작성 시점과 기존 결과 또는 피드백 받기 안내
+    user->>feedbackPage: 피드백 받기 또는 다시 받기 클릭
     feedbackPage->>feedbackApi: POST /api/feedback/generate
     feedbackApi->>feedbackService: 인증 사용자·period·date·force 전달
     feedbackService->>feedbackService: KST 기간 시작일 정규화
@@ -302,5 +314,5 @@ sequenceDiagram
 
 - 저장 user_id는 요청 본문이 아니라 인증된 `req.user.id`다. admin 키·LLM 키는 클라이언트에 전달하지 않는다.
 - 강제 재생성은 기간당 3회, 실제 LLM 호출은 사용자당 분당 5회·일일 20회로 제한하는 설계다. 호출 제한은 단일 서버의 메모리 기반이며 재시작하면 초기화된다.
-- 기록 없음은 400 `NO_DATA`, 한도 초과는 429다. LLM·저장 오류의 상세 처리 방식은 구현 시 보완할 부분이며, 실패를 저장 성공으로 그리지 않았다.
-- 근거: [api.md](api.md)의 `POST /feedback/generate`, [decisions.md](decisions.md) D-06·D-07·D-15. 외부 LLM 제품은 아직 특정하지 않았다.
+- 기록 없음은 400 `NO_DATA`, 한도 초과는 429다. 설정 누락·모델 통신·저장 실패는 서로 다른 안정된 오류 코드로 응답하며 내부 오류와 비밀값은 노출하지 않는다.
+- 근거: [FeedbackPage.jsx](../../client/src/features/feedback/FeedbackPage.jsx), [feedback.js](../../server/services/feedback.js), [llm.js](../../server/services/llm.js), [api.md](api.md), [decisions.md](decisions.md) D-06·D-07·D-15·D-29.

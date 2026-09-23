@@ -79,7 +79,9 @@ try {
         const [offset,setOffset]=React.useState(0);
         const me={data:{profile:{nickname:state==='long'?'아주긴닉네임을가진운동하는사람입니다':'러닝메이트',main_sport:'running',level:'beginner'},settings:{region_sigungu:'마포구'}},refetch:()=>window.previewRetry++};
         const records=state==='populated'?sample:[];
-        const log={data:{recent:records,totals:{activity_count:records.length,distance_m:records.reduce((s,r)=>s+(r.distance_m||0),0),duration_sec:records.reduce((s,r)=>s+r.duration_sec,0)},days:W.weekDates('2026-09-13',offset).map(date=>({date,activity_count:records.filter(r=>r.performed_on===date).length}))},isPending:state==='loading',isError:state==='error',refetch:()=>window.previewRetry++};
+        const goals=state==='populated'?[{id:1,type:'count',sport:null,target:3,current:3,progress:1,period:'week',from:'2026-09-07',to:'2026-09-13'}]:[];
+        const streak=state==='populated'?{current:3,best:8,today_done:true}:{current:0,best:0,today_done:false};
+        const log={data:{recent:records,totals:{activity_count:records.length,distance_m:records.reduce((s,r)=>s+(r.distance_m||0),0),duration_sec:records.reduce((s,r)=>s+r.duration_sec,0)},days:W.weekDates('2026-09-13',offset).map(date=>({date,activity_count:records.filter(r=>r.performed_on===date).length})),goals,streak},isPending:state==='loading',isError:state==='error',refetch:()=>window.previewRetry++};
         return h(H.default,{me,log,days:W.weekDates('2026-09-13',offset),today:'2026-09-13',offset,onWeekChange:setOffset});
       }
       root.render(h(T.MemoryRouter,{initialEntries:['/home'],key:state},h(T.Routes,null,
@@ -159,13 +161,13 @@ try {
       const s=document.querySelector('#workspace-test'),nav=s.querySelector('.ws-nav').getBoundingClientRect();
       return {width:innerWidth,scroll:document.documentElement.scrollWidth,h1:s.querySelectorAll('h1').length,
         days:s.querySelectorAll('.home-week li').length,selected:s.querySelectorAll('.ws-nav-item[aria-current]').length,
-        records:s.querySelectorAll('.home-record-list li').length,empty:!!s.querySelector('.home-log-empty'),
+        records:s.querySelectorAll('.home-record-list li').length,goals:s.querySelectorAll('.goal-progress-list li').length,empty:!!s.querySelector('.home-log-empty'),
         alerts:s.querySelectorAll('[role=alert]').length,navBottom:nav.bottom,
         logoFill:getComputedStyle(s.querySelector('.brand-mark')).fill,
         headerHeight:s.querySelector('.ws-header').getBoundingClientRect().height,
         today:s.querySelector('.home-week [aria-current="date"] > span').textContent,
         dashes:[...s.querySelectorAll('.week-marks')].filter(e=>e.textContent==='—').length,
-        totals:[...s.querySelectorAll('.home-totals strong')].map(e=>e.textContent),
+        totals:[...s.querySelectorAll('.home-totals strong')].map(e=>e.textContent),streak:[...s.querySelectorAll('.home-streak dd strong')].map(e=>e.textContent),
         clipped:[...s.querySelectorAll('button,a,h1')].filter(e=>{const r=e.getBoundingClientRect();return r.width&&(r.left < -1||r.right>innerWidth+1);}).map(e=>e.textContent)};
     })()`);
     assert.equal(m.width,width);assert.ok(m.scroll<=width);assert.equal(m.h1,1);
@@ -173,6 +175,8 @@ try {
     assert.equal(m.logoFill,'none');assert.equal(m.headerHeight,72);
     assert.equal(m.today,'오늘');assert.equal(m.dashes,0);
     assert.equal(m.records,state==='populated'?3:0);
+    assert.equal(m.goals,state==='populated'?1:0);
+    assert.deepEqual(m.streak,state==='populated'?['3','8','완료']:state==='loading'||state==='error'?['—','—','—']:['0','0','아직']);
     assert.deepEqual(m.totals,state==='populated'?['3','8.3','2:11']:state==='loading'||state==='error'?['—','—','—']:['0','0.0','0:00']);
     if(state==='loading'||state==='error')assert.equal(m.empty,false);
     if(state==='error'){

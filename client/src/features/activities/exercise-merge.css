@@ -22,9 +22,11 @@
 .exercise-merge-warning { padding-left: 12px; border-left: 3px solid var(--accent); font-size: .875rem; }
 .exercise-merge-actions { display: flex; flex-wrap: wrap; gap: 12px; }
 .exercise-merge-refresh { justify-self: start; }
-.activity-library-tools { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; }
-.activity-library-tools > a:not(.btn) { color: var(--ink-2); font-size: .875rem; text-decoration: underline; text-underline-offset: 4px; }
+.activity-library-tools { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.activity-library-tools > .btn { padding-inline: 12px; white-space: nowrap; }
 @media (min-width: 640px) {
+  .activity-library-tools { gap: 12px; }
+  .activity-library-tools > .btn { padding-inline: 20px; }
   .exercise-manager-heading h1 { font-size: 2rem; }
   .exercise-manager-panel { padding: 32px; }
   .exercise-merge-names { grid-template-columns: repeat(2, minmax(0, 1fr)); }

@@ -1,1 +1,2 @@
-export { default as MePage } from './MePage.jsx';
+import { lazy } from 'react';
+export const MePage = lazy(() => import('./MePage.jsx'));

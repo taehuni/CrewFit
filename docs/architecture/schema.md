@@ -12,7 +12,8 @@
 | user_settings | 클라 직접 | 비공개(실명·지역·요일·목표 메모). **본인만**. 실명만 크루장 전용 `crew_member_names` RPC로 제한 제공 (D-25·D-28) |
 | activities · activity_routes · exercise_sets | 클라 직접 | 다중 테이블 저장은 함수로 트랜잭션: 헬스(기록 1 + 세트 N) `save_gym_activity`, GPS(기록 1 + 경로 1) `save_tracked_activity` |
 | meals · goals | 클라 직접 | 본인만 |
-| ai_feedbacks | 읽기 클라 / **쓰기 서버 admin** | D-15 예외 ② |
+| ai_feedbacks | 읽기 클라 / **쓰기 서버 admin** | 기간별 최신 캐시·호출 횟수. D-15 예외 ② |
+| ai_feedback_history | 본인 읽기만 / 캐시 저장 트리거로 추가 | 생성별 코칭 전문 보존(D-30), 기존 최신 결과 백필 |
 | regions | 클라 직접 (읽기만) | 지역 고정 목록. 시드 `server/config/seed_regions.sql`, 스키마 적용 직후 실행 |
 | crews | 클라 직접 | INSERT 시 트리거가 리더 멤버십 자동 생성. 인원수는 `crew_member_count()` (개인 행 노출 없이 숫자만) |
 | crew_members | 읽기·탈퇴·강퇴·**can_post 토글** 클라 / **가입·승인·거절 서버** | 서버도 사용자 JWT. can_post는 리더의 단일 행 UPDATE라 D-10 규칙상 클라 직접 |
@@ -747,5 +748,66 @@ create policy "images_delete_own" on storage.objects for delete
 - ✅ `server/config/profiles.sql` → `schema.sql`로 교체됨 (⓪ 리셋 블록이 기존 profiles를 drop하고 전부 새로 생성)
 - ✅ `server/config/supabase.js`: `createUserClient(token)` + `supabaseAdmin` 분리 (구현 ⓪)
 
+## 코칭 이력 추가 (D-30)
+
+기존 DB에는 `server/config/migrations/20260921_feedback_history.sql`만 적용한다. 현재 저장된 코칭을 백필하며, 이미 덮어쓴 과거 답변은 복원하지 못한다. 전체 schema.sql은 초기화용이므로 기존 데이터에 실행하지 않는다.
+
+`ai_feedbacks`는 기간별 최신 캐시로 유지하고, 새 생성 저장과 동시에 트리거가 `ai_feedback_history`에 추가한다. 이력은 본인 SELECT만 허용하고 클라이언트 INSERT/UPDATE/DELETE는 허용하지 않는다. 캐시 삭제와 독립적으로 보존하고 계정 삭제 시 함께 삭제한다. 캐시 반환은 DB 쓰기가 없으므로 중복 이력이 생기지 않는다. 최초 백필은 받은 날짜 순서, 이후 목록은 생성 ID 역순으로 조회한다.
+
+```sql
+-- Existing feedback is preserved. Run once in Supabase SQL Editor.
+begin;
+lock table public.ai_feedbacks in share row exclusive mode;
+
+create table if not exists public.ai_feedback_history (
+  id bigint generated always as identity primary key,
+  feedback_id bigint not null,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  period text not null check (period in ('day','week','month')),
+  period_start date not null,
+  content text not null,
+  model text,
+  llm_calls integer not null,
+  created_at timestamptz not null,
+  unique (feedback_id, llm_calls),
+  check (period <> 'week' or extract(isodow from period_start) = 1),
+  check (period <> 'month' or extract(day from period_start) = 1)
+);
+create index if not exists feedback_history_owner_id on public.ai_feedback_history(user_id, id desc);
+alter table public.ai_feedback_history enable row level security;
+revoke all on public.ai_feedback_history from public, anon, authenticated;
+grant select on public.ai_feedback_history to authenticated;
+grant all on public.ai_feedback_history to service_role;
+grant usage, select on sequence public.ai_feedback_history_id_seq to service_role;
+drop policy if exists feedback_history_select_own on public.ai_feedback_history;
+create policy feedback_history_select_own on public.ai_feedback_history
+  for select to authenticated using (user_id = (select auth.uid()));
+
+-- No FK to the cache: deleting a cache row must not erase coaching history.
+insert into public.ai_feedback_history(feedback_id,user_id,period,period_start,content,model,llm_calls,created_at)
+select id,user_id,period,period_start,content,model,llm_calls,created_at
+from public.ai_feedbacks order by created_at, id
+on conflict (feedback_id,llm_calls) do nothing;
+
+create or replace function public.archive_ai_feedback() returns trigger
+language plpgsql security invoker set search_path = '' as $$
+begin
+  if TG_OP = 'UPDATE' then
+    if new.content is not distinct from old.content and new.llm_calls = old.llm_calls then
+      return new;
+    end if;
+  end if;
+  insert into public.ai_feedback_history(feedback_id,user_id,period,period_start,content,model,llm_calls,created_at)
+  values(new.id,new.user_id,new.period,new.period_start,new.content,new.model,new.llm_calls,new.created_at);
+  return new;
+end;
+$$;
+revoke all on function public.archive_ai_feedback() from public, anon, authenticated;
+drop trigger if exists archive_ai_feedback on public.ai_feedbacks;
+create trigger archive_ai_feedback after insert or update on public.ai_feedbacks
+  for each row execute function public.archive_ai_feedback();
+commit;
+```
 ## 미결
-- 없음. 스키마 갈림은 전부 D-16 ~ D-26에서 확정. 남은 미결(일정·기존 문서/코드 갱신)은 decisions.md 참조.
+
+- 원격 DB 코칭 이력 마이그레이션과 권한 회귀 SQL 실행은 decisions.md 진행 상황 참조.

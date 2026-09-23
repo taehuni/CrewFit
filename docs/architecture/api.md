@@ -29,15 +29,19 @@
 ### 3. `POST /feedback/generate`
 ```
 req  { "period": "day" | "week" | "month", "date": "2026-09-03", "force": false }   // date: 그 기간에 속한 아무 날짜
-res  { "id": 12, "period": "week", "period_start": "2026-08-31", "content": "…", "model": "claude-…",
-       "created_at": "…", "cached": true, "regen_count": 1, "regen_limit": 3 }
+res  { "id": 12, "period": "week", "period_start": "2026-08-31", "content": "…", "model": "gpt-4.1-mini",
+       "created_at": "…", "cached": true, "regen_count": 1, "remaining_regenerations": 2 }
 ```
 - **기준일은 서버가 계산** (`date` → day: 그대로 / week: 그 주 월요일 / month: 1일, KST). 클라가 준 날짜를 그대로 저장하지 않음 — 같은 주가 두 행이 되는 것 방지. DB CHECK가 재검증.
-- **호출 흐름 (D-06)**: 프롬프트를 조립 → `source_hash = sha256(프롬프트 문자열 + 모델명)` (입력 목록을 따로 관리하지 않음 — 프롬프트에 들어간 건 전부 자동 포함, 템플릿·모델 변경도 잡힘) → 기존 행과 같고 `force`가 아니면 **LLM 호출 없이 기존 행 반환** (`cached: true`, 즉시). 다르면 생성 후 upsert(`llm_calls + 1`). `force: true`면 무조건 생성, `regen_count + 1`, `llm_calls + 1`; `regen_count`가 이미 3이면 **429 `REGEN_LIMIT`**. 클라는 화면 열 때 force 없이 호출, "다시 생성 (n/3)" 버튼이 force.
+- **호출 흐름 (D-06)**: 화면 진입·기간 변경은 Supabase JWT/RLS로 `ai_feedbacks`의 본인·기간·정규화된 시작일 행만 조회한다. ‘피드백 받기’ 클릭 시에만 이 API를 호출한다. `source_hash = sha256(코칭 지침 + 입력 프롬프트 + 모델명)`가 기존 행과 같고 `force`가 아니면 **LLM 호출 없이 기존 행 반환** (`cached: true`). 다르면 생성 후 upsert(`llm_calls + 1`). ‘다시 받기’는 `force: true`, `regen_count + 1`, `llm_calls + 1`; 이미 3이면 **429 `REGEN_LIMIT`**. 생성 중 버튼·기간 선택을 잠그고 오류 시 기존 결과를 보존한다. 저장된 결과는 작성 시점의 분석이며 자동 갱신하지 않는다.
+- **코칭 내용**: 서버 집계(종목별 횟수·시간·거리)와 원천 기록으로 현재 상태 → 잘한 점 → 개선할 점 → 다음 행동을 작성한다. 현재 활성 목표는 과거 목표 이력이 아니며, 이전 기간 비교 자료는 전달하지 않는다. 무근거 추세·운동량 증가·미입력 영양소 추정을 금지하고 데이터 부족을 명시한다.
 - **비용 상한**: 실제 LLM 호출(캐시 반환 제외, force 여부 무관)을 서버 in-memory `Map`으로 **사용자당 분당 5회 · 일일 20회** 제한, 초과 429 `RATE_LIMIT`. 데이터를 조금씩 바꿔 해시를 갈아도 일일 상한에 걸림. 단일 인스턴스 전제·재시작 시 리셋 — 사용자 늘거나 인스턴스 늘면 `llm_usage` 테이블로 교체(그때 `llm_calls` 누계가 상한값 근거).
 - 읽기(JWT): 해당 기간 `activities`(+`exercise_sets`)·`meals`·활성 `goals`·`profiles.main_sport`·`user_settings.goal_note`.
 - 쓰기(admin): `ai_feedbacks` upsert on `(user_id, period, period_start)` — `user_id`는 **반드시 `req.user.id`** (요청 본문에서 받지 않음).
 - 기록이 0건이면 400 `NO_DATA`.
+- D-30: 최신 캐시 upsert 트랜잭션의 트리거가 생성 이력을 `ai_feedback_history`에 추가한다. 캐시 반환은 쓰기가 없으므로 이력도 늘지 않는다. 생성 전 이력 테이블 접근 실패 시 503 `HISTORY_REQUIRED`로 중단한다. 이력은 사용자 JWT/RLS로 본인 행을 ID 내림차순·20건 커서(`id < 마지막 ID`)로 조회한다. 이력에 저장된 전문을 여는 동작은 LLM을 호출하지 않는다.
+- 외부 모델은 OpenAI Responses API를 사용한다(D-29). 서버 전용 `OPENAI_API_KEY`가 필수이고 `OPENAI_MODEL`은 기본 `gpt-4.1-mini`에서 교체할 수 있다. 키·원문 응답·Supabase 오류 상세는 클라이언트 응답에 포함하지 않는다.
+- 설정 누락 503 `CONFIG_REQUIRED`, 모델 거절 422 `LLM_REFUSED`, 모델 통신 실패 502 `LLM_FAILED`, 저장 결과 불명 500 `FEEDBACK_SAVE_FAILED`. 실패 요청은 성공으로 표시하거나 자동 재전송하지 않는다.
 
 ### 4. `GET /crews/match`
 ```
@@ -97,14 +101,15 @@ res  { "period": "week", "period_start": "2026-09-01",
 - 잘못된 기간/날짜 400, 인증 실패 401, 집계 중 조회 실패 500. 부분 합계를 성공 응답으로 보내지 않는다.
 - 여러 페이지 조회는 단일 DB 스냅샷이 아니다. 조회 도중 다른 기기에서 기록이 변경되면 새로고침 시 다시 집계한다.
 
-후속 확장 계약 (D-21, 스트릭·목표 구현 시 추가):
+목표 달성률·스트릭 계약 (D-21, 구현됨):
 ```
 res  { "streak": { "current": 6, "best": 14, "today_done": false },
        "totals": { "activity_count": 4, "distance_m": 21000, "duration_sec": 9800 },
        "goals": [ { "id", "type", "sport", "target", "period", "progress": 0.62, "current": 31000 } ] }
 ```
-- 전부 JWT(내 기록만). 스트릭: `performed_on` KST 기준 연속 일수, 오늘은 유예(어제까지 이어졌으면 유지) (D-21).
-- 목표 진행률: 활성 goals마다 이번 주/월 기록을 type별 합산 (`count`=건수, `distance`=`distance_m`, `duration`=`duration_sec`), sport null이면 전체.
+- 전부 JWT(내 기록만). 스트릭은 `performed_on` KST 날짜를 중복 제거해 계산한다. 오늘 기록이 있으면 오늘부터, 없고 어제 기록이 있으면 어제부터 역산해 현재 연속일을 구한다. 따라서 오늘 운동 전에는 어제까지의 스트릭을 유지한다. 최고 연속일은 오늘까지의 전체 기록에서 계산하며 미래 날짜는 제외한다.
+- 목표 진행률: 활성 goals마다 **KST 현재 주/월** 기록을 type별 합산 (`count`=기록 건수, `distance`=`distance_m`, `duration`=`duration_sec`), sport null이면 전체. 홈에서 과거 주를 조회해도 목표 기간은 현재 주/월이다.
+- 클라는 `/goals`에서 본인 목표를 직접 CRUD한다. 거리 입력은 km→m, 시간은 분→초로 변환해 저장하며 생성·수정·일시 중지·재시작·삭제 후 goals와 dashboard 캐시를 함께 무효화한다.
 
 ### 10. `POST /exercises/merge`
 ```
@@ -121,17 +126,32 @@ res  { "updated": 37 }
 
 ## 2. 클라 직접 접근 매핑 (supabase-js)
 
+### 가입 이메일 인증 설정·검증 (D-12)
+
+- Confirm email은 **ON 유지**. 가입 성공 후 세션이 없으면 `/verify-email`에서 메일 확인 안내를 표시한다. 가입과 `auth.resend({ type: 'signup' })`는 같은 `/auth/callback`을 복귀 주소로 사용한다.
+- Supabase Authentication → URL Configuration의 Redirect URLs에 개발 주소 `http://localhost:5173/auth/callback`, `http://localhost:5173/reset-password`를 추가한다. `127.0.0.1`로 접속하면 해당 호스트의 두 주소도 등록한다. 배포 시 Site URL과 Redirect URLs를 실제 HTTPS 도메인으로 설정한다. 메일 템플릿은 기본 `ConfirmationURL` 링크를 사용한다.
+- SDK가 인증 링크를 읽어 세션을 만든 뒤 콜백 화면에서 완료를 안내한다. 과거 메일이 `/`로 돌아오면 가입 콜백으로 보내고, `type=recovery`는 비밀번호 재설정으로 보낸다. 만료·사용된 링크는 재발송 화면으로 연결한다. 재발송 후 60초 대기, 요청 실패 시 이메일 유지, 자동 재발송 없음.
+- 검증 순서: 테스트 계정 가입 → 메일 확인 안내 → 가장 최근 메일 링크 → 인증 완료 → 내 운동 → 새로고침 → 로그아웃·로그인. 만료된 링크에서는 새 메일 요청을 확인한다. 실제 메일 발송량·수신 대상은 Supabase 발송 설정을 따른다.
+- AI 키는 `server/.env`의 `OPENAI_API_KEY`, 모델은 `OPENAI_MODEL`(기본 `gpt-4.1-mini`)에 설정하고 서버를 재시작한다. 프런트 환경변수에는 넣지 않는다.
+- 참고: [Supabase Redirect URLs](https://supabase.com/docs/guides/auth/redirect-urls), [인증 메일 재발송](https://supabase.com/docs/reference/javascript/auth-resend).
+
 | 기능 | 테이블 / rpc / storage | 비고 |
 |---|---|---|
 | auth | `supabase.auth.*` (signUp·signInWithPassword·resetPasswordForEmail·updateUser) | signUp `options.data.nickname`·`real_name` → 가입 트리거. 닉네임은 공개 profiles, 실명은 비공개 user_settings (D-28) |
 | profile | `profiles`(select 전원 / update 본인), `user_settings`(본인), `regions`(select) | 회원 페이지: `profiles` + `crew_members`(RLS가 show_crews 처리) + `activities`(RLS가 공개 3단계 처리) |
 | activities | `activities`, `activity_routes`, `exercise_sets` CRUD. 헬스 생성 `rpc('save_gym_activity')`, 수정 `rpc('update_gym_activity')` | 자동완성: 본인 `exercise_sets`의 ID·운동명을 커서 조회하고 클라에서 중복 제거 |
 | tracking | 종료 시 `rpc('save_tracked_activity', {...points})` — 기록+경로 한 트랜잭션 | 트래킹 중엔 DB 접근 없음. 실패 시 좌표는 화면 상태에 남아 재시도 |
-| meals | `meals` | |
+| meals | `meals` CRUD | 끼니·음식 목록·메모, 본인 행만 직접 접근(D-08·D-10) |
 | goals | `goals` | 달성률은 `/api/dashboard` |
-| feedback | `ai_feedbacks` select (생성은 API 3) | |
+| feedback | `ai_feedbacks`, `ai_feedback_history` select (생성은 API 3) | 최신 캐시와 생성별 이력, 본인만 조회 |
 | crews | `crews` select·insert(트리거가 리더 행)·update·delete, `crew_members` select·delete(탈퇴·강퇴)·**update(can_post, 리더가 남의 행)**, `rpc('crew_member_count')` | 가입·승인·거절·매칭·통계는 API 4~8. can_post 토글은 단일 행 UPDATE라 클라 직접(D-10), RLS `members_update_owner`가 문지기 |
 | feed | `posts`, `post_likes`, `comments` CRUD. 사진: storage `post-images` upload(`{me}/{uuid}.jpg`) → `posts.image_path` | 표시: `createSignedUrls(paths, 3600)` 배치 |
+
+### 크루 탐색·생성·상세 (구현 ③ 첫 단계)
+
+- `/crews`: 로그인 회원 대상 종목 필터, ID 내림차순 20건 커서 목록. `/crews/new`: 이름 2~40자·소개 1,000자 이하 폼 검증, `regions`의 시/도·시/군/구 쌍 선택, 요일 0~6(미선택 시 협의), 레벨 선택, open/approval 선택.
+- 생성은 사용자 JWT로 `crews`에 직접 INSERT, `owner_id`는 로그인 사용자 값만 전달. `add_owner_membership` 트리거로 크루장을 approved·can_post 상태로 등록한다. 중복 제출 잠금, 실패 시 입력 보존 및 목록 확인 안내.
+- `/crews/:crewId`: 크루 기본 정보, 공개 닉네임, 본인 멤버십, `crew_member_count` RPC의 승인 인원수만 조회한다. 실명이나 타인의 비공개 설정은 조회하지 않는다. 가입·탈퇴·승인 액션은 다음 단계.
 
 ### 내 운동 기록 목록·새 기록
 
@@ -143,6 +163,15 @@ res  { "updated": 37 }
 - 쿼리 키는 `['activities', userId, 'list', { sport, from, to }]`. 필터 변경 시 별도 캐시를 쓰며, 모든 요청에 같은 필터를 적용한다. 추가 조회 실패 시 기존 목록을 유지하고 재시도를 제공한다. 여러 페이지는 단일 DB 스냅샷이 아니므로 다른 기기에서 날짜를 수정한 경우 새로고침해 재조회한다.
 - 목록에서 상세·수정으로 이동할 때 목록 주소를 history state로 전달한다. 취소·목록 복귀·수정/삭제 성공 후 해당 필터로 돌아온다. 홈에서 진입한 수정/삭제는 기존처럼 해당 주 홈으로 돌아간다. 새 기록 저장은 필터에 가려지지 않도록 기록 날짜의 홈으로 이동한다.
 - 기록 행에는 날짜·종목·시간·거리(값이 있는 경우)·메모 첫 줄만 표시한다. 빈 목록과 필터 결과 없음, 최초 로딩 실패, 추가 로딩 실패를 구분한다. 이 화면에 대한 DB 마이그레이션은 없다.
+
+### 내 식단 기록 CRUD (D-08)
+
+- 경로는 목록 `/meals`, 작성 `/meals/new`, 상세 `/meals/:mealId`, 수정 `/meals/:mealId/edit`다. 상단 `기록` 메뉴 아래에서 운동·식단 보조 탭을 공유하며 하위 화면에서도 `기록`을 활성 상태로 유지한다.
+- 본인 `meals`만 사용자 세션·RLS와 `user_id` 필터로 직접 조회·생성·수정·삭제한다(D-10). 생성 시 `user_id`는 로그인 사용자 ID로 덮어쓰고, 수정·삭제는 식별자와 사용자 ID를 모두 조건으로 사용한다. 영향 행이 없으면 성공으로 처리하지 않는다.
+- 저장 구조는 `eaten_on`, `meal_type`(`breakfast`·`lunch`·`dinner`·`snack`), `items` JSON 배열, `note`다. 음식은 1~30개이며 이름은 필수 1~100자, 양은 선택 100자 이하, 칼로리는 선택 정수 0~100,000이다. 외부 음식·칼로리 DB 조회나 자동 영양 계산은 하지 않는다.
+- 목록은 `eaten_on DESC, id DESC`로 20건씩 표시하고 날짜+ID 커서를 사용한다. 모든 추가 요청에 사용자 필터를 반복 적용하며, 추가 조회 실패 시 기존 목록을 유지한다. 여러 페이지는 단일 DB 스냅샷이 아니므로 다른 기기의 변경은 새로고침으로 다시 맞춘다.
+- 쿼리 키는 목록 `['meals', userId, 'list']`, 상세 `['meals', userId, 'detail', mealId]`다. 저장·수정·삭제 후 해당 사용자의 meals 루트만 무효화한다. 대시보드는 식단을 집계하지 않으므로 갱신 대상이 아니다.
+- 없는 기록과 다른 회원 기록은 같은 찾을 수 없음 화면으로 처리한다. 저장 실패 시 입력값, 삭제 실패 시 확인창을 유지하고 자동 재전송하지 않는다. 저장·삭제 중 중복 요청을 막는다. 기존 `meals` 스키마와 소유자 RLS를 사용하므로 추가 DB 마이그레이션은 없다.
 
 ### 헬스 운동명 자동완성 (D-05)
 
