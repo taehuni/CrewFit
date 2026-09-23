@@ -7,7 +7,7 @@
 -- ═══════════════════════════════════════════
 -- ⚠ public 스키마의 앱 테이블 데이터가 전부 삭제됨 (auth.users 계정은 유지되고, ② 트리거 아래 백필 문장이 그 계정들의 profiles·user_settings 를 다시 만듦 — 같은 이메일은 재가입이 안 되므로).
 --   실데이터가 쌓인 뒤에는 이 블록을 지우고 ALTER 마이그레이션으로 전환할 것.
-drop table if exists public.comments, public.post_likes, public.posts, public.ai_feedbacks,
+drop table if exists public.comments, public.post_likes, public.posts, public.ai_feedback_history, public.ai_feedbacks,
   public.goals, public.meals, public.exercise_sets, public.activity_routes, public.activities,
   public.crew_members, public.crews, public.user_settings, public.profiles, public.regions cascade;
 drop function if exists public.save_gym_activity(date, integer, text, jsonb);
@@ -724,3 +724,57 @@ create policy "images_delete_own" on storage.objects for delete
   to authenticated using (
     bucket_id = 'post-images' and (storage.foldername(name))[1] = (select auth.uid())::text);
 -- 글 저장 전 업로드만 하고 버린 고아 객체는 본인만 봄. 정리는 Post-MVP
+
+-- 코칭 이력 (D-30): migration과 동일, 최신 캐시 + 불변 이력의 원자적 저장.
+-- Existing feedback is preserved. Run once in Supabase SQL Editor.
+begin;
+lock table public.ai_feedbacks in share row exclusive mode;
+
+create table if not exists public.ai_feedback_history (
+  id bigint generated always as identity primary key,
+  feedback_id bigint not null,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  period text not null check (period in ('day','week','month')),
+  period_start date not null,
+  content text not null,
+  model text,
+  llm_calls integer not null,
+  created_at timestamptz not null,
+  unique (feedback_id, llm_calls),
+  check (period <> 'week' or extract(isodow from period_start) = 1),
+  check (period <> 'month' or extract(day from period_start) = 1)
+);
+create index if not exists feedback_history_owner_id on public.ai_feedback_history(user_id, id desc);
+alter table public.ai_feedback_history enable row level security;
+revoke all on public.ai_feedback_history from public, anon, authenticated;
+grant select on public.ai_feedback_history to authenticated;
+grant all on public.ai_feedback_history to service_role;
+grant usage, select on sequence public.ai_feedback_history_id_seq to service_role;
+drop policy if exists feedback_history_select_own on public.ai_feedback_history;
+create policy feedback_history_select_own on public.ai_feedback_history
+  for select to authenticated using (user_id = (select auth.uid()));
+
+-- No FK to the cache: deleting a cache row must not erase coaching history.
+insert into public.ai_feedback_history(feedback_id,user_id,period,period_start,content,model,llm_calls,created_at)
+select id,user_id,period,period_start,content,model,llm_calls,created_at
+from public.ai_feedbacks order by created_at, id
+on conflict (feedback_id,llm_calls) do nothing;
+
+create or replace function public.archive_ai_feedback() returns trigger
+language plpgsql security invoker set search_path = '' as $$
+begin
+  if TG_OP = 'UPDATE' then
+    if new.content is not distinct from old.content and new.llm_calls = old.llm_calls then
+      return new;
+    end if;
+  end if;
+  insert into public.ai_feedback_history(feedback_id,user_id,period,period_start,content,model,llm_calls,created_at)
+  values(new.id,new.user_id,new.period,new.period_start,new.content,new.model,new.llm_calls,new.created_at);
+  return new;
+end;
+$$;
+revoke all on function public.archive_ai_feedback() from public, anon, authenticated;
+drop trigger if exists archive_ai_feedback on public.ai_feedbacks;
+create trigger archive_ai_feedback after insert or update on public.ai_feedbacks
+  for each row execute function public.archive_ai_feedback();
+commit;
