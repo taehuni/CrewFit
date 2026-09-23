@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "node --watch --env-file=.env index.js",
-    "start": "node --env-file=.env index.js"
+    "start": "node --env-file=.env index.js",
+    "test": "node --test \"services/**/*.test.js\" \"config/tests/**/*.test.mjs\""
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",

@@ -9,3 +9,7 @@ dist/
 
 *.log
 .DS_Store
+
+# local review captures / accidental Windows cache copies
+/스크린샷 *.png
+/%SystemDrive%/
