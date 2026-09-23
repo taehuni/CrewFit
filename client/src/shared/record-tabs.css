@@ -1,0 +1,4 @@
+.record-tabs { display: flex; gap: 24px; margin-bottom: 28px; border-bottom: 1px solid var(--line); }
+.record-tabs a { position: relative; padding: 0 2px 12px; color: var(--ink-2); font-weight: 650; }
+.record-tabs a[aria-current="page"] { color: var(--ink); }
+.record-tabs a[aria-current="page"]::after { content: ''; position: absolute; inset: auto 0 -1px; height: 3px; background: var(--accent); }

@@ -26,7 +26,25 @@
 .home-week li[aria-current="date"] > span:first-child { font-weight: 750; }
 .week-marks { min-height: 20px; font-size: .75rem; color: var(--ink-2); }
 .home-week li[data-active] .week-marks { color: var(--accent-ink); font-weight: 750; }
+.home-streak { margin-top: 32px; }
+.home-streak > header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.home-streak h2 { font-size: 1.125rem; }
+.home-streak > header span { color: var(--ink-2); font-size: .75rem; }
+.home-streak dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-block: 1px solid var(--line); background: var(--surface); }
+.home-streak dl > div { min-width: 0; padding: 18px 24px; }
+.home-streak dl > div + div { border-left: 1px solid var(--line); }
+.home-streak dt { color: var(--ink-2); font-size: .75rem; }
+.home-streak dd { display: flex; align-items: baseline; gap: 6px; margin-top: 6px; }
+.home-streak dd strong { font: 600 2rem/1 var(--font-num); overflow-wrap: anywhere; }
+.home-streak dd span { color: var(--ink-2); font-size: .75rem; }
+.home-streak dd.is-done strong { color: var(--accent-ink); font-family: var(--font-body); font-size: 1rem; font-weight: 750; }
 .home-records { margin-top: 32px; }
+.home-coaching { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 32px; padding: 20px 24px; border: 1px solid var(--line); border-left: 4px solid var(--accent); background: var(--surface); }
+.home-coaching > div { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.home-coaching > div > span { display: grid; place-items: center; width: 40px; height: 40px; flex: none; background: var(--ink); color: var(--surface); font: 650 1.125rem/1 var(--font-num); }
+.home-coaching h2 { font-size: 1rem; }
+.home-coaching p { margin-top: 3px; color: var(--ink-2); font-size: .8125rem; }
+.home-coaching .btn { height: 40px; flex: none; font-size: .8125rem; }
 .home-records-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid var(--ink); }
 .home-records-head > span { font-size: .8125rem; color: var(--ink-2); }
 .home-log-message { min-height: 112px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 24px 0; border-bottom: 1px solid var(--line); color: var(--ink-2); font-size: .9375rem; }
@@ -66,6 +84,8 @@
   .home-totals dd > span { font-size: .6875rem; }
   .home-week li { padding-top: 16px; }
   .home-week li > strong { font-size: 1.5rem; }
+  .home-streak dl > div { padding: 16px 12px; }
+  .home-streak dd strong { font-size: 1.75rem; }
   .home-log-message { align-items: flex-start; flex-direction: column; gap: 8px; }
   .home-record-row { gap: 12px; }
   .record-date { min-width: 40px; font-size: 1.25rem; }
@@ -74,4 +94,6 @@
   .home-sport-link strong { font-size: .8125rem; }
   .home-record-row > p { gap: 12px; }
   .home-record-row > p > span { font-size: 1.5rem; }
+  .home-coaching { align-items: stretch; flex-direction: column; padding: 18px 16px; }
+  .home-coaching .btn { width: 100%; }
 }

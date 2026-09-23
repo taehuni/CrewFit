@@ -2,6 +2,7 @@ import { Link } from 'react-router';
 import { SPORT_LABEL } from '../../shared/ui.jsx';
 import { ACTIVITY_SPORTS, distanceFactor, distanceUnit } from '../activities/index.js';
 import { shortDate, weekLabel } from './week.js';
+import { GoalProgress } from '../goals/index.js';
 import './home.css';
 
 function durationLabel(seconds) {
@@ -13,6 +14,7 @@ export default function HomeView({ log, days, today, offset, onWeekChange }) {
   const ready = !log.isPending && !log.isError && Boolean(log.data);
   const records = ready ? log.data.recent : [];
   const totals = ready ? log.data.totals : null;
+  const streak = ready ? log.data.streak : null;
   return (
     <div className="home-workspace">
       <header className="home-heading">
@@ -44,6 +46,22 @@ export default function HomeView({ log, days, today, offset, onWeekChange }) {
             </li>;
           })}
         </ol>
+      </section>
+
+      <section className="home-streak" aria-labelledby="streak-title">
+        <header><h2 id="streak-title">연속 운동</h2><span>하루에 운동 기록 1개 이상</span></header>
+        <dl aria-busy={log.isPending}>
+          <div><dt>현재 연속</dt><dd><strong>{streak ? streak.current : '—'}</strong><span>일</span></dd></div>
+          <div><dt>최고 연속</dt><dd><strong>{streak ? streak.best : '—'}</strong><span>일</span></dd></div>
+          <div><dt>오늘 운동</dt><dd className={streak?.today_done ? 'is-done' : undefined}><strong>{streak ? (streak.today_done ? '완료' : '아직') : '—'}</strong></dd></div>
+        </dl>
+      </section>
+
+      <GoalProgress log={log} />
+
+      <section className="home-coaching" aria-labelledby="coaching-title">
+        <div><span aria-hidden="true">AI</span><div><h2 id="coaching-title">이번 주 코칭</h2><p>운동·식단·목표를 함께 읽고 다음 행동을 제안해요.</p></div></div>
+        <Link to="/feedback" className="btn btn-ghost">코칭 보기 <span aria-hidden="true">›</span></Link>
       </section>
 
       <section className="home-records" aria-labelledby="records-title">
