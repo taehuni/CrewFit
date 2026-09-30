@@ -61,6 +61,7 @@ export default function ActivityForm({ today, onSave, initialSport = 'running', 
             <input type="radio" name="sport" value={value} checked={form.sport === value} onChange={() => changeSport(value)} />{SPORT_LABEL[value]}
           </label>)}
         </fieldset>
+        {!editing && ['running', 'walking', 'cycling'].includes(form.sport) && <Link className="btn btn-ghost" to={`/activities/track?sport=${form.sport}`}>GPS로 측정하기</Link>}
         <div className="activity-basics">
           <Field id="activity-date" label="운동 날짜" type="date" required min="1900-01-01" max="9999-12-24" value={form.date} onChange={e => change('date', e.target.value)} error={errors.date} />
           <fieldset className="activity-duration"><legend>운동 시간</legend><div className="activity-duration-fields">

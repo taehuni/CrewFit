@@ -63,3 +63,12 @@ export async function loadCrew(db, id, userId) {
   if (count.error || owner.error || member.error) throw new Error('크루 상세 정보를 불러오지 못했어요.');
   return { ...data, member_count: count.data, owner_nickname: owner.data?.nickname || '크루장', membership: member.data?.status || null };
 }
+
+export async function leaveCrew(db, crew, userId) {
+  if (!userId || crew.owner_id === userId) throw new Error('크루장은 탈퇴할 수 없어요.');
+  if (!['pending','approved'].includes(crew.membership)) throw new Error('가입 상태를 다시 확인해 주세요.');
+  const {data,error}=await db.from('crew_members').delete().eq('crew_id',crew.id).eq('user_id',userId)
+    .eq('status',crew.membership).select('user_id');
+  if(error) throw new Error('처리 결과를 확인하지 못했어요. 현재 상태를 다시 조회해 주세요.');
+  if(!data?.length) throw new Error('가입 상태가 변경됐어요. 다시 조회한 후 진행해 주세요.');
+}

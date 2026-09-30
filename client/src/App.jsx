@@ -11,12 +11,14 @@ import {
 } from './features/auth/index.js';
 import { HomePage } from './features/dashboard/index.js';
 import { ActivitiesPage, ActivityCreatePage, ActivityDetailPage, ActivityEditPage, ExerciseNamesPage } from './features/activities/index.js';
-import { MePage } from './features/profile/index.js';
+import { MePage, MemberPage } from './features/profile/index.js';
 import { LandingPage } from './features/landing/index.js';
 import { GoalsPage } from './features/goals/index.js';
 import { MealsPage, MealCreatePage, MealDetailPage, MealEditPage } from './features/meals/index.js';
 import { FeedbackPage } from './features/feedback/index.js';
 import { CrewsPage, CrewCreatePage, CrewDetailPage } from './features/crews/index.js';
+import { FeedPage, PostEditor, PostDetail } from './features/feed/index.js';
+import { TrackingPage } from './features/tracking/index.js';
 
 function AuthLinkEntry({ children }) {
   const { pathname } = useLocation();
@@ -49,6 +51,7 @@ export default function App() {
 
             {/* 회원: 셸 안 */}
             <Route element={<RequireAuth />}>
+              <Route path="/activities/track" element={<TrackingPage />} />
               <Route element={<AppShell />}>
                 <Route path="/home" element={<HomePage />} />
                 <Route path="/goals" element={<GoalsPage />} />
@@ -65,9 +68,12 @@ export default function App() {
                 <Route path="/crews" element={<CrewsPage />} />
                 <Route path="/crews/new" element={<CrewCreatePage />} />
                 <Route path="/crews/:crewId" element={<CrewDetailPage />} />
-                <Route path="/feed" element={<ComingSoon title="피드" step="④" />} />
+                <Route path="/feed" element={<FeedPage />} />
+                <Route path="/feed/new" element={<PostEditor />} />
+                <Route path="/feed/:postId" element={<PostDetail />} />
+                <Route path="/feed/:postId/edit" element={<PostEditor />} />
                 <Route path="/me" element={<MePage />} />
-                <Route path="/users/:id" element={<ComingSoon title="회원" step="④" />} />
+                <Route path="/users/:id" element={<MemberPage />} />
                 <Route path="*" element={<ComingSoon title="없는 페이지" step="—" />} />
               </Route>
             </Route>

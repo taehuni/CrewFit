@@ -1,0 +1,9 @@
+.profile-settings select { min-height: 44px; width: 100%; font: inherit; padding: 10px; border: 1px solid var(--line, #cbd0d8); background: white; color: inherit; }
+.profile-checkbox { display: flex; gap: 10px; align-items: center; min-height: 44px; }
+.profile-checkbox input { flex: 0 0 auto; width: 20px; height: 20px; }
+.member-page, .profile-settings { overflow-wrap: anywhere; }
+.member-list { list-style: none; padding: 0; margin: 0; }
+.member-list li { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--line, #cbd0d8); }
+.member-list li:last-child { border-bottom: 0; }
+.member-list p { margin: 4px 0 0; }
+.member-list li > :last-child { text-align: right; }

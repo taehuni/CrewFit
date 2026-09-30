@@ -5,6 +5,7 @@ import { supabase } from '../../shared/supabaseClient.js';
 import { queryKeys } from '../../shared/queryKeys.js';
 import { SPORTS, LEVELS, dayLabel, loadCrews } from './crews.js';
 import './crews.css';
+import CrewRecommendations from './CrewRecommendations.jsx';
 
 export default function CrewsPage() {
   const { user } = useAuth();
@@ -15,6 +16,8 @@ export default function CrewsPage() {
   const rows = crews.data?.pages.flatMap(page => page.rows) || [];
   return <div className="crews-page">
     <header className="crews-heading"><div><h1>크루</h1><p>같은 종목, 가까운 동네에서 함께 운동해요.</p></div><Link className="btn btn-primary" to="/crews/new">크루 만들기</Link></header>
+    <CrewRecommendations />
+    <h2 className="crew-browse-title">전체 크루</h2>
     <div className="crew-sports" role="group" aria-label="종목 필터">
       {[['','전체'], ...Object.entries(SPORTS)].map(([value,label]) => <button key={value} type="button" aria-pressed={sport === value}
         onClick={() => setParams(value ? {sport:value} : {})}>{label}</button>)}

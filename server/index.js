@@ -4,7 +4,10 @@ import meRouter from './routes/me.js';
 import dashboardRouter from './routes/dashboard.js';
 import { createExercisesRouter } from './routes/exercises.js';
 import { createFeedbackRouter } from './routes/feedback.js';
+import { createCrewsRouter } from './routes/crews.js';
 import { requireAuth } from './middleware/auth.js';
+import { fileURLToPath } from 'node:url';
+import { serveFrontend } from './config/frontend.js';
 
 const app = express();
 app.use(cors());
@@ -16,7 +19,11 @@ app.use('/api/me', meRouter);
 app.use('/api/dashboard', dashboardRouter);
 app.use('/api/exercises', createExercisesRouter(requireAuth));
 app.use('/api/feedback', createFeedbackRouter(requireAuth));
-// 이후 라우트: crews (docs/architecture/api.md 3절)
+app.use('/api/crews', createCrewsRouter(requireAuth));
+
+if (process.env.NODE_ENV === 'production') {
+  serveFrontend(app, fileURLToPath(new URL('../client/dist/', import.meta.url)));
+}
 
 const port = process.env.PORT || 4000;
 app.listen(port, () => console.log(`crewfit server on http://localhost:${port}`));

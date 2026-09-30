@@ -39,7 +39,7 @@ export default function CrewCreatePage() {
         <fieldset className="crew-days"><legend>활동 요일 <small>미선택 시 협의</small></legend>{DAYS.map((day,index)=><label key={day}><input type="checkbox" checked={form.activity_days.includes(index)} onChange={e=>change('activity_days',e.target.checked ? [...form.activity_days,index] : form.activity_days.filter(d=>d!==index))} />{day}</label>)}</fieldset>
         <label>가입 방식<select value={form.join_mode} onChange={e=>change('join_mode',e.target.value)}><option value="open">즉시 가입형</option><option value="approval">크루장 승인형</option></select></label>
         <label>크루 소개 <small>선택 · 1,000자 이내</small><textarea rows={5} maxLength={1000} value={form.description} onChange={e=>change('description',e.target.value)} placeholder="모이는 장소, 시간, 활동 방식을 알려주세요." /></label>
-        <p className="crew-form-note">만든 회원이 크루장으로 자동 등록됩니다. 가입·승인 기능은 다음 단계에서 연결됩니다.</p>
+        <p className="crew-form-note">만든 회원이 크루장으로 자동 등록됩니다. 승인형 크루는 가입 요청만 가능하며, 크루장의 승인 화면은 다음 단계에서 연결됩니다.</p>
         {error && <p role="alert" className="crew-error">{error}</p>}
         <button className="btn btn-primary" type="submit" disabled={busy || !regions.data?.length || !!regions.error}>{busy ? '만드는 중…' : '크루 만들기'}</button>
       </fieldset>

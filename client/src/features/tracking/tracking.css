@@ -1,0 +1,13 @@
+.tracking-page { max-width: 680px; margin: auto; padding: 28px 20px; min-height: 100dvh; display: flex; flex-direction: column; gap: 20px; overflow-wrap: anywhere; }
+.tracking-page h1, .tracking-page p { margin: 0; }
+.tracking-page label { display: grid; gap: 8px; }
+.tracking-page select, .tracking-page textarea { width: 100%; padding: 12px; font: inherit; color: inherit; background: white; border: 1px solid #bcc3cd; }
+.tracking-page textarea { min-height: 100px; }
+.tracking-active { background: #090b0d; color: #f6f7f9; max-width: none; align-items: center; text-align: center; justify-content: center; }
+.tracking-active .btn { min-height: 60px; min-width: 200px; }
+.tracking-metrics { margin: 0; display: grid; gap: 24px; }
+.tracking-metrics dd { margin: 6px 0 0; font: 700 clamp(36px, 9vw, 68px)/1.15 monospace; font-variant-numeric: tabular-nums; }
+.tracking-metrics small { font: 400 20px sans-serif; }
+.route-map, .route-outline { width: 100%; height: 320px; background: #f1f3f6; border: 1px solid #d2d8e0; }
+.route-map[hidden] { display: none; }
+.route-preview { min-width: 0; }

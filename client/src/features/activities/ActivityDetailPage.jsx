@@ -7,6 +7,7 @@ import { loadActivityDetail } from './activityDetail.js';
 import ActivityDetailView from './ActivityDetailView.jsx';
 import { deleteActivity, invalidateActivityData } from './activityMutations.js';
 import { activitiesReturnTo } from './activityList.js';
+import { SavedRoute, TRACKING_SPORTS } from '../tracking/index.js';
 
 export default function ActivityDetailPage() {
   const { activityId } = useParams();
@@ -26,5 +27,5 @@ export default function ActivityDetailPage() {
     navigate(returnTo || '/home', { replace: true, state: { performedOn } });
     await invalidateActivityData(cache, user.id);
   }
-  return <ActivityDetailView detail={detail} onDelete={remove} />;
+  return <><ActivityDetailView detail={detail} onDelete={remove} />{detail.data?.activity && !detail.isError && TRACKING_SPORTS.includes(detail.data.activity.sport) && <SavedRoute activityId={activityId} />}</>;
 }

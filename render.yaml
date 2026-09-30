@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: crewfit-test
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm --prefix server ci && npm --prefix client ci --include=dev && VITE_API_URL= npm --prefix client run build
+    startCommand: npm --prefix server start
+    healthCheckPath: /health
+    autoDeployTrigger: "off"
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
+      - key: VITE_NAVER_MAP_CLIENT_ID
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-4.1-mini

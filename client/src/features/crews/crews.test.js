@@ -1,7 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { crewInput, createCrew, dayLabel, validCrewId, loadCrews, loadRegions, loadCrew } from './crews.js';
+import { crewInput, createCrew, dayLabel, validCrewId, loadCrews, loadRegions, loadCrew, leaveCrew } from './crews.js';
 const regions = [{sido:'서울',sigungu:'마포구'}];
+test('leave blocks owner and scopes delete to self, crew and observed membership',async()=>{
+  await assert.rejects(leaveCrew({}, {owner_id:'self'},'self'),/크루장은/);
+  const calls=[];let data=[{user_id:'self'}];
+  const db={from(table){assert.equal(table,'crew_members');return this;},delete(){return this;},eq(...a){calls.push(a);return this;},select:async()=>({data})};
+  await leaveCrew(db,{id:15,owner_id:'leader',membership:'pending'},'self');
+  assert.deepEqual(calls,[['crew_id',15],['user_id','self'],['status','pending']]);
+  data=[];await assert.rejects(leaveCrew(db,{id:15,owner_id:'leader',membership:'pending'},'self'),/가입 상태가 변경/);
+});
 const form = {name:' 크루 이름 ',description:' 소개 ',sport:'running',level:'',region_sido:'서울',region_sigungu:'마포구',activity_days:[3,1,3],join_mode:'open',owner_id:'other'};
 test('crew form trims, validates region pair and enumerations, strips supplied owner',()=>{
   const row=crewInput(form,regions);

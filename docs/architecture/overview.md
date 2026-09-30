@@ -77,6 +77,8 @@ server/
 
 ## 5. 보안 요약 (전문: schema.md)
 
+테스트 배포는 Render Free Web Service 한 개에서 Express API와 `client/dist`를 같은 HTTPS 주소로 제공한다. 브라우저의 `/api`는 같은 출처를 사용하며 DB/Auth/Storage는 기존 Supabase를 유지한다. 배포·환경변수·허용 URL 절차는 [`../deployment-render.md`](../deployment-render.md)를 따른다.
+
 - 모든 테이블 RLS ON, `to authenticated`. INSERT/UPDATE `with check`. `(select auth.uid())`.
 - 식별 컬럼(`id`·`user_id`·`author_id`·`crew_id`·`owner_id`·`activities.sport`) 불변 — 컬럼 단위 GRANT.
 - 값 범위·행 간 관계는 DB 제약 (CHECK·FK·트리거). 함수 경로만 믿지 않음.
@@ -94,7 +96,7 @@ server/
 | ① 인증 | 0.5주 | `/api/me` | 태훈: 뼈대(Query·Router·AuthContext·보호 라우트) + 디자인 시스템 + 로그인 화면 완성본 / 민규: 가입·비밀번호 재설정 | 가입→로그인→새로고침 유지→재설정 메일 |
 | ② 기록·식단·목표·AI | 1.5주 | `/api/feedback/generate`, `/api/dashboard`, `/api/exercises/merge`, 프롬프트 튜닝 | 종목별 입력 폼(헬스 세트·자동완성), 식단, 목표, 대시보드, 피드백 화면 | 헬스+러닝 기록→주간 피드백 생성→대시보드 달성률 |
 | ③ 크루 | 1.5주 | `/api/crews/match`·`join`·`approve`·`reject`·`stats` | 탐색·매칭·생성·상세·멤버 관리·통계 카드 | 승인제 크루 신청→리더 승인→can_post 부여 |
-| ④ 피드·GPS·프로필 | 2주 | (클라 직접이 대부분) 사진 정책 검증 | 전체/크루 피드·글쓰기·사진·좋아요·댓글, GPS 트래킹+카카오맵, 회원 페이지·설정 | 러닝→경로→글에 첨부(include_route)→크루원만 경로 보임 |
+| ④ 피드·GPS·프로필 | 2주 | (클라 직접이 대부분) 사진 정책 검증 | 전체/크루 피드·글쓰기·사진·좋아요·댓글, GPS 트래킹+네이버 지도, 회원 페이지·설정 | 러닝→경로→글에 첨부(include_route)→크루원만 경로 보임 |
 
 - 합계 5.5주 (6~11주차 중반). 테스트 11.5~13.5(2주), 배포 13.5~14.5(1주), 운영·보완 14.5~15(1.5주). → `개발계획.md` 3·4절에 확정 반영.
 - ⓪은 문서 SQL의 실행 순서·문법과 `/api/me`를 검증하는 단계다.

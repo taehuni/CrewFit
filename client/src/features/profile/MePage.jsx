@@ -2,10 +2,12 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../auth/index.js';
 import { api } from '../../shared/api.js';
 import { queryKeys } from '../../shared/queryKeys.js';
-import { ProfileCard, Button, Empty, FormMessage, bibNumber } from '../../shared/ui.jsx';
+import { ProfileCard, Button, FormMessage, bibNumber } from '../../shared/ui.jsx';
+import PublicProfileForm from './PublicProfileForm.jsx';
 import RealNameForm from './RealNameForm.jsx';
+import CrewPreferencesForm from './CrewPreferencesForm.jsx';
 
-// "나" 탭. 프로필 카드·로그아웃·실명 입력(D-28). 나머지 프로필 설정은 ④에서 추가.
+// "나" 탭. 프로필 카드·실명(D-28)·크루 추천(D-16)·공개 범위(D-19).
 export default function MePage() {
   const { user, token, signOut } = useAuth();
   const me = useQuery({ queryKey: queryKeys.me(user.id), queryFn: () => api('/me', { token }) });
@@ -29,7 +31,8 @@ export default function MePage() {
           />
         )}
         {me.data && <RealNameForm key={user.id} userId={user.id} initialName={me.data.settings?.real_name} />}
-        <Empty title="다른 프로필 설정은 준비 중이에요">주종목·레벨·지역·기록 공개 범위 설정이 구현 ④ 단계에서 들어와요.</Empty>
+        {me.data && <CrewPreferencesForm key={user.id} userId={user.id} profile={me.data.profile} settings={me.data.settings} />}
+        {me.data && <PublicProfileForm key={user.id} userId={user.id} profile={me.data.profile} />}
       </div>
     </>
   );
