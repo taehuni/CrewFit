@@ -6,7 +6,7 @@ export function validActivityId(id) {
 export async function loadActivityDetail(db, userId, id) {
   if (!validActivityId(id)) return null;
   const { data: activity, error } = await db.from('activities')
-    .select('id,sport,performed_on,duration_sec,distance_m,note,details')
+    .select('id,sport,performed_on,duration_sec,distance_m,note,details,activity_routes(activity_id)')
     .eq('user_id', userId).eq('id', id).maybeSingle();
   if (error) throw error;
   if (!activity) return null;

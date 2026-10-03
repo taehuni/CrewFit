@@ -8,6 +8,7 @@ import './activity-list.css';
 import './exercise-merge.css';
 import RecordTabs from '../../shared/RecordTabs.jsx';
 import { GpsDraftList } from '../tracking/index.js';
+import { recordSource } from './recordSource.js';
 
 function Filters({ filters, onFilter }) {
   const [draft, setDraft] = useState(filters);
@@ -58,7 +59,7 @@ export default function ActivityListView({ filters, filterMessage, records, onFi
         : <>
           {items.length ? <ul className="activity-library-list">{items.map(record => <li key={record.id}>
             <Link to={'/activities/' + record.id} state={{ activitiesReturnTo: returnTo }} className="activity-library-row">
-              <time dateTime={record.performed_on}>{record.performed_on.replaceAll('-', '.')}</time>
+              <time dateTime={record.performed_on}>{record.performed_on.replaceAll('-', '.')} · {recordSource(record)}</time>
               <div className="activity-library-name"><strong>{SPORT_LABEL[record.sport] || '운동'}</strong>{record.note?.trim() && <p>{record.note.trim().split(/\r?\n/)[0]}</p>}</div>
               <div className="activity-library-metrics">
                 {record.distance_m != null && <span><b>{(record.distance_m / distanceFactor(record.sport)).toLocaleString('ko-KR', { maximumFractionDigits: 3 })}</b><small>{distanceUnit(record.sport)}</small></span>}

@@ -3,6 +3,7 @@ import { Button, SPORT_LABEL } from '../../shared/ui.jsx';
 import { detailDuration, groupExerciseSets } from './activityDetail.js';
 import './activity-detail.css';
 import DeleteActivityButton from './DeleteActivityButton.jsx';
+import { recordSource } from './recordSource.js';
 import { activitiesReturnTo } from './activityList.js';
 import { ACTIVITY_SPORTS, distanceFactor, distanceUnit } from './sports.js';
 
@@ -17,6 +18,7 @@ export default function ActivityDetailView({ detail, onDelete }) {
       <Link to={returnTo || '/home'} state={activity ? { performedOn: activity.performed_on } : undefined} className="activity-back">운동 목록으로</Link>
       <h1>{activity ? (SPORT_LABEL[activity.sport] || '운동') + ' 기록' : '운동 기록 상세'}</h1>
       {activity && <time dateTime={activity.performed_on}>{activity.performed_on.replaceAll('-', '.')}</time>}
+      {activity && <p className="muted">{recordSource(activity)}</p>}
       {activity && <div className="activity-detail-actions">
         {ACTIVITY_SPORTS.includes(activity.sport) && <Link to={`/activities/${activity.id}/edit`} state={location.state} className="btn btn-ghost">수정</Link>}
         {onDelete && <DeleteActivityButton onDelete={onDelete} />}

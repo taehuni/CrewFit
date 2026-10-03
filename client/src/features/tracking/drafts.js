@@ -43,3 +43,12 @@ export async function finalizeGpsDraft(db, id, note) {
   if (error || !/^[1-9]\d*$/.test(String(data))) throw new Error(error?.code === 'P0002' ? '보관한 측정 또는 원래 기록이 삭제되었어요. 목록에서 다시 확인해 주세요.' : draftError(error));
   return String(data);
 }
+export async function deleteGpsDraft(db, userId, id) {
+  if (!userId || !isDraftId(id)) throw new Error('삭제할 측정을 확인해 주세요.');
+  const { data, error } = await db.from('gps_drafts').delete()
+    .eq('user_id', userId).eq('id', id).is('finalized_at', null).select('id');
+  if (error) throw new Error('삭제를 확인하지 못했어요. 다시 시도해 주세요.');
+  if (!Array.isArray(data) || data.length !== 1 || data[0].id !== id) {
+    throw new Error('이미 삭제했거나 운동 기록으로 저장한 측정이에요. 목록을 다시 확인해 주세요.');
+  }
+}

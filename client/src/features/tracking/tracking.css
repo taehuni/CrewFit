@@ -21,3 +21,7 @@
 .gps-drafts ul { padding: 0; list-style: none; }
 .gps-drafts li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
 .gps-drafts .btn { min-height: 44px; }
+.gps-drafts-toggle { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-height: 44px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.gps-drafts-toggle span { font-size: .875rem; font-weight: 400; }
+.gps-draft-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.gps-draft-confirm { flex-basis: 100%; padding-top: 8px; }

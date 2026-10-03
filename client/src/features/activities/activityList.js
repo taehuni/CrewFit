@@ -42,7 +42,7 @@ export async function loadActivityPage(db, userId, filters, cursor = null, signa
   const rows = [];
   let after = cursor;
   while (rows.length < LIST_PAGE_SIZE + 1) {
-    let query = db.from('activities').select('id,sport,performed_on,duration_sec,distance_m,note')
+    let query = db.from('activities').select('id,sport,performed_on,duration_sec,distance_m,note,activity_routes(activity_id)')
       .eq('user_id', userId).order('performed_on', { ascending: false }).order('id', { ascending: false })
       .limit(LIST_PAGE_SIZE + 1 - rows.length);
     if (filters.sport) query = query.eq('sport', filters.sport);
