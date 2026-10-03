@@ -1,6 +1,9 @@
 // D-13: Query 키는 여기서만 만든다. 사용자 범위 데이터는 userId를 키에 포함.
 export const queryKeys = {
   me: (userId) => ['me', userId],
+  gpsDraftsRoot: userId => ['gpsDrafts', userId],
+  gpsDrafts: (userId, filters) => ['gpsDrafts', userId, 'list', filters],
+  gpsDraft: (userId, id) => ['gpsDrafts', userId, 'detail', id],
   ownRoute: (userId, activityId) => ['activities', userId, 'route', activityId],
   postRoute: (userId, postId) => ['posts', userId, 'route', postId],
   memberRoot: (viewerId) => ['members', viewerId],

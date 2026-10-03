@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { Suspense, useRef, useState } from 'react';
 import { Link } from 'react-router';
 import { Button, Field, SPORT_LABEL } from '../../shared/ui.jsx';
 import { detailDuration } from './activityDetail.js';
@@ -7,6 +7,7 @@ import { distanceFactor, distanceUnit } from './sports.js';
 import './activity-list.css';
 import './exercise-merge.css';
 import RecordTabs from '../../shared/RecordTabs.jsx';
+import { GpsDraftList } from '../tracking/index.js';
 
 function Filters({ filters, onFilter }) {
   const [draft, setDraft] = useState(filters);
@@ -43,9 +44,11 @@ export default function ActivityListView({ filters, filterMessage, records, onFi
   return <div className="activity-library">
     <RecordTabs active="activities" />
     <header className="activity-library-heading"><div><h1>운동 기록</h1><p>날짜순으로 모아 보는 내 운동</p></div>
-      <div className="activity-library-tools"><Link className="btn btn-primary" to="/activities/new" state={{ activitiesReturnTo: returnTo }}>＋ 운동 기록하기</Link>
+      <div className="activity-library-tools"><Link className="btn btn-ghost" to="/activities/new" state={{ activitiesReturnTo: returnTo }}>직접 기록</Link>
+        <Link className="btn btn-primary" to="/activities/track">GPS 측정</Link>
         <Link className="btn btn-ghost" to="/activities/exercises" state={{ activitiesReturnTo: returnTo }}>운동명 관리</Link></div>
     </header>
+    <Suspense fallback={<p>보관한 측정 확인 중…</p>}><GpsDraftList /></Suspense>
     <Filters key={returnTo} filters={filters} onFilter={onFilter} />
     <section className="activity-library-results" aria-label="운동 기록 목록" aria-busy={records.isFetching}>
       <div className="activity-library-caption"><span>최신 날짜순</span><span role="status">{!filterMessage && records.data ? items.length + '건 표시' + (records.hasNextPage ? ' · 더 있음' : '') : ''}</span></div>

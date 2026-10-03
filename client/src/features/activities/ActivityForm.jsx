@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react';
+import { Suspense, useRef, useState } from 'react';
+import { GpsDraftList, GpsRouteMap } from '../tracking/index.js';
 import { Link, useLocation } from 'react-router';
 import { Button, Field, FormMessage, SPORT_LABEL } from '../../shared/ui.jsx';
 import { activityPayload } from './record.js';
@@ -8,7 +9,7 @@ import './activities.css';
 
 const emptySet = () => ({ name: '', reps: '', weight: '' });
 
-export default function ActivityForm({ today, onSave, initialSport = 'running', initialValues, editing = false, cancelTo = '/home',
+export default function ActivityForm({ today, onSave, initialSport = 'running', initialValues, editing = false, cancelTo = '/home', gpsDraft, onSelectDraft, onClearDraft,
   exerciseNames = [], exerciseNamesPending = false, exerciseNamesError = false, onExerciseNameFocus, onExerciseNamesRetry }) {
   const location = useLocation();
   const [form, setForm] = useState(() => initialValues || { sport: initialActivitySport(initialSport), date: today, minutes: '', seconds: '0', distance: '', lapCount: '', note: '', sets: [emptySet()] });
@@ -41,7 +42,7 @@ export default function ActivityForm({ today, onSave, initialSport = 'running', 
     try {
       await onSave(payload);
     } catch (error) {
-      setMessage(editing
+      setMessage(gpsDraft ? error.message : editing
         ? error.code === 'PGRST202' ? '헬스 수정용 DB 함수가 아직 적용되지 않았어요. 20260914_update_gym_activity.sql 적용이 필요합니다. 입력 내용은 유지됩니다.'
           : error.code === 'not_found' || error.code === 'P0002' ? '기록이 삭제되었거나 수정할 수 없어요. 입력 내용은 유지됩니다.'
           : '수정 결과를 확인하지 못했어요. 입력 내용은 유지됩니다. 연결 상태를 확인하고 다시 시도해 주세요.'
@@ -56,13 +57,15 @@ export default function ActivityForm({ today, onSave, initialSport = 'running', 
     <form ref={formRef} onSubmit={submit} noValidate>
       <fieldset disabled={busy} className="activity-fields">
         <legend className="sr-only">운동 기록</legend>
-        <fieldset className="activity-sports" disabled={editing}><legend>{editing ? '종목 · 변경할 수 없어요' : '종목'}</legend>
+        {gpsDraft && <section className="gps-drafts"><strong>보관한 GPS 측정을 불러왔어요.</strong><p>종목·날짜·시간·거리는 측정값을 사용합니다. 메모를 남기고 저장해 주세요.</p><Button variant="ghost" onClick={onClearDraft}>불러오기 취소</Button></section>}
+        {gpsDraft && <Suspense fallback={<p>경로를 불러오는 중…</p>}><GpsRouteMap points={gpsDraft.points} /></Suspense>}
+        <fieldset className="activity-sports" disabled={editing || Boolean(gpsDraft)}><legend>{editing || gpsDraft ? '종목 · 변경할 수 없어요' : '종목'}</legend>
           {ACTIVITY_SPORTS.map(value => <label key={value} data-selected={form.sport === value}>
             <input type="radio" name="sport" value={value} checked={form.sport === value} onChange={() => changeSport(value)} />{SPORT_LABEL[value]}
           </label>)}
         </fieldset>
-        {!editing && ['running', 'walking', 'cycling'].includes(form.sport) && <Link className="btn btn-ghost" to={`/activities/track?sport=${form.sport}`}>GPS로 측정하기</Link>}
-        <div className="activity-basics">
+        {!editing && !gpsDraft && onSelectDraft && <Suspense fallback={<p>보관한 GPS 측정 확인 중…</p>}><GpsDraftList date={form.date} sport={form.sport} onSelect={onSelectDraft} /></Suspense>}
+        <fieldset className="activity-basics" disabled={Boolean(gpsDraft)}><legend className="sr-only">운동 측정값</legend>
           <Field id="activity-date" label="운동 날짜" type="date" required min="1900-01-01" max="9999-12-24" value={form.date} onChange={e => change('date', e.target.value)} error={errors.date} />
           <fieldset className="activity-duration"><legend>운동 시간</legend><div className="activity-duration-fields">
             <Field id="activity-minutes" label="분" type="number" inputMode="numeric" required min="0" step="1" placeholder="30" value={form.minutes} onChange={e => change('minutes', e.target.value)} error={errors.minutes} />
@@ -70,7 +73,7 @@ export default function ActivityForm({ today, onSave, initialSport = 'running', 
           </div></fieldset>
           {hasDistance(form.sport) && <Field id="activity-distance" label={'거리 (' + distanceUnit(form.sport) + ')'} type="number" inputMode={form.sport === 'swimming' ? 'numeric' : 'decimal'} required={!editing} min="0" step={form.sport === 'swimming' ? '1' : '0.001'} placeholder={form.sport === 'swimming' ? '1000' : '5.2'} value={form.distance} onChange={e => change('distance', e.target.value)} error={errors.distance} />}
           {form.sport === 'swimming' && <Field id="activity-laps" label="랩 수 (선택)" type="number" inputMode="numeric" min="0" max="10000" step="1" placeholder="20" hint="편도 한 번이 1랩입니다. 총 거리는 위에 직접 입력해 주세요." value={form.lapCount ?? ''} onChange={e => change('lapCount', e.target.value)} error={errors.lapCount} />}
-        </div>
+        </fieldset>
         {form.sport === 'gym' && <section className="activity-sets" aria-labelledby="sets-title">
           <div className="activity-sets-head"><h2 id="sets-title">운동 세트</h2><span>{editing ? '빈 횟수·중량은 미입력으로 저장' : '맨몸 운동은 0kg'}</span></div>
           <div className="exercise-history-status" role="status">

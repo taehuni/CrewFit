@@ -12,12 +12,13 @@
 
 /* 내비 */
 .lp-nav { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--ink) 88%, transparent); backdrop-filter: blur(8px); color: var(--paper); }
-.lp-nav .row { height: 60px; justify-content: space-between; }
-.lp-nav .wordmark { font-size: 1.625rem; }
+.lp-nav .row { height: 60px; justify-content: space-between; gap: 8px; }
+.lp-nav .wordmark { font-size: 1.375rem; }
 .lp-nav-links { display: none; gap: 24px; font-weight: 500; color: var(--dim); }
 .lp-nav-links a:hover { color: var(--paper); }
-.lp-nav-cta { display: flex; gap: 8px; }
-.lp-nav-cta .btn-ghost { display: none; border-color: var(--char-2); color: var(--paper); }
+.lp-nav-cta { display: flex; gap: 8px; flex-shrink: 0; }
+.lp-nav-cta .btn { min-height: 44px; padding: 0 10px; }
+.lp-nav-cta .btn-ghost { display: inline-flex; border-color: var(--dim); color: var(--paper); }
 .lp-nav-cta .btn-ghost:hover { background: var(--char); border-color: var(--dim); }
 
 /* 트랙 레인 */
@@ -170,10 +171,10 @@
 .lp-foot nav a:hover { color: var(--accent-ink); }
 
 @media (min-width: 768px) {
+  .lp-nav .wordmark { font-size: 1.625rem; }
   .lp h2 { font-size: 3rem; }
   .lp-lead { font-size: 1.125rem; }
   .lp-nav-links { display: flex; }
-  .lp-nav-cta .btn-ghost { display: inline-flex; }
   .lp-hero { padding-top: 64px; }
   .lp-hero-grid { grid-template-columns: 1fr 1.1fr; align-items: center; gap: 48px; padding-bottom: 64px; }
   .lp-hero h1 { font-size: 3.5rem; }

@@ -53,7 +53,7 @@ export default function LandingPage() {
           </nav>
           <div className="lp-nav-cta">
             <Link to="/login" className="btn btn-ghost btn-sm">로그인</Link>
-            <Link to="/signup" className="btn btn-primary btn-sm">무료로 시작하기</Link>
+            <Link to="/signup" className="btn btn-primary btn-sm">회원가입</Link>
           </div>
         </div>
       </header>

@@ -8,7 +8,7 @@
 .activity-sports label { display: flex; align-items: center; gap: 8px; justify-content: center; padding: 10px 8px; min-height: 48px; border: 1px solid var(--line); border-radius: var(--radius); cursor: pointer; }
 .activity-sports label[data-selected="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
 .activity-sports input { accent-color: var(--ink); }
-.activity-basics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; gap: 20px; margin-bottom: 24px; }
+.activity-basics { border: 0; padding: 0; min-width: 0; margin: 0 0 24px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; gap: 20px; }
 .activity-page .field { margin: 0; min-width: 0; }
 .activity-page input, .activity-page textarea { width: 100%; min-width: 0; }
 .activity-page input[type="radio"] { width: auto; }

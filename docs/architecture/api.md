@@ -271,6 +271,14 @@ res  { "updated": 37 }
 
 ## 3. 서버 파일 배치
 
+### GPS 측정 보관 (2026-10-03)
+
+- 클라이언트는 사용자 JWT로 `gps_drafts`를 조회한다. 목록은 좌표를 제외한 메타데이터만 최대 50건 조회하며, 직접 기록 화면에서는 한국 날짜·종목으로 필터링한다. 상세 좌표는 본인만 조회 가능하다.
+- `save_gps_draft(p_id uuid, p_sport text, p_started_at timestamptz, p_duration_sec integer, p_distance_m integer, p_note text, p_points jsonb) → uuid`: 한 측정에 같은 UUID를 재사용한다. 소유자와 한국 날짜는 DB에서 결정하며, 이미 보관된 측정은 덮어쓰지 않는다.
+- `finalize_gps_draft(p_id uuid, p_note text default null) → bigint`: 본인 보관 측정을 잠근 뒤 운동·경로를 원자적으로 생성한다. 재호출은 기존 운동 ID를 반환한다. 이미 저장했던 운동을 삭제한 경우 새로 만들지 않는다.
+- 두 RPC만 `SECURITY DEFINER`를 사용하며 `auth.uid()` 직접 검증, 빈 `search_path`, 스키마 명시, authenticated 전용 실행 권한으로 제한한다. 테이블 INSERT/UPDATE 권한은 부여하지 않는다. SELECT/미완료 DELETE만 소유자 RLS로 허용한다.
+- 보관 단계에는 activities에 행을 만들지 않아 통계·목표·피드 첨부 후보에서 제외된다. 최종 저장 후 관련 캐시를 무효화한다. 새 서버 HTTP API나 서비스 역할 키는 사용하지 않는다.
+
 ### 회원 페이지·공개 설정 (2026-09-30)
 
 - `/users/:id`는 사용자 JWT로 `profiles` 공개 필드만 조회한다. 실명·지역·선호 요일·목표 메모 및 GPS 경로는 조회하지 않는다.

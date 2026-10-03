@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { routeSegments } from './tracking.js';
 import './tracking.css';
 let sdkPromise;
+const customStyleId = import.meta.env.VITE_NAVER_MAP_STYLE_ID?.trim();
 function loadMapSdk() {
   const key = import.meta.env.VITE_NAVER_MAP_CLIENT_ID;
   if (!key) return Promise.reject(new Error('map-not-configured'));
@@ -16,7 +17,7 @@ function loadMapSdk() {
     window.navermap_authFailure = fail;
     // The SDK callback can run before the script assigns window.naver.maps.
     window.crewfitNaverMapReady = () => queueMicrotask(() => { if (settled) return; if (!window.naver?.maps?.Map) return fail(); settled = true; clean(); resolve(window.naver.maps); });
-    script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${encodeURIComponent(key)}&callback=crewfitNaverMapReady`;
+    script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${encodeURIComponent(key)}&callback=crewfitNaverMapReady${customStyleId ? '&submodules=gl' : ''}`;
     script.onerror = fail; document.head.appendChild(script);
   }).catch(error => { sdkPromise = null; throw error; });
   return sdkPromise;
@@ -36,7 +37,10 @@ export default function RouteMap({ points }) {
     const segments = routeSegments(points); if (!segments.length) { setError(true); return; }
     loadMapSdk().then(maps => {
       if (cancelled) return;
-      const first = segments[0][0]; map = new maps.Map(target.current, { center: new maps.LatLng(first[0], first[1]), zoom: 15 });
+      const first = segments[0][0]; map = new maps.Map(target.current, {
+        center: new maps.LatLng(first[0], first[1]), zoom: 15,
+        ...(customStyleId ? { gl: true, customStyleId } : {}),
+      });
       const bounds = new maps.LatLngBounds();
       for (const segment of segments) { const path = segment.map(p => new maps.LatLng(p[0], p[1])); path.forEach(p => bounds.extend(p)); overlays.push(new maps.Polyline({ map, path, strokeWeight: 5, strokeColor: '#ff550a', strokeOpacity: 0.9 })); }
       const all = segments.flat(); for (const point of [all[0], all.at(-1)]) overlays.push(new maps.Marker({ map, position: new maps.LatLng(point[0], point[1]) }));

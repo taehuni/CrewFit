@@ -21,6 +21,7 @@ Render 환경변수에는 로컬 파일의 값을 옮긴다. `.env` 자체를 Gi
 | `VITE_SUPABASE_URL` | client/.env | 브라우저 공개 설정 |
 | `VITE_SUPABASE_ANON_KEY` | client/.env | 브라우저 공개 키, RLS 적용 |
 | `VITE_NAVER_MAP_CLIENT_ID` | client/.env | 지도 Client ID |
+| `VITE_NAVER_MAP_STYLE_ID` | Style Editor에서 발행한 My Style ID | 선택: GL 커스텀 지도 스타일. 비워 두면 기본 지도 |
 | `SUPABASE_URL` | server/.env | 서버 DB 연결 |
 | `SUPABASE_ANON_KEY` | server/.env | 사용자 JWT와 함께 사용 |
 | `SUPABASE_SERVICE_ROLE_KEY` | server/.env | 서버 전용 크루 통계·AI 저장 |
@@ -30,6 +31,15 @@ Render 환경변수에는 로컬 파일의 값을 옮긴다. `.env` 자체를 Gi
 프론트 빌드의 `VITE_API_URL`은 빈 값으로 강제해 휴대폰이 localhost를 호출하지 않도록 한다. 비밀키에는 `VITE_` 접두사를 붙이지 않는다. 프론트 환경변수 변경 후에는 다시 빌드·배포한다.
 
 ## 주소 발급 후
+
+### 2026-10-03 GPS 보관 기능 배포 순서
+
+1. 기존 Supabase SQL Editor에서 `server/config/migrations/20261003_gps_drafts.sql`만 실행한다. 기존 기록은 유지된다. `schema.sql`은 초기화용이므로 기존 프로젝트에 실행하지 않는다.
+2. Render 환경변수 `VITE_NAVER_MAP_STYLE_ID`에 발행한 스타일 ID `7b56055a-ba14-4716-8659-5c57f1290f18`을 저장한다. 지도 SDK는 GL 모듈과 커스텀 스타일을 함께 사용한다.
+3. 승인된 `render_test` 커밋을 빌드·배포한다. GPS 저장이 새 RPC를 사용하므로 DB 업데이트를 먼저 완료해야 한다.
+4. 휴대폰에서 기록 → GPS 측정 → 종목 선택 → 종료 → 나중에 작성 → 불러오기 → 최종 저장을 확인한다. 최종 저장 전후 통계와 경로 표시도 확인한다.
+
+### 공통 확인
 
 1. 네이버 Maps Application의 Web 서비스 URL에 발급된 `https://서비스명.onrender.com`을 추가한다. 기존 localhost는 유지한다.
 2. Supabase Authentication → URL Configuration에서 테스트 배포 주소를 Site URL로 설정하고 Redirect URLs에 `https://서비스명.onrender.com/auth/callback`, `https://서비스명.onrender.com/reset-password`를 추가한다. 기존 개발용 URL은 유지한다.
