@@ -1,5 +1,14 @@
 // D-13: Query 키는 여기서만 만든다. 사용자 범위 데이터는 userId를 키에 포함.
 export const queryKeys = {
+  memberCard:(viewer,id)=>['community',viewer,'member',id],
+  crewCover:(viewer,id)=>['community',viewer,'cover',id],
+  myCrews:viewer=>['crewList',viewer,'mine'],
+  recentCrews:(viewer,ids)=>['community',viewer,'recentCrews',ids],
+  socialSummary:(viewer,ids)=>['posts',viewer,'summaries',ids],
+  socialSummaryRoot:viewer=>['posts',viewer,'summaries'],
+  notifications:viewer=>['community',viewer,'notifications'],
+  blocks:viewer=>['community',viewer,'blocks'],
+  reports:viewer=>['community',viewer,'reports'],
   me: (userId) => ['me', userId],
   gpsDraftsRoot: userId => ['gpsDrafts', userId],
   gpsDrafts: (userId, filters) => ['gpsDrafts', userId, 'list', filters],
@@ -28,7 +37,7 @@ export const queryKeys = {
   crews: (filters = {}) => ['crews', filters],
   crewListRoot: (userId) => ['crewList', userId],
   crewMatches: (userId) => ['crewList', userId, 'matches'],
-  crewList: (userId, sport) => ['crewList', userId, sport],
+  crewList: (userId, sport, filters={}) => ['crewList', userId, sport,filters],
   crewDetail: (userId, id) => ['crewDetail', userId, id],
   crewMembers: (userId, id) => ['crewMembers', userId, id],
   crewStats: (userId, id, period) => ['crewStats', userId, id, period],

@@ -184,6 +184,8 @@ h2 { font-size: 1.125rem; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* ── 페이지 공통 ─────────────────────────────────── */
+.not-found { width: min(100%, 600px); min-height: 100svh; margin: 0 auto; padding: 32px 20px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 20px; }
+.not-found h1 { font-size: clamp(1.5rem, 5vw, 2rem); }
 .page-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
 .page-head h1 { min-width: 0; }
 .stack { display: grid; gap: 16px; }

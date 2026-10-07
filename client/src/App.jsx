@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './shared/queryClient.js';
 import AppShell from './shared/AppShell.jsx';
-import ComingSoon from './shared/ComingSoon.jsx';
+import NotFoundPage from './shared/NotFoundPage.jsx';
 import {
   AuthProvider, RequireAuth, GuestOnly,
   LoginPage, SignupPage, ForgotPasswordPage, ResetPasswordPage,
@@ -19,6 +19,7 @@ import { FeedbackPage } from './features/feedback/index.js';
 import { CrewsPage, CrewCreatePage, CrewDetailPage } from './features/crews/index.js';
 import { FeedPage, PostEditor, PostDetail } from './features/feed/index.js';
 import { TrackingPage } from './features/tracking/index.js';
+import {NotificationsPage} from './features/social/index.js';
 
 function AuthLinkEntry({ children }) {
   const { pathname } = useLocation();
@@ -54,6 +55,7 @@ export default function App() {
               <Route path="/activities/track" element={<TrackingPage />} />
               <Route element={<AppShell />}>
                 <Route path="/home" element={<HomePage />} />
+                <Route path="/notifications" element={<NotificationsPage />} />
                 <Route path="/goals" element={<GoalsPage />} />
                 <Route path="/feedback" element={<FeedbackPage />} />
                 <Route path="/activities" element={<ActivitiesPage />} />
@@ -74,9 +76,9 @@ export default function App() {
                 <Route path="/feed/:postId/edit" element={<PostEditor />} />
                 <Route path="/me" element={<MePage />} />
                 <Route path="/users/:id" element={<MemberPage />} />
-                <Route path="*" element={<ComingSoon title="없는 페이지" step="—" />} />
               </Route>
             </Route>
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
           </Suspense>
           </AuthLinkEntry>

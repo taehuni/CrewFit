@@ -891,3 +891,17 @@ revoke all on function public.save_gps_draft(uuid,text,timestamptz,integer,integ
 grant execute on function public.save_gps_draft(uuid,text,timestamptz,integer,integer,text,jsonb), public.finalize_gps_draft(uuid,text) to authenticated;
 commit;
 ```
+
+## 커뮤니티 보완 (2026-10-07)
+
+적용: `server/config/migrations/20261007_community_polish.sql`. 기존 테이블 삭제 없이 추가한다.
+
+| 테이블 | 권한 | 용도 |
+|---|---|---|
+| member_cards | 회원 조회, 본인 쓰기 | 아바타 경로·160자 소개 |
+| crew_covers | 회원 조회, 크루장 쓰기 | 크루 대표 사진 |
+| member_blocks | 본인만 조회·생성·삭제 | 상호 피드·댓글 차단 |
+| notifications | 수신자 조회·읽음 표시, 트리거 생성 | 댓글·좋아요·가입 요청·승인 |
+| content_reports | 본인 생성·조회, 운영 관리자 처리 | 게시글 신고 |
+
+community-media 비공개 버킷은 본인 폴더 또는 현재 조회 가능한 프로필/크루 커버의 참조만 서명한다. 사진 교체 시 다른 참조가 없는 이전 파일만 삭제한다. 알림은 본문을 복제하지 않고 식별자만 저장하며 현재 글 권한과 차단 상태를 다시 확인한다. `feed_summaries`와 `crew_recent_activity`는 security invoker RPC로 기존 RLS를 따른다. 신고 처리는 운영자가 Supabase Table Editor에서 status(received/reviewed/resolved)를 수정하며 일반 회원에게 처리 권한을 부여하지 않는다.

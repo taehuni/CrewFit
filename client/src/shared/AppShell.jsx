@@ -5,6 +5,9 @@ import { api } from './api.js';
 import { queryKeys } from './queryKeys.js';
 import { bibNumber } from './ui.jsx';
 import './workspace.css';
+import './quality.css';
+import {NotificationLink} from '../features/social/index.js';
+import {MemberAvatar} from './CommunityMedia.jsx';
 
 const TABS = [
   { to: '/home', paths: ['/home', '/goals', '/feedback'], label: '홈', d: 'M3 11.5 12 4l9 7.5M5 10v10h14V10' },
@@ -28,11 +31,11 @@ export function Wordmark() {
 export default function AppShell() {
   const { user, token } = useAuth();
   const me = useQuery({ queryKey: queryKeys.me(user.id), queryFn: () => api('/me', { token }) });
-  return <WorkspaceFrame nickname={me.data?.profile?.nickname} number={bibNumber(user.id)} />;
+  return <WorkspaceFrame nickname={me.data?.profile?.nickname} userId={user.id} number={bibNumber(user.id)} />;
 }
 
 // 하나의 nav를 데스크톱 상단 / 모바일 하단에 배치.
-export function WorkspaceFrame({ nickname, number }) {
+export function WorkspaceFrame({ nickname, number,userId }) {
   const { pathname } = useLocation();
   return (
     <div className="workspace">
@@ -50,8 +53,9 @@ export function WorkspaceFrame({ nickname, number }) {
         })}
         </div>
       </nav>
+        <NotificationLink/>
         <Link to="/me" className="ws-account" aria-label="내 계정 관리">
-          {number && <span className="ws-bib" aria-hidden="true">{number}</span>}
+          {userId?<MemberAvatar id={userId} name={nickname||'회원'}/>:number&&<span className="ws-bib" aria-hidden="true">{number}</span>}
           <span className="ws-account-name">{nickname || '내 계정'}</span>
         </Link>
       </header>

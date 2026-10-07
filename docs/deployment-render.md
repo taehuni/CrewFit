@@ -39,7 +39,14 @@ Render 환경변수에는 로컬 파일의 값을 옮긴다. `.env` 자체를 Gi
 3. 승인된 `render_test` 커밋을 빌드·배포한다. GPS 저장이 새 RPC를 사용하므로 DB 업데이트를 먼저 완료해야 한다.
 4. 휴대폰에서 기록 → GPS 측정 → 종목 선택 → 종료 → 나중에 작성 → 불러오기 → 최종 저장을 확인한다. 최종 저장 전후 통계와 경로 표시도 확인한다.
 
-### 공통 확인
+### 2026-10-07 커뮤니티 화면 보완 배포
+
+1. 기존 DB에는 `server/config/migrations/20261007_community_polish.sql`을 적용한다. 이번 연결에서는 적용과 실제 저장 검증을 마쳤다. 사진·소개·알림·신고·차단용 테이블/정책/비공개 버킷을 추가하며 기존 데이터를 초기화하지 않는다.
+2. 이전 실명 기능이 빠진 프로젝트는 `server/config/migrations/20260909_member_real_name.sql`도 적용한다. `schema.sql` 전체는 기존 서비스에 실행하지 않는다.
+3. 앱 빌드·검증 후 승인된 커밋을 Render에 배포하고 크루 커버, 내 크루, 사진 글, 알림과 차단 설정을 확인한다.
+4. 신고 처리는 현재 운영자의 Supabase Table Editor에서 `content_reports.status`를 검토·변경한다. 앱은 신고 접수와 본인 처리 상태 조회를 제공하며 별도 운영자 대시보드는 포함하지 않는다.
+
+### 공통 주소 및 동작 확인
 
 1. 네이버 Maps Application의 Web 서비스 URL에 발급된 `https://서비스명.onrender.com`을 추가한다. 기존 localhost는 유지한다.
 2. Supabase Authentication → URL Configuration에서 테스트 배포 주소를 Site URL로 설정하고 Redirect URLs에 `https://서비스명.onrender.com/auth/callback`, `https://서비스명.onrender.com/reset-password`를 추가한다. 기존 개발용 URL은 유지한다.

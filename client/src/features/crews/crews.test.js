@@ -29,7 +29,12 @@ test('crew list filters by sport with stable descending cursor',async()=>{
   const calls=[];
   const q={select(){return this;},order(...a){calls.push(a);return this;},limit(n){calls.push(n);return this;},eq(...a){calls.push(a);return this;},lt(...a){calls.push(a);return this;},then(resolve){return Promise.resolve({data:[{id:8}]}).then(resolve);}};
   const page=await loadCrews({from:()=>q},'gym',10);
-  assert.equal(page.nextCursor,8); assert.deepEqual(calls,[['id',{ascending:false}],20,['sport','gym'],['id',10]]);
+  assert.equal(page.nextCursor,undefined); assert.deepEqual(calls,[['id',{ascending:false}],21,['sport','gym'],['id',10]]);
+});
+test('crew search escapes wildcard characters and scopes region; only full pages continue',async()=>{
+ const calls=[];const q={select(){return this;},order(){return this;},limit(){return this;},ilike(...v){calls.push(v);return this;},eq(...v){calls.push(v);return this;},then(resolve){return Promise.resolve({data:Array.from({length:21},(_,i)=>({id:30-i}))}).then(resolve);}};
+ const page=await loadCrews({from:()=>q},'',null,{search:'run_100%',region:'서울특별시'});
+ assert.deepEqual(calls,[['name','%run\\_100\\%%'],['region_sido','서울특별시']]);assert.equal(page.rows.length,20);assert.equal(page.nextCursor,11);
 });
 test('region pagination continues through server row caps until empty',async()=>{
   const pages=[[{sido:'서울',sigungu:'마포구'}],[{sido:'서울',sigungu:'강남구'}],[]], offsets=[];

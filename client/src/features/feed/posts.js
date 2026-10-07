@@ -4,7 +4,7 @@ import { ownAttachment } from './postActivities.js';
 import { loadOwnRoute, TRACKING_SPORTS } from '../tracking/index.js';
 
 export const KINDS = {free:'자유', recruit:'모집',log:'인증'};
-const FIELDS = 'id,author_id,crew_id,visibility,kind,sport,content,image_path,activity_id,include_route,is_pinned,created_at,updated_at,profiles!posts_author_id_fkey(nickname),crews(name,owner_id)';
+const FIELDS = 'id,author_id,crew_id,visibility,kind,sport,content,image_path,activity_id,include_route,is_pinned,created_at,updated_at,profiles!posts_author_id_fkey(nickname),crews(name,owner_id,sport),activities!posts_activity_id_fkey(id,sport,duration_sec,distance_m)';
 export const feedUrl = crewId => crewId ? `/feed?crew=${crewId}` : '/feed';
 export function postInput(form, crewId) {
   const content = form.content?.trim() || '';
@@ -31,7 +31,7 @@ export async function loadPosts(db, crewId, kind='', cursor=null) {
   if(cursor!=null && (crewId ? !cursor || typeof cursor.is_pinned!=='boolean' || !validCrewId(String(cursor.id)) : !validCrewId(String(cursor))))throw new Error('목록을 새로 조회해 주세요.');
   let query=db.from('posts').select(FIELDS);
   if(crewId)query=query.order('is_pinned',{ascending:false});
-  query=query.order('id',{ascending:false}).limit(20);
+  query=query.order('id',{ascending:false}).limit(21);
   query=crewId ? query.eq('crew_id',crewId) : query.eq('visibility','public');
   if(kind)query=query.eq('kind',kind);
   if(cursor!=null){
@@ -41,8 +41,8 @@ export async function loadPosts(db, crewId, kind='', cursor=null) {
   }
   const {data,error}=await query;
   if(error || !Array.isArray(data))throw new Error('피드를 불러오지 못했어요.');
-  const last=data.at(-1);
-  return {rows:data,next:last ? crewId ? {id:last.id,is_pinned:last.is_pinned} : last.id : undefined};
+  const rows=data.slice(0,20),last=rows.at(-1);
+  return {rows,next:data.length>20 ? crewId ? {id:last.id,is_pinned:last.is_pinned} : last.id : undefined};
 }
 export function canPinPost(post,userId){return !!userId && !!post.crew_id && post.author_id===userId && post.crews?.owner_id===userId;}
 export async function setPostPinned(db,userId,post,pinned){

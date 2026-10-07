@@ -1,0 +1,8 @@
+.sport-symbol { display:inline-flex; align-items:center; justify-content:center; flex:none; width:48px; height:48px; border-radius:15px; color:#38634a; background:#eaf2e9; }
+.sport-symbol svg { width:27px; height:27px; }
+.sport-symbol[data-sport=running] { color:#a34225; background:#fbece5; }
+.sport-symbol[data-sport=cycling] { color:#735426; background:#f6efdf; }
+.sport-symbol[data-sport=swimming] { color:#286479; background:#e5f1f5; }
+.sport-symbol[data-sport=gym] { color:#62528d; background:#eeeaf6; }
+.sport-symbol[data-sport=other] { color:#535f65; background:#ebeff0; }
+.section-eyebrow { display:block; font-size:.75rem; letter-spacing:.06em; font-weight:700; color:#52665b; margin-bottom:10px; }

@@ -4,6 +4,7 @@ import { ACTIVITY_SPORTS, distanceFactor, distanceUnit } from '../activities/ind
 import { shortDate, weekLabel } from './week.js';
 import { GoalProgress } from '../goals/index.js';
 import './home.css';
+import SportIcon from '../../shared/SportIcon.jsx';
 
 function durationLabel(seconds) {
   const minutes = Math.floor(seconds / 60);
@@ -18,9 +19,10 @@ export default function HomeView({ log, days, today, offset, onWeekChange }) {
   return (
     <div className="home-workspace">
       <header className="home-heading">
-        <h1>내 운동</h1>
+        <div><span className="section-eyebrow">하루하루, 나의 페이스로</span><h1>내 운동</h1></div>
         <Link to="/activities/new" className="btn btn-primary home-record-link"><span aria-hidden="true">＋</span> 운동 기록하기</Link>
       </header>
+      <div className="home-today-cue"><span className="home-today-dot" aria-hidden="true"/><div><strong>{streak?.today_done?'오늘의 운동을 남겼어요':ready?'오늘은 어떻게 움직여 볼까요?':'나의 운동을 확인하고 있어요'}</strong><p>{streak?.today_done?'쌓아온 기록을 돌아보고, 크루와 오늘의 성취를 나눠 보세요.':'완벽한 기록보다, 나에게 맞는 작은 시작.'}</p></div><Link to={streak?.today_done?'/feed/new':'/activities'}>{streak?.today_done?'이야기 쓰기':'기록 탭으로'} <span aria-hidden="true">↗</span></Link></div>
 
       <section className="home-week-section" aria-labelledby="week-title">
         <div className="home-section-head">
@@ -72,7 +74,7 @@ export default function HomeView({ log, days, today, offset, onWeekChange }) {
             <li key={record.id}>
               <Link to={`/activities/${record.id}`} className="home-record-row" aria-label={`${shortDate(record.performed_on)} ${SPORT_LABEL[record.sport] || '운동'} 기록 상세`}>
               <span className="record-date">{shortDate(record.performed_on)}</span>
-              <div className="record-title"><strong>{SPORT_LABEL[record.sport] || '운동'}</strong></div>
+              <div className="record-title"><SportIcon sport={record.sport}/><strong>{SPORT_LABEL[record.sport] || '운동'}</strong></div>
               <p>{record.distance_m != null && <span>{(record.distance_m / distanceFactor(record.sport)).toLocaleString('ko-KR', { maximumFractionDigits: 2 })}<small>{distanceUnit(record.sport)}</small></span>}<span>{Math.floor(record.duration_sec / 60)}<small>분</small></span></p>
               <span className="record-open" aria-hidden="true">›</span>
               </Link>
@@ -81,7 +83,7 @@ export default function HomeView({ log, days, today, offset, onWeekChange }) {
           : <div className="home-log-message home-log-empty">
             <p>이 주에 기록한 운동이 없어요.</p>
             <div className="home-sport-actions" role="group" aria-label="종목별 운동 기록하기">
-              {ACTIVITY_SPORTS.map(sport => <Link key={sport} to={'/activities/new?sport=' + sport} className="home-sport-link"><strong>{SPORT_LABEL[sport]} 기록하기</strong><span>{sport === 'gym' ? '운동 · 세트 · 중량' : sport === 'swimming' ? '거리 · 시간 · 랩 수' : sport === 'other' ? '시간 · 메모' : '거리 · 시간'}</span></Link>)}
+              {ACTIVITY_SPORTS.map(sport => <Link key={sport} to={'/activities/new?sport=' + sport} className="home-sport-link"><SportIcon sport={sport}/><strong>{SPORT_LABEL[sport]} 기록하기</strong><span>{sport === 'gym' ? '운동 · 세트 · 중량' : sport === 'swimming' ? '거리 · 시간 · 랩 수' : sport === 'other' ? '시간 · 메모' : '거리 · 시간'}</span></Link>)}
             </div>
           </div>}
       </section>

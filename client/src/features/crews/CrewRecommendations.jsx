@@ -4,6 +4,7 @@ import { useAuth } from '../auth/index.js';
 import { api } from '../../shared/api.js';
 import { queryKeys } from '../../shared/queryKeys.js';
 import { SPORTS, LEVELS, dayLabel } from './crews.js';
+import CrewMark from '../../shared/CrewMark.jsx';
 
 const labels = { sport: '종목', region: '지역', days: '요일', level: '레벨' };
 export default function CrewRecommendations() {
@@ -18,7 +19,7 @@ export default function CrewRecommendations() {
       {!query.data.crews.length && <p>아직 추천할 크루가 없어요. 가입·신청한 크루는 추천에서 제외돼요. 아래 전체 목록도 살펴보세요.</p>}
       <div className="crew-grid">{query.data.crews.map(crew => <Link key={crew.id} to={`/crews/${crew.id}`} className="crew-card">
         <div className="crew-card-top"><span>{SPORTS[crew.sport]} · {crew.member_count}명</span><span>{crew.join_mode === 'open' ? '즉시 가입형' : '승인형'}</span></div>
-        <h3>{crew.name}</h3><p>{crew.region_sido} {crew.region_sigungu}</p>
+        <div className="crew-identity"><CrewMark name={crew.name} sport={crew.sport}/><h3>{crew.name}</h3></div><p>{crew.region_sido} {crew.region_sigungu}</p>
         <p className="crew-match-note">{crew.matched_on.map(key => labels[key]).join(' · ')} 일치</p>
         <div className="crew-card-bottom"><span>{dayLabel(crew.activity_days)}</span><span>{LEVELS[crew.level] || '레벨 무관'}</span></div>
       </Link>)}</div>

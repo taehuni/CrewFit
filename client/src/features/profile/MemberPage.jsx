@@ -3,9 +3,10 @@ import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { useAuth } from '../auth/index.js';
 import { supabase } from '../../shared/supabaseClient.js';
 import { queryKeys } from '../../shared/queryKeys.js';
-import { ProfileCard, SPORT_LABEL, bibNumber } from '../../shared/ui.jsx';
+import { SPORT_LABEL } from '../../shared/ui.jsx';
 import { loadMember, loadMemberRecords, loadMemberCrews } from './memberProfile.js';
 import './profile.css';
+import {MemberOverview} from '../../shared/CommunityMedia.jsx';
 
 function QueryState({ query, empty }) {
   if (query.isPending) return <p role="status">불러오는 중…</p>;
@@ -18,7 +19,7 @@ function MemberContent({ userId, profile }) {
   const records = useInfiniteQuery({ ...options, queryKey: queryKeys.memberRecords(userId, profile.id), queryFn: ({ pageParam, signal }) => loadMemberRecords(supabase, profile.id, pageParam, signal) });
   const crews = useInfiniteQuery({ ...options, queryKey: queryKeys.memberCrews(userId, profile.id), queryFn: ({ pageParam, signal }) => loadMemberCrews(supabase, profile.id, pageParam, signal) });
   return <>
-    <ProfileCard nickname={profile.nickname} sport={profile.main_sport} level={profile.level} number={bibNumber(profile.id)} />
+    <MemberOverview profile={profile}/>
     <section className="card stack"><h2>가입 크루</h2><p className="muted">공개 설정에 따라 볼 수 있는 승인된 크루만 표시해요.</p>
       <QueryState query={crews} empty="표시할 수 있는 가입 크루가 없어요." />
       {!crews.isError && <ul className="member-list">{crews.data?.pages.flatMap(page => page.rows).filter(row => row.crews).map(row => <li key={row.crew_id}><Link to={`/crews/${row.crew_id}`}>{row.crews.name}</Link><span>{SPORT_LABEL[row.crews.sport]}</span></li>)}</ul>}

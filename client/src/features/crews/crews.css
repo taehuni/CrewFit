@@ -31,6 +31,31 @@
 .crew-leave-confirm { padding:16px; border:1px solid var(--line); background:var(--surface); }
 .crew-detail-hero { padding:28px; background:var(--ink); color:var(--surface); border-top:4px solid var(--accent); overflow-wrap:anywhere; }
 .crew-detail-hero h2 { font-size:2rem; margin:20px 0 28px; }
+.crew-home > .crews-heading { margin-bottom:16px; }
+.crew-home .crew-detail-hero { padding:18px; }
+.crew-home .crew-detail-hero > .crew-mark { float:left; width:48px; height:48px; font-size:24px; border-radius:14px; margin:0 12px 8px 0; }
+.crew-home .crew-detail-hero h2 { font-size:1.5rem; margin:6px 0 12px; }
+.crew-home .crew-detail-hero > p { font-size:.8125rem; }
+.crew-home .crew-detail-hero > div { clear:both; gap:16px; font-size:.8125rem; }
+.crew-home .crew-stats { margin-top:18px; padding-top:0; border:0; }
+.crew-home .crew-stats .crews-heading { margin-bottom:12px; gap:8px; }
+.crew-home .crew-stats-controls { gap:6px; }
+.crew-home .crew-stats-controls button { padding:8px 10px; }
+.crew-home .crew-stats .crew-match-note { margin:8px 0; font-size:.75rem; }
+.crew-home .crew-stats-totals { grid-template-columns:repeat(3,minmax(0,1fr)); padding:16px 12px; gap:8px; }
+.crew-home .crew-stats-totals dt { font-size:.75rem; }
+.crew-home .crew-stats-totals dd { display:block; }
+.crew-home .crew-stats-totals strong { display:block; font-size:clamp(1.6rem,6vw,2.5rem); }
+.crew-home .crew-stats-totals span { font-size:.7rem; }
+.crew-inline-feed { margin-top:24px; padding-top:20px; border-top:1px solid var(--line); }
+.crew-inline-feed .feed-heading { margin-bottom:12px; }
+.crew-inline-feed .feed-heading h2 { font-size:1.25rem; }
+.crew-inline-feed .feed-filters { margin:12px 0; gap:8px; }
+.crew-inline-feed .feed-filters button { padding:8px 14px; }
+.crew-home .crew-detail-body { padding-top:24px; border-top:1px solid var(--line); }
+.crew-detail-hero > .crew-mark { margin-bottom:16px; }
+.crew-card .crew-identity { margin:20px 0 12px; }
+.crew-card .crew-identity h2,.crew-card .crew-identity h3 { margin:0; }
 .crew-detail-hero > div { display:flex; flex-wrap:wrap; gap:24px; }
 .crew-detail-body { display:grid; gap:32px; margin-top:32px; }
 .crew-detail-body h2 { font-size:1.125rem; margin-bottom:16px; }

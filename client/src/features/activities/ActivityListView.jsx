@@ -9,6 +9,8 @@ import './exercise-merge.css';
 import RecordTabs from '../../shared/RecordTabs.jsx';
 import { GpsDraftList } from '../tracking/index.js';
 import { recordSource } from './recordSource.js';
+import SportIcon from '../../shared/SportIcon.jsx';
+import './record-polish.css';
 
 function Filters({ filters, onFilter }) {
   const [draft, setDraft] = useState(filters);
@@ -44,23 +46,25 @@ export default function ActivityListView({ filters, filterMessage, records, onFi
   }
   return <div className="activity-library">
     <RecordTabs active="activities" />
-    <header className="activity-library-heading"><div><h1>운동 기록</h1><p>날짜순으로 모아 보는 내 운동</p></div>
-      <div className="activity-library-tools"><Link className="btn btn-ghost" to="/activities/new" state={{ activitiesReturnTo: returnTo }}>직접 기록</Link>
-        <Link className="btn btn-primary" to="/activities/track">GPS 측정</Link>
-        <Link className="btn btn-ghost" to="/activities/exercises" state={{ activitiesReturnTo: returnTo }}>운동명 관리</Link></div>
+    <header className="activity-library-heading"><div><span className="section-eyebrow">나의 운동 일지</span><h1>움직인 만큼, 쌓이는 기록</h1><p>가벼운 산책부터 마지막 한 세트까지.</p></div>
     </header>
+    <div className="record-entry-grid">
+      <Link className="record-entry record-entry-gps" to="/activities/track"><span className="record-entry-tag">지금 밖에서 운동한다면</span><strong>GPS 측정 시작</strong><p>러닝 · 걷기 · 자전거<br/>움직인 경로와 시간을 함께 남겨요.</p><span className="record-entry-bottom">종목 선택하기 <span aria-hidden="true">↗</span></span><svg className="record-route-art" viewBox="0 0 200 170" fill="none" aria-hidden="true"><path d="M180 0C70 0 195 70 90 80S10 145 165 150" stroke="currentColor" strokeWidth="24" opacity=".08"/><path d="M180 0C70 0 195 70 90 80S10 145 165 150" stroke="currentColor" strokeWidth="2" strokeDasharray="5 7"/><circle cx="165" cy="150" r="7" fill="currentColor"/></svg></Link>
+      <Link className="record-entry record-entry-manual" to="/activities/new" state={{activitiesReturnTo:returnTo}}><span className="record-entry-tag">운동을 마쳤다면</span><strong>직접 기록하기</strong><p>모든 종목의 시간과 거리,<br/>헬스 세트와 오늘의 메모까지.</p><span className="record-entry-bottom">운동 남기기 <span aria-hidden="true">＋</span></span></Link>
+    </div>
     <Suspense fallback={<p>보관한 측정 확인 중…</p>}><GpsDraftList /></Suspense>
-    <Filters key={returnTo} filters={filters} onFilter={onFilter} />
+    <div className="record-history-heading"><h2>내 운동 모아보기</h2><Link to="/activities/exercises" state={{activitiesReturnTo:returnTo}}>운동명 관리 ↗</Link></div>
+    <div className="record-sport-filters" role="group" aria-label="종목 빠른 선택">{['',...LIST_SPORTS].map(sport=><button type="button" key={sport} aria-pressed={filters.sport===sport} onClick={()=>onFilter({...filters,sport})}>{sport&&<SportIcon sport={sport}/>}<span>{SPORT_LABEL[sport]||'전체'}</span></button>)}</div>
+    <details className="record-date-filter" open={filtered||undefined}><summary>날짜 · 상세 필터{filtered?' · 적용 중':''}</summary><Filters key={returnTo} filters={filters} onFilter={onFilter} /></details>
     <section className="activity-library-results" aria-label="운동 기록 목록" aria-busy={records.isFetching}>
       <div className="activity-library-caption"><span>최신 날짜순</span><span role="status">{!filterMessage && records.data ? items.length + '건 표시' + (records.hasNextPage ? ' · 더 있음' : '') : ''}</span></div>
       {filterMessage ? <p className="activity-list-message" role="alert">{filterMessage}</p>
         : records.isPending ? <p className="activity-list-message" role="status">운동 기록을 불러오고 있어요.</p>
         : !records.data && records.isError ? <div className="activity-list-message" role="alert"><p>기록을 불러오지 못했어요.</p><Button variant="ghost" onClick={() => records.refetch()}>다시 불러오기</Button></div>
         : <>
-          {items.length ? <ul className="activity-library-list">{items.map(record => <li key={record.id}>
+          {items.length ? <ul className="activity-library-list">{items.map(record => <li key={record.id} data-sport={record.sport}>
             <Link to={'/activities/' + record.id} state={{ activitiesReturnTo: returnTo }} className="activity-library-row">
-              <time dateTime={record.performed_on}>{record.performed_on.replaceAll('-', '.')} · {recordSource(record)}</time>
-              <div className="activity-library-name"><strong>{SPORT_LABEL[record.sport] || '운동'}</strong>{record.note?.trim() && <p>{record.note.trim().split(/\r?\n/)[0]}</p>}</div>
+              <SportIcon sport={record.sport}/><div className="activity-library-name"><time dateTime={record.performed_on}>{record.performed_on.replaceAll('-', '.')}</time><strong>{SPORT_LABEL[record.sport] || '운동'}</strong><span className="record-source-label">{recordSource(record)}</span>{record.note?.trim() && <p>{record.note.trim().split(/\r?\n/)[0]}</p>}</div>
               <div className="activity-library-metrics">
                 {record.distance_m != null && <span><b>{(record.distance_m / distanceFactor(record.sport)).toLocaleString('ko-KR', { maximumFractionDigits: 3 })}</b><small>{distanceUnit(record.sport)}</small></span>}
                 <span>{detailDuration(record.duration_sec)}</span>

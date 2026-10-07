@@ -30,15 +30,24 @@ export async function loadRegions(db) {
   }
 }
 
-export async function loadCrews(db, sport = '', cursor = null) {
+export async function loadCrews(db, sport = '', cursor = null, filters={}) {
   if (sport && !Object.hasOwn(SPORTS, sport)) throw new Error('올바른 종목을 선택해 주세요.');
-  let query = db.from('crews').select(CREW_FIELDS).order('id', { ascending: false }).limit(20);
+  let query = db.from('crews').select(CREW_FIELDS).order('id', { ascending: false }).limit(21);
+  if(filters.search?.trim())query=query.ilike('name',`%${filters.search.trim().slice(0,40).replace(/[\\%_]/g,'\\$&')}%`);
+  if(filters.region)query=query.eq('region_sido',filters.region);
   if (sport) query = query.eq('sport', sport);
   if (cursor != null) query = query.lt('id', cursor);
   const { data, error } = await query;
   if (error) throw error;
   if (!Array.isArray(data)) throw new Error('크루 목록을 불러오지 못했어요.');
-  return { rows: data, nextCursor: data.length ? data.at(-1).id : undefined };
+  return { rows: data.slice(0,20), nextCursor: data.length>20 ? data[19].id : undefined };
+}
+
+export async function loadMyCrews(db,userId,cursor=null){
+  let query=db.from('crew_members').select(`crew_id,status,crews(${CREW_FIELDS})`).eq('user_id',userId).order('crew_id',{ascending:false}).limit(21);
+  if(cursor)query=query.lt('crew_id',cursor);
+  const {data,error}=await query;if(error)throw new Error('내 크루를 불러오지 못했어요.');
+  return {rows:data.slice(0,20),next:data.length>20?data[19].crew_id:undefined};
 }
 
 export async function createCrew(db, userId, form, regions) {
