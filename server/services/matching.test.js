@@ -10,7 +10,7 @@ function fixture({p=profile,s=settings,crews=[],members=[],fail=null}={}) {
   const reads=[];
   return {reads,db:{from(table){const filters=[];return {
     select(){return this;},eq(key,value){filters.push(row=>row[key]===value);reads.push([table,key,value]);return this;},
-    neq(key,value){filters.push(row=>row[key]!==value);return this;},
+    in(key,values){filters.push(row=>values.includes(row[key]));return this;},neq(key,value){filters.push(row=>row[key]!==value);return this;},
     overlaps(key,value){filters.push(row=>row[key].some(day=>value.includes(day)));return this;},order(){return this;},
     async maybeSingle(){return {data:table==='profiles'?p:s,error:fail===table?{}:null};},
     async range(start,end){return {data:(table==='crews'?crews:members).filter(row=>filters.every(fn=>fn(row))).slice(start,end+1),error:fail===table?{}:null};},
@@ -48,7 +48,7 @@ test('paginates memberships and candidates before relaxing and caps recommendati
 });
 test('auth, missing sport and partial database errors never become empty success',async()=>{
   await assert.rejects(matchCrews({},null),{status:401});
-  await assert.rejects(matchCrews(fixture({p:{}}).db,'me'),{status:400,code:'SETTINGS_REQUIRED'});
+  await assert.rejects(matchCrews(fixture({p:null}).db,'me'),{status:400,code:'SETTINGS_REQUIRED'});
   for(const fail of ['profiles','user_settings','crew_members','crews','rpc'])
     await assert.rejects(matchCrews(fixture({fail,crews:[crew(1)]}).db,'me'),{status:500});
 });
@@ -61,4 +61,13 @@ test('match route requires auth and takes caller from verified session rather th
   assert.equal((await fetch(url)).status,401);
   assert.equal((await fetch(url,{headers:{Authorization:'Bearer test'}})).status,200);
   assert.deepEqual(calls,[[{scoped:true},'actual']]);
+});
+
+test('multiple interests include either sport; an explicit empty choice explores all sports without false match reasons',async()=>{
+ const crews=[crew(1),crew(2,{sport:'gym'}),crew(3,{sport:'swimming'})];
+ const multi=await matchCrews(fixture({s:{...settings,interested_sports:['running','gym']},crews}).db,'me');
+ assert.deepEqual(multi.crews.map(c=>c.id),[1,2]);
+ const any=await matchCrews(fixture({p:{},s:{interested_sports:[]},crews}).db,'me');
+ assert.equal(any.crews.length,3);
+ assert.ok(any.crews.every(c=>!c.matched_on.includes('sport')));
 });

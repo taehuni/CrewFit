@@ -30,7 +30,7 @@ export default function CrewsPage() {
       {mine.isPending?<p role="status">내 크루를 불러오고 있어요.</p>:mine.isError?<button className="btn btn-ghost" onClick={()=>mine.refetch()}>내 크루 다시 불러오기</button>:!mine.data?.pages.some(p=>p.rows.length)?<p className="empty-state">아직 함께하는 크루가 없어요. 아래에서 내 운동에 맞는 크루를 찾아보세요.</p>:<div className="crew-grid">{mine.data.pages.flatMap(p=>p.rows).filter(r=>r.crews).map(r=><CrewCard key={r.crew_id} crew={r.crews} status={r.status}/>)}</div>}
       {mine.hasNextPage&&<button className="btn btn-ghost" disabled={mine.isFetching} onClick={()=>mine.fetchNextPage()}>내 크루 더 보기</button>}
     </section>
-    <details className="crew-recommendation-disclosure"><summary>나에게 맞는 크루 추천</summary><CrewRecommendations /></details>
+    <section className="crew-recommendation-disclosure"><h2>나에게 맞는 크루 추천</h2><CrewRecommendations /></section>
     <h2 className="crew-browse-title">전체 크루</h2>
     <form className="crew-search" onSubmit={e=>{e.preventDefault();filter('q',search);}}><label><span className="sr-only">크루 이름</span><input type="search" value={search} maxLength={40} onChange={e=>setSearch(e.target.value)} placeholder="크루 이름으로 검색"/></label><label><span className="sr-only">활동 지역</span><select value={filters.region} onChange={e=>filter('region',e.target.value)}><option value="">모든 지역</option>{[...new Set(regions.data?.map(r=>r.sido)||[])].map(s=><option key={s}>{s}</option>)}</select></label><button className="btn btn-primary">검색</button></form>
     <div className="crew-sports" role="group" aria-label="종목 필터">

@@ -305,3 +305,16 @@ server/
 └── config/supabase.js     createUserClient(token), supabaseAdmin
 ```
 - `services/` = **Express와 분리된 애플리케이션 로직** (DB·LLM 접근 포함). 그 안에서 순수 계산(`matching.js`의 필터·완화, `dashboard.js`의 스트릭·달성률, `feedback.js`의 프롬프트 조립)은 DB를 모르는 함수로 분리해 HTTP 없이 케이스 테스트 (CLAUDE.md AI 방침의 "여러 케이스 확인").
+
+## AI 코치
+
+GET /api/coach: 최근 대화 30개·계획 100개. POST /api/coach/chat: {id(UUID),message(1~2000자)} → 저장한 turn. POST /api/coach/plans: {turn_id,items:[{position,title,sport,scheduled_on,start_time,minutes,note}]} → 저장 계획. DELETE /api/coach/plans/:id: 본인 계획 삭제. 모두 requireAuth, req.db RLS. 최근 일부 기록만 입력됨을 화면에서 안내하고 실패 시 자동 재호출하지 않는다.
+
+크루 채팅: 사용자 JWT로 crew_chat_rooms() RPC 목록/미리보기/안 읽은 수. crew_messages 직접 조회(seq 커서 50개), insert(UUID 재시도), crew_chat_reads 최초 insert / 이후 last_seq만 조건부 update(읽음 위치 후퇴 방지). Realtime 알림 후 RLS 재조회 + 활성 대화 3초/목록 15초 폴링.
+
+
+1:1 채팅: direct_chat_rooms() 목록 RPC, direct_messages 사용자 JWT 조회/insert 및 direct_chat_reads 최초 insert/읽음 위치 조건부 update. 프로필 공개 닉네임 검색은 최소 2자, 최대 20개.
+
+POST /api/calendar/plans/:id: 본인 계획 → 본인 Google 캘린더 추가, GET /api/calendar/exports: 본인 완료 목록. GET /api/partners: 데모 시설/상품, GET/POST /api/partners/reservations: 내 예약 조회/생성, POST /:id/simulate: 결제 시뮬레이션, POST /:id/cancel: 데모 예약 취소.
+
+식단 코치: GET /api/coach/nutrition(본인 선호·계획), PUT /api/coach/nutrition(선호 저장), POST /api/coach/meal-plans({turn_id,position}, 본인 제안에서 복사, 중복 안전), DELETE /api/coach/meal-plans/:id(본인 계획). /api/coach/chat은 기존 운동 proposals와 별도 meal_proposals를 저장·반환한다. 식단 기록은 기존 meals CRUD를 사용하며 선택한 계획을 확인 화면에 불러온 뒤 저장한다.

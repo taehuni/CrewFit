@@ -7,7 +7,7 @@
 -- ═══════════════════════════════════════════
 -- ⚠ public 스키마의 앱 테이블 데이터가 전부 삭제됨 (auth.users 계정은 유지되고, ② 트리거 아래 백필 문장이 그 계정들의 profiles·user_settings 를 다시 만듦 — 같은 이메일은 재가입이 안 되므로).
 --   실데이터가 쌓인 뒤에는 이 블록을 지우고 ALTER 마이그레이션으로 전환할 것.
-drop table if exists public.content_reports, public.notifications, public.member_blocks, public.member_cards, public.crew_covers, public.gps_drafts, public.comments, public.post_likes, public.posts, public.ai_feedback_history, public.ai_feedbacks,
+drop table if exists public.calendar_exports, public.partner_reservations, public.direct_chat_reads, public.direct_messages, public.crew_chat_reads, public.crew_messages, public.workout_plans, public.coach_turns, public.content_reports, public.notifications, public.member_blocks, public.member_cards, public.crew_covers, public.gps_drafts, public.comments, public.post_likes, public.posts, public.ai_feedback_history, public.ai_feedbacks,
   public.goals, public.meals, public.exercise_sets, public.activity_routes, public.activities,
   public.crew_members, public.crews, public.user_settings, public.profiles, public.regions cascade;
 drop function if exists public.save_gym_activity(date, integer, text, jsonb);
@@ -51,6 +51,7 @@ create table public.profiles (
 
 -- 2. user_settings — 비공개 1:1 (D-25). 매칭·AI 프롬프트용
 create table public.user_settings (
+  interested_sports text[] check (interested_sports is null or (cardinality(interested_sports)<=6 and array_position(interested_sports,null) is null and interested_sports <@ array['running','walking','cycling','swimming','gym','other']::text[])),
   user_id        uuid primary key references public.profiles(id) on delete cascade,
   real_name      text constraint user_settings_real_name_check check (
                    real_name is null or (real_name = btrim(real_name)
@@ -683,7 +684,7 @@ create trigger set_updated_at before update on public.comments      for each row
 -- 막는 것: 리더가 crew_members.user_id를 남으로 바꿔 강제 가입 / 글 author_id·crew_id 변조 / id·user_id·created_at 변경
 revoke update on all tables in schema public from authenticated;
 grant update (nickname, main_sport, level, activity_visibility, show_crews)   on public.profiles      to authenticated;
-grant update (real_name, region_sido, region_sigungu, preferred_days, goal_note) on public.user_settings to authenticated;
+grant update (interested_sports, real_name, region_sido, region_sigungu, preferred_days, goal_note) on public.user_settings to authenticated;
 grant update (name, description, sport, level, region_sido, region_sigungu, activity_days, join_mode)
                                                                               on public.crews         to authenticated;
 grant update (status, can_post)                                               on public.crew_members  to authenticated;
@@ -991,3 +992,215 @@ revoke all on function public.feed_summaries(bigint[]),public.crew_recent_activi
 grant execute on function public.feed_summaries(bigint[]),public.crew_recent_activity(bigint[]) to authenticated;
 notify pgrst,'reload schema';
 commit;
+
+
+begin;
+create table if not exists public.coach_turns (
+ id uuid primary key, user_id uuid not null references auth.users(id) on delete cascade,
+ message text not null check(char_length(message) between 1 and 2000),
+ answer text not null check(char_length(answer) between 1 and 6000),
+ proposals jsonb not null default '[]' check(jsonb_typeof(proposals)='array' and jsonb_array_length(proposals)<=7),
+ created_at timestamptz not null default now(), unique(user_id,id)
+);
+create table if not exists public.workout_plans (
+ id uuid primary key default gen_random_uuid(), user_id uuid not null references auth.users(id) on delete cascade,
+ turn_id uuid not null, position integer not null check(position between 0 and 6),
+ title text not null check(char_length(title) between 1 and 100),
+ sport text not null check(sport in ('running','walking','cycling','swimming','gym','other')),
+ scheduled_on date not null, start_time time not null,
+ minutes integer not null check(minutes between 5 and 240), note text not null default '' check(char_length(note)<=1000),
+ created_at timestamptz not null default now(), unique(user_id,turn_id,position),
+ foreign key(user_id,turn_id) references public.coach_turns(user_id,id) on delete cascade
+);
+create index if not exists coach_turns_user_time on public.coach_turns(user_id,created_at desc);
+create index if not exists workout_plans_user_date on public.workout_plans(user_id,scheduled_on);
+alter table public.coach_turns enable row level security;
+alter table public.workout_plans enable row level security;
+drop policy if exists coach_read on public.coach_turns;
+create policy coach_read on public.coach_turns for select to authenticated using(user_id=auth.uid());
+drop policy if exists coach_insert on public.coach_turns;
+create policy coach_insert on public.coach_turns for insert to authenticated with check(user_id=auth.uid());
+drop policy if exists plans_read on public.workout_plans;
+create policy plans_read on public.workout_plans for select to authenticated using(user_id=auth.uid());
+drop policy if exists plans_insert on public.workout_plans;
+create policy plans_insert on public.workout_plans for insert to authenticated with check(user_id=auth.uid());
+drop policy if exists plans_delete on public.workout_plans;
+create policy plans_delete on public.workout_plans for delete to authenticated using(user_id=auth.uid());
+revoke all on public.coach_turns,public.workout_plans from anon,authenticated;
+grant select,insert on public.coach_turns to authenticated;
+grant select,insert,delete on public.workout_plans to authenticated;
+commit;
+
+
+begin;
+create table if not exists public.crew_messages (
+ id uuid primary key, seq bigint generated always as identity unique,
+ crew_id bigint not null references public.crews(id) on delete cascade,
+ author_id uuid not null references public.profiles(id) on delete cascade,
+ body text not null check(char_length(btrim(body)) between 1 and 2000),
+ created_at timestamptz not null default clock_timestamp()
+);
+create index if not exists crew_messages_room_seq on public.crew_messages(crew_id,seq desc);
+create table if not exists public.crew_chat_reads (
+ crew_id bigint not null references public.crews(id) on delete cascade,
+ user_id uuid not null references public.profiles(id) on delete cascade,
+ last_seq bigint not null default 0 check(last_seq>=0), primary key(crew_id,user_id)
+);
+alter table public.crew_messages enable row level security;
+alter table public.crew_chat_reads enable row level security;
+drop policy if exists chat_read on public.crew_messages;
+create policy chat_read on public.crew_messages for select to authenticated using(public.is_crew_member(crew_id) and not public.community_blocked(author_id));
+drop policy if exists chat_send on public.crew_messages;
+create policy chat_send on public.crew_messages for insert to authenticated with check(author_id=auth.uid() and public.is_crew_member(crew_id));
+drop policy if exists chat_seen on public.crew_chat_reads;
+create policy chat_seen on public.crew_chat_reads for all to authenticated using(user_id=auth.uid() and public.is_crew_member(crew_id)) with check(user_id=auth.uid() and public.is_crew_member(crew_id));
+revoke all on public.crew_messages,public.crew_chat_reads from anon,authenticated;
+grant select on public.crew_messages,public.crew_chat_reads to authenticated;
+grant insert(id,crew_id,author_id,body) on public.crew_messages to authenticated;
+grant usage on sequence public.crew_messages_seq_seq to authenticated;
+grant insert(crew_id,user_id,last_seq),update(last_seq) on public.crew_chat_reads to authenticated;
+create or replace function public.crew_chat_rooms() returns table(crew_id bigint,name text,last_body text,last_at timestamptz,unread bigint)
+language sql stable security invoker set search_path='' as $$
+ select c.id,c.name,l.body,l.created_at,
+ (select count(*) from public.crew_messages m where m.crew_id=c.id and m.author_id<>auth.uid() and m.seq>coalesce(r.last_seq,0))
+ from public.crews c join public.crew_members cm on cm.crew_id=c.id and cm.user_id=auth.uid() and cm.status='approved'
+ left join public.crew_chat_reads r on r.crew_id=c.id and r.user_id=auth.uid()
+ left join lateral(select body,created_at from public.crew_messages where crew_id=c.id order by seq desc limit 1) l on true
+ order by l.created_at desc nulls last,c.name;
+$$;
+revoke all on function public.crew_chat_rooms() from public;
+grant execute on function public.crew_chat_rooms() to authenticated;
+-- Notifications are hints only. Every message fetch still passes RLS.
+do $$ begin
+ if exists(select 1 from pg_publication where pubname='supabase_realtime') and not exists(select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='crew_messages') then
+ alter publication supabase_realtime add table public.crew_messages;
+ end if;
+end $$;
+commit;
+
+begin;
+create table if not exists public.direct_messages (
+ id uuid primary key, seq bigint generated always as identity unique,
+ author_id uuid not null references public.profiles(id) on delete cascade,
+ recipient_id uuid not null references public.profiles(id) on delete cascade,
+ body text not null check(char_length(btrim(body)) between 1 and 2000),
+ created_at timestamptz not null default clock_timestamp(), check(author_id<>recipient_id)
+);
+create index if not exists direct_messages_author_seq on public.direct_messages(author_id,seq desc);
+create index if not exists direct_messages_recipient_seq on public.direct_messages(recipient_id,seq desc);
+create table if not exists public.direct_chat_reads (
+ user_id uuid not null references public.profiles(id) on delete cascade,
+ peer_id uuid not null references public.profiles(id) on delete cascade,
+ last_seq bigint not null default 0 check(last_seq>=0), primary key(user_id,peer_id),check(user_id<>peer_id)
+);
+alter table public.direct_messages enable row level security;
+alter table public.direct_chat_reads enable row level security;
+drop policy if exists direct_read on public.direct_messages;
+create policy direct_read on public.direct_messages for select to authenticated using(
+ (author_id=auth.uid() or recipient_id=auth.uid()) and not public.community_blocked(case when author_id=auth.uid() then recipient_id else author_id end));
+drop policy if exists direct_send on public.direct_messages;
+create policy direct_send on public.direct_messages for insert to authenticated with check(author_id=auth.uid() and not public.community_blocked(recipient_id));
+drop policy if exists direct_seen on public.direct_chat_reads;
+create policy direct_seen on public.direct_chat_reads for all to authenticated using(user_id=auth.uid()) with check(user_id=auth.uid());
+revoke all on public.direct_messages,public.direct_chat_reads from anon,authenticated;
+grant select on public.direct_messages,public.direct_chat_reads to authenticated;
+grant insert(id,author_id,recipient_id,body) on public.direct_messages to authenticated;
+grant usage on sequence public.direct_messages_seq_seq to authenticated;
+grant insert(user_id,peer_id,last_seq),update(last_seq) on public.direct_chat_reads to authenticated;
+create or replace function public.direct_chat_rooms() returns table(peer_id uuid,nickname text,last_body text,last_at timestamptz,unread bigint)
+language sql stable security invoker set search_path='' as $$
+ with peers as(select distinct case when author_id=auth.uid() then recipient_id else author_id end as id from public.direct_messages)
+ select p.id,p.nickname,l.body,l.created_at,
+ (select count(*) from public.direct_messages m where m.author_id=p.id and m.recipient_id=auth.uid() and m.seq>coalesce(r.last_seq,0))
+ from peers join public.profiles p on p.id=peers.id
+ left join public.direct_chat_reads r on r.peer_id=p.id and r.user_id=auth.uid()
+ join lateral(select body,created_at from public.direct_messages where author_id=p.id or recipient_id=p.id order by seq desc limit 1) l on true
+ order by l.created_at desc;
+$$;
+revoke all on function public.direct_chat_rooms() from public;
+grant execute on function public.direct_chat_rooms() to authenticated;
+do $$ begin
+ if exists(select 1 from pg_publication where pubname='supabase_realtime') and not exists(select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='direct_messages') then
+ alter publication supabase_realtime add table public.direct_messages;
+ end if;
+end $$;
+notify pgrst, 'reload schema';
+commit;
+select to_regclass('public.direct_messages') as messages_table,
+       to_regclass('public.direct_chat_reads') as reads_table,
+       to_regprocedure('public.direct_chat_rooms()') as rooms_function;
+
+
+
+begin;
+create table if not exists public.calendar_exports (
+ user_id uuid not null references public.profiles(id) on delete cascade,
+ plan_id uuid not null references public.workout_plans(id) on delete cascade,
+ event_id text not null, event_url text not null,
+ created_at timestamptz not null default now(), primary key(user_id,plan_id)
+);
+alter table public.calendar_exports enable row level security;
+drop policy if exists calendar_read on public.calendar_exports;
+create policy calendar_read on public.calendar_exports for select to authenticated using(user_id=auth.uid());
+drop policy if exists calendar_insert on public.calendar_exports;
+create policy calendar_insert on public.calendar_exports for insert to authenticated with check(user_id=auth.uid() and exists(select 1 from public.workout_plans p where p.id=plan_id and p.user_id=auth.uid()));
+revoke all on public.calendar_exports from anon,authenticated;
+grant select,insert on public.calendar_exports to authenticated;
+create table if not exists public.partner_reservations (
+ id uuid primary key, user_id uuid not null references public.profiles(id) on delete cascade,
+ offer_id text not null, facility_name text not null, offer_name text not null,
+ amount integer not null check(amount>=0), visit_on date not null,
+ status text not null default 'pending' check(status in ('pending','test_paid','cancelled')),
+ mode text not null default 'simulation' check(mode='simulation'),
+ created_at timestamptz not null default now(), paid_at timestamptz,
+ cancelled_at timestamptz
+);
+create index if not exists partner_reservations_user_time on public.partner_reservations(user_id,created_at desc);
+alter table public.partner_reservations enable row level security;
+drop policy if exists reservations_read on public.partner_reservations;
+create policy reservations_read on public.partner_reservations for select to authenticated using(user_id=auth.uid());
+revoke all on public.partner_reservations from anon,authenticated;
+grant select on public.partner_reservations to authenticated;
+grant select,insert,update,delete on public.partner_reservations to service_role;
+notify pgrst,'reload schema';
+commit;
+select to_regclass('public.calendar_exports') as calendar_table,to_regclass('public.partner_reservations') as reservations_table;
+
+
+
+-- Nutrition coach extension, 2026-10-10
+begin;
+alter table public.coach_turns add column if not exists meal_proposals jsonb not null default '[]' check(jsonb_typeof(meal_proposals)='array' and jsonb_array_length(meal_proposals)<=7);
+create table if not exists public.nutrition_preferences (
+ user_id uuid primary key references auth.users(id) on delete cascade,
+ goal text not null default 'balanced' check(goal in ('balanced','fitness','muscle','weight')),
+ allergies text not null default '' check(char_length(allergies)<=300),
+ avoid text not null default '' check(char_length(avoid)<=300),
+ preference text not null default '' check(char_length(preference)<=300)
+);
+create table if not exists public.meal_plans (
+ id uuid primary key default gen_random_uuid(),user_id uuid not null references auth.users(id) on delete cascade,
+ turn_id uuid not null,position integer not null check(position between 0 and 6),
+ title text not null check(char_length(title) between 1 and 100),scheduled_on date not null,
+ meal_type text not null check(meal_type in ('breakfast','lunch','dinner','snack')),
+ items jsonb not null check(jsonb_typeof(items)='array' and jsonb_array_length(items) between 1 and 10),
+ note text not null default '' check(char_length(note)<=1000),created_at timestamptz not null default now(),
+ unique(user_id,turn_id,position), unique(user_id,id),
+ foreign key(user_id,turn_id) references public.coach_turns(user_id,id) on delete cascade
+);
+alter table public.nutrition_preferences enable row level security;
+alter table public.meal_plans enable row level security;
+drop policy if exists nutrition_own on public.nutrition_preferences;
+create policy nutrition_own on public.nutrition_preferences for all to authenticated using(user_id=auth.uid()) with check(user_id=auth.uid());
+drop policy if exists meal_plans_own on public.meal_plans;
+create policy meal_plans_own on public.meal_plans for all to authenticated using(user_id=auth.uid()) with check(user_id=auth.uid());
+revoke all on public.nutrition_preferences,public.meal_plans from anon,authenticated;
+grant select,insert,update on public.nutrition_preferences to authenticated;
+grant select,insert,delete on public.meal_plans to authenticated;
+create index if not exists meal_plans_user_date on public.meal_plans(user_id,scheduled_on);
+-- A stable source marker keeps retries from creating duplicate meal records.
+-- It remains after plan deletion; it deliberately is not a foreign key.
+alter table public.meals add column if not exists source_meal_plan_id uuid;
+create unique index if not exists meals_source_plan_unique on public.meals(user_id,source_meal_plan_id) where source_meal_plan_id is not null;
+commit;
+select to_regclass('public.nutrition_preferences') as nutrition_preferences,to_regclass('public.meal_plans') as meal_plans;

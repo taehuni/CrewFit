@@ -13,7 +13,7 @@ export default function CrewRecommendations() {
   return <section className="crew-recommendations" aria-labelledby="crew-recommendation-title">
     <header className="crews-heading"><h2 id="crew-recommendation-title">나에게 맞는 크루</h2><Link to="/me#crew-preferences">추천 설정</Link></header>
     {query.isPending ? <p role="status">내 설정에 맞는 크루를 찾고 있어요.</p> : query.isError ?
-      query.error.code === 'SETTINGS_REQUIRED' ? <p>주종목을 설정하면 맞는 크루를 추천해 드려요. <Link to="/me#crew-preferences">주종목 설정하기</Link></p> :
+      query.error.code === 'SETTINGS_REQUIRED' ? <p>관심 운동과 활동 지역을 설정하면 크루 추천에 반영돼요. <Link to="/me#crew-preferences">관심 운동 설정하기</Link></p> :
         <div role="alert"><p>추천을 불러오지 못했어요.</p><button className="btn btn-ghost" onClick={() => query.refetch()} disabled={query.isFetching}>다시 조회</button></div> : <>
       {!!query.data.relaxed.length && <p className="crew-match-note">모든 조건에 맞는 크루가 없어 {query.data.relaxed.map(key => labels[key]).join(' · ')} 조건을 넓혔어요. 종목은 같아요.</p>}
       {!query.data.crews.length && <p>아직 추천할 크루가 없어요. 가입·신청한 크루는 추천에서 제외돼요. 아래 전체 목록도 살펴보세요.</p>}
@@ -26,3 +26,4 @@ export default function CrewRecommendations() {
     </>}
   </section>;
 }
+

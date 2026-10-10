@@ -905,3 +905,15 @@ commit;
 | content_reports | 본인 생성·조회, 운영 관리자 처리 | 게시글 신고 |
 
 community-media 비공개 버킷은 본인 폴더 또는 현재 조회 가능한 프로필/크루 커버의 참조만 서명한다. 사진 교체 시 다른 참조가 없는 이전 파일만 삭제한다. 알림은 본문을 복제하지 않고 식별자만 저장하며 현재 글 권한과 차단 상태를 다시 확인한다. `feed_summaries`와 `crew_recent_activity`는 security invoker RPC로 기존 RLS를 따른다. 신고 처리는 운영자가 Supabase Table Editor에서 status(received/reviewed/resolved)를 수정하며 일반 회원에게 처리 권한을 부여하지 않는다.
+
+## 코치 테이블
+
+coach_turns: UUID id, user_id, message, answer, proposals(jsonb), created_at. workout_plans: UUID id, user_id, turn_id, position, title, sport, scheduled_on, start_time(한국시간), minutes, note, created_at. (user_id,turn_id,position) unique로 중복 저장 방지. 복합 FK로 다른 회원의 대화 참조 방지. 두 테이블 모두 본인만 select/insert 가능, 계획은 본인 delete 가능. AI 답변은 사용자 입력과 같이 비신뢰 콘텐츠로 취급한다.
+
+크루 채팅: crew_messages(UUID, 서버 seq, crew_id, author_id, body 1~2000자, 서버 created_at), crew_chat_reads(crew_id,user_id,last_seq). 승인 멤버만 읽기/쓰기, 작성자 위조 및 서버 순번/시각 입력 금지. 차단 관계 메시지 제외. 20261009_crew_chat.sql은 기존 데이터 유지 추가 마이그레이션.
+
+1:1 채팅: direct_messages(id,seq,author_id,recipient_id,body,created_at), direct_chat_reads(user_id,peer_id,last_seq)。RLS는 대화 참여자만 허용하고 양방향 차단 관계는 메시지 조회/전송 금지.
+
+calendar_exports: 본인의 계획별 Google 이벤트 ID/링크만 저장(토큰 제외). partner_reservations: 본인 조회만, 서버가 고정 데모 상품의 금액·예약일·상태를 기록. pending/test_paid/cancelled, mode=simulation.
+
+식단 코치(2026-10-10): nutrition_preferences(user_id,goal,allergies,avoid,preference)는 본인 읽기/등록/수정. coach_turns.meal_proposals는 음식·양·대체안을 포함한 제안 배열(최대 7). meal_plans는 본인 읽기/등록/삭제와 본인 대화 복합 FK, 제안 위치별 중복 방지. meals.source_meal_plan_id는 본인 범위 unique인 출처 표식이며 계획 삭제 후에도 유지. 추가 SQL: server/config/20261010_nutrition_coach.sql.

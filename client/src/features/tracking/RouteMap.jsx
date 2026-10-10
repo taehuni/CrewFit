@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { routeSegments } from './tracking.js';
+import {roundedDisplaySegments as displaySegments} from './routeDisplay.js';
 import './tracking.css';
 let sdkPromise;
 const customStyleId = import.meta.env.VITE_NAVER_MAP_STYLE_ID?.trim();
@@ -22,19 +23,20 @@ function loadMapSdk() {
   }).catch(error => { sdkPromise = null; throw error; });
   return sdkPromise;
 }
-function RouteOutline({ points }) {
-  const segments = routeSegments(points), all = segments.flat();
+function RouteOutline({ points, simplified }) {
+  const segments = simplified?displaySegments(points):routeSegments(points), all = segments.flat();
   if (!all.length) return null;
   const xs = all.map(p => p[1] * Math.cos(all[0][0] * Math.PI / 180)), ys = all.map(p => -p[0]);
   const minX = Math.min(...xs), minY = Math.min(...ys), scale = 260 / Math.max(Math.max(...xs) - minX, Math.max(...ys) - minY, 0.00001);
   const xy = p => [20 + (p[1] * Math.cos(all[0][0] * Math.PI / 180) - minX) * scale, 20 + (-p[0] - minY) * scale];
-  return <svg className="route-outline" viewBox="0 0 300 300" role="img" aria-label="지도 배경 없는 GPS 경로 미리보기">{segments.map((segment, i) => <polyline key={i} points={segment.map(p => xy(p).join(',')).join(' ')} fill="none" stroke="#ff550a" strokeWidth="3" />)}<circle cx={xy(all[0])[0]} cy={xy(all[0])[1]} r="5" fill="#20252c" /><circle cx={xy(all.at(-1))[0]} cy={xy(all.at(-1))[1]} r="5" fill="#ff550a" /></svg>;
+  return <svg className="route-outline" viewBox="0 0 300 300" role="img" aria-label="지도 배경 없는 GPS 경로 미리보기">{segments.map((segment, i) => <polyline key={i} points={segment.map(p => xy(p).join(',')).join(' ')} fill="none" stroke="#ff550a" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" />)}<circle cx={xy(all[0])[0]} cy={xy(all[0])[1]} r="5" fill="#20252c" /><circle cx={xy(all.at(-1))[0]} cy={xy(all.at(-1))[1]} r="5" fill="#ff550a" /></svg>;
 }
 export default function RouteMap({ points }) {
   const target = useRef(null), [error, setError] = useState(false), [attempt, setAttempt] = useState(0);
+  const [simplified,setSimplified]=useState(true);
   useEffect(() => {
     let cancelled = false, observer, map; const overlays = []; setError(false);
-    const segments = routeSegments(points); if (!segments.length) { setError(true); return; }
+    const segments = simplified?displaySegments(points):routeSegments(points); if (!segments.length) { setError(true); return; }
     loadMapSdk().then(maps => {
       if (cancelled) return;
       const first = segments[0][0]; map = new maps.Map(target.current, {
@@ -49,6 +51,6 @@ export default function RouteMap({ points }) {
       observer = new ResizeObserver(fit); observer.observe(target.current);
     }).catch(() => { if (!cancelled) setError(true); });
     return () => { cancelled = true; observer?.disconnect(); overlays.forEach(overlay => overlay.setMap(null)); map?.destroy(); };
-  }, [points, attempt]);
-  return <div className="route-preview"><div ref={target} className="route-map" hidden={error} role="img" aria-label="GPS 운동 경로 지도" />{error && <><p>지도를 불러올 수 없어 경로 모양을 표시합니다.</p><RouteOutline points={points} /><button type="button" className="btn btn-ghost" onClick={() => setAttempt(n => n + 1)}>지도 다시 불러오기</button></>}<p className="muted">수신이 30초 넘게 끊긴 구간은 연결하지 않습니다.</p></div>;
+  }, [points, attempt,simplified]);
+  return <div className="route-preview"><label className="route-display-toggle"><input type="checkbox" checked={simplified} onChange={e=>setSimplified(e.target.checked)}/>잔흔들림 줄여 보기</label><div ref={target} className="route-map" hidden={error} role="img" aria-label="GPS 운동 경로 지도" />{error && <><p>지도를 불러올 수 없어 경로 모양을 표시합니다.</p><RouteOutline points={points} simplified={simplified}/><button type="button" className="btn btn-ghost" onClick={() => setAttempt(n => n + 1)}>지도 다시 불러오기</button></>}<p className="muted">{simplified?'작은 굴곡을 약 8m 기준으로 단순화한 경로예요. 저장된 원본과 거리는 그대로 유지됩니다. ':''}수신이 30초 넘게 끊긴 구간은 연결하지 않습니다.</p></div>;
 }

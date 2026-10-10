@@ -117,6 +117,8 @@
 .workspace .post-content { font-size:1rem; line-height:1.9; }
 .post-safety { padding:16px 0; margin-top:16px; color:var(--ink-2); font-size:.875rem; }
 .post-safety > .feed-actions { margin-top:16px; }
+.post-safety > h2,.community-settings > h2,.post-options > h2,.crew-recommendation-disclosure > h2,.crew-form-note > h2 { font-size:1rem; }
+.crew-form-note > h2 { margin-bottom:8px; }
 .social-page { max-width:740px; margin:auto; }
 .notification-list { list-style:none; display:grid; gap:10px; margin:24px 0; }
 .notification-list li { display:flex; justify-content:space-between; align-items:center; gap:12px; background:white; border:1px solid var(--line); border-radius:14px; padding:18px; }
@@ -164,3 +166,60 @@
 .feed-read-more { display:inline-block; margin-top:8px; font-size:.75rem; font-weight:650; color:#48614d; }
 @media(max-width:579px) { .home-today-cue { padding:18px 16px; gap:10px; flex-wrap:wrap; }.home-today-cue > div { flex:1; }.home-today-cue > a { margin-left:32px; }.workspace .home-sport-link { padding:16px 12px; }.workspace .home-record-row { padding:14px 12px; }.workspace .record-title { gap:8px; } }
 @media(max-width:579px) { .home-today-cue { display:grid; grid-template-columns:20px minmax(0,1fr); align-items:start; }.home-today-cue > a { grid-column:2; margin:0; padding-top:6px; }.home-today-dot { margin-top:7px; }.workspace .home-record-list li { border-bottom:0; } }
+/* Desktop pages share the same outer edges as the navigation and dashboard. */
+.crew-admin-panel { margin:24px 0 32px; padding:24px; border:1px solid #cbd9ca; border-radius:20px; background:#f1f5ef; }
+.crew-admin-panel > header { display:flex; justify-content:space-between; gap:16px; align-items:start; }
+.crew-admin-panel > header h2 { font-size:1.25rem; }
+.crew-admin-panel > header p { font-size:.8125rem; color:#52664d; margin-top:6px; }
+.crew-admin-tabs { display:flex; gap:8px; margin:22px 0; }
+.crew-admin-tabs button { min-height:44px; padding:10px 16px; border:1px solid #cbd9ca; border-radius:10px; background:white; font:inherit; font-size:.8125rem; cursor:pointer; }
+.crew-admin-tabs button[aria-pressed=true] { background:#263d36; border-color:#263d36; color:white; }
+.crew-admin-panel .crew-management { margin:0; padding:0; border:0; }
+.crew-admin-panel .crew-member-group { background:white; border:1px solid #dde5da; border-radius:14px; padding:20px; margin:16px 0; }
+.crew-admin-panel .crew-member-group > p { font-size:.8125rem; color:var(--ink-2); padding:10px 0; }
+.crew-group-count { display:inline-block; font-size:.75rem; margin-left:6px; padding:3px 7px; border-radius:12px; background:#eaf0e6; color:#426040; }
+.crew-managed-person { display:flex; align-items:center; gap:12px; min-width:0; }
+.crew-managed-person strong { display:block; font-size:.875rem; }
+.crew-managed-person .crew-member-name { font-size:.75rem; }
+.route-display-toggle { display:flex; gap:8px; align-items:center; font-size:.8125rem; margin:12px 0; }
+@media(max-width:579px) { .crew-admin-panel { padding:18px 14px; }.crew-admin-panel > header { flex-wrap:wrap; }.crew-admin-panel .crew-member-group { padding:16px 12px; }.crew-admin-tabs button { flex:1; padding-inline:10px; } }
+.member-type-label { color:#63766b; font-size:.6875rem; letter-spacing:.04em; }
+.member-profile-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
+.member-profile-tags > span { background:#edf3e9; color:#426040; padding:5px 10px; border-radius:20px; font-size:.75rem; }
+.person-role-label { color:#697374; font-size:.625rem; font-weight:400; }
+.crew-type-label { font-size:.625rem; font-weight:650; color:#3b644c; letter-spacing:.04em; }
+.workspace .post-crew-context { margin:-4px 0 18px; padding:0 0 12px; border-bottom:1px solid var(--line-soft); gap:8px; font-size:.8125rem; color:#48614d; }
+.post-crew-context .crew-mark { width:24px; height:24px; border-radius:6px; }
+.post-crew-context > span:nth-last-child(2) { overflow-wrap:anywhere; }
+.crew-context-arrow { margin-left:auto; font-size:1.125rem; }
+.workspace .post-author-name > a { font-size:1rem; font-weight:750; }
+.member-list .crew-type-label { display:block; margin-bottom:4px; }
+.feed-layout { display:grid; grid-template-columns:minmax(0,1fr); gap:28px; width:100%; }
+.feed-layout > .feed-page { width:100%; min-width:0; }
+.feed-sidebar { display:grid; align-content:start; gap:20px; min-width:0; }
+.feed-side-card { padding:24px; border:1px solid var(--line); border-radius:18px; background:white; min-width:0; }
+.feed-side-card header { display:flex; justify-content:space-between; gap:12px; align-items:center; margin-bottom:20px; }
+.feed-side-card h2 { font-size:1rem; line-height:1.5; }
+.feed-side-card header > a { font-size:.7rem; color:var(--ink-2); white-space:nowrap; }
+.feed-side-card ul { list-style:none; padding:0; }
+.feed-side-card li + li { border-top:1px solid var(--line-soft); }
+.feed-side-card li > a { display:flex; align-items:center; gap:12px; padding:14px 0; }
+.feed-side-card li > a > span:nth-child(2) { flex:1; min-width:0; }
+.feed-side-card strong { display:block; font-size:.875rem; overflow-wrap:anywhere; }
+.feed-side-card small { display:block; font-size:.75rem; color:var(--ink-2); margin-top:5px; line-height:1.7; }
+.feed-side-empty p { font-size:.875rem; }
+.feed-side-empty .btn { margin-top:18px; width:100%; }
+.feed-side-record { background:#edf3e9; border-color:#d8e2d2; }
+.feed-side-record p { color:#52664d; font-size:.8125rem; line-height:1.9; margin:12px 0 22px; }
+.feed-side-record .btn { width:100%; }
+.feed-side-secondary { display:block; text-align:center; font-size:.75rem; margin-top:16px; color:#48614d; }
+.feed-side-footnote { color:var(--ink-2); font-size:.75rem; line-height:1.9; padding:0 8px; }
+@media(min-width:960px) {
+  .feed-layout { grid-template-columns:minmax(0,740px) minmax(260px,1fr); }
+  .feed-sidebar { position:sticky; top:24px; align-self:start; }
+  .workspace .ws-main > :is(.home-workspace,.activity-library,.crews-page,.crew-home,.feed-page,.profile-page,.member-page,.social-page,.feedback-page,.activity-page,.activity-detail,.meal-form-page,.meal-detail) {
+    width:100%; max-width:none; margin-inline:0;
+  }
+  .workspace .feed-page:not(.crew-inline-feed) { max-width:none; }
+  .workspace .post-image-button .post-image { max-width:100%; }
+}

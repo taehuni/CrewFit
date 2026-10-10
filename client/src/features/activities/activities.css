@@ -24,6 +24,21 @@
 .activity-actions { display: flex; align-items: center; gap: 24px; margin-top: 24px; }
 .activity-actions > .btn { min-width: 180px; }
 .activity-actions > a { color: var(--ink-2); font-size: .875rem; }
+.activity-form-intro { color:var(--ink-2); font-size:.875rem; margin-top:10px; line-height:1.7; }
+.workspace .activity-fields { border-radius:20px; }
+.workspace .activity-sports label { min-height:80px; flex-direction:column; position:relative; gap:6px; background:#fafbf8; border-radius:14px; }
+.activity-sports label > input { position:absolute; opacity:0; width:1px; height:1px; }
+.activity-sports label:has(input:focus-visible) { outline:2px solid #315944; outline-offset:3px; }
+.workspace .activity-sports label[data-selected=true] { background:#edf4e9; border-color:#577451; box-shadow:inset 0 0 0 1px #577451; }
+.activity-sports .sport-symbol { width:32px; height:32px; border-radius:10px; }
+.activity-sports .sport-symbol svg { width:24px; height:24px; }
+.workspace .activity-basics { background:#f6f8f4; border:1px solid #e0e7db; padding:20px; border-radius:16px; }
+.workspace .activity-page input[type=date],.workspace .activity-filters input[type=date] { display:block; box-sizing:border-box; width:100%; min-width:0; max-width:100%; min-height:48px; font-size:16px; text-align:left; appearance:none; -webkit-appearance:none; }
+.activity-page input[type=date]::-webkit-date-and-time-value,.activity-filters input[type=date]::-webkit-date-and-time-value { text-align:left; min-width:0; }
+.activity-page input[type=date]::-webkit-datetime-edit,.activity-filters input[type=date]::-webkit-datetime-edit { min-width:0; padding:0; }
+.activity-page input[type=date]::-webkit-calendar-picker-indicator,.activity-filters input[type=date]::-webkit-calendar-picker-indicator { flex-shrink:0; margin-left:4px; }
+.workspace .activity-set { border-radius:14px; }
+@media(max-width:639px) { .workspace .activity-basics { padding:16px 12px; }.workspace .activity-sports { grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }.activity-sports label > span:last-child { font-size:.8125rem; }.workspace .activity-page input,.workspace .activity-page textarea { font-size:16px; }.activity-actions { border-top:1px solid var(--line); padding-top:20px; gap:16px; } }
 @media (max-width: 639px) {
   .activity-sports { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .activity-heading h1 { font-size: 1.75rem; }

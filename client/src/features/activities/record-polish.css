@@ -24,7 +24,7 @@
 .record-sport-filters .sport-symbol { width:22px; height:22px; border-radius:6px; background:none; color:inherit; }
 .record-sport-filters svg { width:21px; height:21px; }
 .record-date-filter { border:1px solid var(--line); border-radius:14px; background:white; margin:8px 0 24px; overflow:hidden; }
-.record-date-filter summary { padding:15px 18px; font-size:.8125rem; cursor:pointer; color:var(--ink-2); }
+.record-date-filter > h3 { padding:15px 18px; font-size:.8125rem; color:var(--ink-2); }
 .record-date-filter .activity-filters { border:0; border-top:1px solid var(--line); }
 .activity-library .activity-library-caption { border:0; padding-bottom:14px; }
 .activity-library-list { display:grid; gap:10px; padding:0; }

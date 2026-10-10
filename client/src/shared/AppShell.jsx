@@ -1,3 +1,4 @@
+import ChatDock from '../features/coach/ChatDock.jsx';
 import { Link, Outlet, useLocation } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../features/auth/index.js';
@@ -10,11 +11,11 @@ import {NotificationLink} from '../features/social/index.js';
 import {MemberAvatar} from './CommunityMedia.jsx';
 
 const TABS = [
-  { to: '/home', paths: ['/home', '/goals', '/feedback'], label: '홈', d: 'M3 11.5 12 4l9 7.5M5 10v10h14V10' },
+  { to: '/home', paths: ['/home', '/goals', '/feedback', '/coach'], label: '홈', d: 'M3 11.5 12 4l9 7.5M5 10v10h14V10' },
   { to: '/activities', paths: ['/activities', '/meals'], label: '기록', d: 'M4 17h3l3-9 4 12 3-7h3' },
   { to: '/crews', label: '크루', d: 'M8 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm8 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3 20c0-3 2-5 5-5s5 2 5 5M13 20c0-3 2-5 5-5s3 1 3 5' },
   { to: '/feed', label: '피드', d: 'M5 4h14v16H5zM8 9h8M8 13h8M8 17h5' },
-  { to: '/me', label: '나', d: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 9c0-4 3-6 7-6s7 2 7 6' },
+  { to: '/store', label: '스토어', d: 'M5 8h14l2 12H3L5 8Zm3 0V6a4 4 0 0 1 8 0v2' },
 ];
 
 export function Wordmark() {
@@ -54,12 +55,15 @@ export function WorkspaceFrame({ nickname, number,userId }) {
         </div>
       </nav>
         <NotificationLink/>
-        <Link to="/me" className="ws-account" aria-label="내 계정 관리">
+        <Link to="/me" className="ws-account" aria-label="내 계정 관리" aria-current={pathname === "/me" ? "page" : undefined}>
           {userId?<MemberAvatar id={userId} name={nickname||'회원'}/>:number&&<span className="ws-bib" aria-hidden="true">{number}</span>}
           <span className="ws-account-name">{nickname || '내 계정'}</span>
         </Link>
       </header>
-      <main id="main" className="ws-main" tabIndex={-1}><Outlet /></main>
+      <main id="main" className="ws-main" tabIndex={-1}><Outlet /></main><ChatDock key={userId}/>
     </div>
   );
 }
+
+
+

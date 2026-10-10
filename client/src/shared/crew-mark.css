@@ -1,6 +1,8 @@
 .crew-mark { display:inline-flex; position:relative; flex:0 0 auto; width:46px; height:46px; align-items:center; justify-content:center; border-radius:14px; overflow:hidden; font-size:22px; font-weight:800; line-height:1; }
 .crew-mark-lines { position:absolute; width:36px; height:36px; right:-14px; bottom:-17px; border:2px solid currentColor; border-radius:50%; opacity:.22; box-shadow:0 0 0 5px currentColor; }
 .crew-mark-large { width:72px; height:72px; border-radius:22px; font-size:34px; }
+.crew-mark { border-radius:10px; }
+.crew-mark svg { width:60%; height:60%; position:relative; z-index:1; }
 .crew-identity { display:flex; align-items:center; gap:12px; min-width:0; }
 .crew-identity > div { min-width:0; overflow-wrap:anywhere; }
 .crew-feed-identity { margin-bottom:14px; font-weight:700; }

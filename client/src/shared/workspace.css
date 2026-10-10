@@ -29,3 +29,5 @@
   .ws-account-name { max-width: 80px; }
   .ws-main { padding: 24px 20px calc(92px + env(safe-area-inset-bottom)); }
 }
+
+.ws-account[aria-current=page] { color: var(--accent); }

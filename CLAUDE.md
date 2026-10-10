@@ -15,7 +15,7 @@
 - Backend: Node.js + Express (`server/`) — AI 코칭·크루 매칭 등 서버측 로직/API 담당
 - DB: Supabase(PostgreSQL) — 로컬 DB 설치 없이 클라우드 관리형 사용
 - 인증: Supabase Auth — 클라(supabase-js)가 로그인, 서버는 `supabase.auth.getUser(token)`로 토큰 검증. bcrypt/JWT 직접 구현 안 함
-- 권한: **기본 권한선은 Supabase RLS** (D-15). 서버도 요청의 사용자 JWT로 RLS 적용 클라이언트를 씀. service_role(`supabaseAdmin`)은 `services/crewStats.js`·`services/feedback.js` 두 파일만 — 이 두 경로에서는 RLS가 아니라 **서버 코드가 권한선**이므로 열거·최소화
+- 권한: **기본 권한선은 Supabase RLS** (D-15). 서버도 요청의 사용자 JWT로 RLS 적용 클라이언트를 씀. service_role(`supabaseAdmin`)은 `services/crewStats.js`·`services/feedback.js`·`services/partners.js`만 — 이 경로에서는 RLS가 아니라 **서버 코드가 권한선**이므로 열거·최소화
 - 클라 상태: TanStack Query(서버 데이터) + `AuthContext`(세션) + react-router — 구현 ①에서 추가 (D-13)
 - AI 코칭: OpenAI Responses API — 서버 `OPENAI_API_KEY`·`OPENAI_MODEL` 사용(D-29). 기록·식단·목표를 종합한 일/주/월 피드백. 입력 해시 같으면 재호출 없음, 재생성 기간당 3회 (D-06)
 - GPS 트래킹: 브라우저 `Geolocation API` + `Wake Lock API` (네이티브 앱 없음)
@@ -97,8 +97,9 @@ cd client && npm test         # client/src 아래 Node 테스트
 cd server && npm test         # services + config 소스 일치 테스트
 ```
 
-- 스택 메모: 백엔드 ESM. DB/인증은 Supabase. 로그인은 클라가 supabase-js로 처리, 서버는 `requireAuth`가 토큰 검증 후 **사용자 JWT로 만든 RLS 클라이언트를 `req.db`에 부착**. service_role 키는 서버 `.env`에만, 사용처는 services 2파일(위 "권한").
+- 스택 메모: 백엔드 ESM. DB/인증은 Supabase. 로그인은 클라가 supabase-js로 처리, 서버는 `requireAuth`가 토큰 검증 후 **사용자 JWT로 만든 RLS 클라이언트를 `req.db`에 부착**. service_role 키는 서버 `.env`에만, 사용처는 services 3파일(위 "권한").
 
 ## 아직 정해지지 않은 것
 
 - ESLint/Prettier 등 린트 설정 (아직 안 붙임 — 필요할 때 추가)
+

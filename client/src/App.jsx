@@ -1,3 +1,6 @@
+import { lazy } from 'react';
+const StorePage = lazy(() => import('./features/store/StorePage.jsx'));
+const CoachPage = lazy(() => import('./features/coach/CoachPage.jsx'));
 import { Suspense, useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -7,7 +10,7 @@ import NotFoundPage from './shared/NotFoundPage.jsx';
 import {
   AuthProvider, RequireAuth, GuestOnly,
   LoginPage, SignupPage, ForgotPasswordPage, ResetPasswordPage,
-  VerifyEmailPage, AuthCallbackPage, initialAuthLink,
+  VerifyEmailPage, AuthCallbackPage, GoogleCallbackPage, initialAuthLink,
 } from './features/auth/index.js';
 import { HomePage } from './features/dashboard/index.js';
 import { ActivitiesPage, ActivityCreatePage, ActivityDetailPage, ActivityEditPage, ExerciseNamesPage } from './features/activities/index.js';
@@ -41,6 +44,7 @@ export default function App() {
           <Routes>
             {/* 공개: 소개 화면(회원은 /home으로) */}
             <Route path="/" element={<LandingPage />} />
+            <Route path="/about" element={<LandingPage preview />} />
             <Route element={<GuestOnly />}>
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
@@ -49,6 +53,7 @@ export default function App() {
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/verify-email" element={<VerifyEmailPage />} />
             <Route path="/auth/callback" element={<AuthCallbackPage />} />
+            <Route path="/auth/google" element={<GoogleCallbackPage />} />
 
             {/* 회원: 셸 안 */}
             <Route element={<RequireAuth />}>
@@ -58,6 +63,7 @@ export default function App() {
                 <Route path="/notifications" element={<NotificationsPage />} />
                 <Route path="/goals" element={<GoalsPage />} />
                 <Route path="/feedback" element={<FeedbackPage />} />
+                <Route path="/coach" element={<CoachPage />} /><Route path="/store" element={<StorePage />} /><Route path="/partners" element={<Navigate to="/store?category=facilities" replace />} />
                 <Route path="/activities" element={<ActivitiesPage />} />
                 <Route path="/activities/new" element={<ActivityCreatePage />} />
                 <Route path="/activities/exercises" element={<ExerciseNamesPage />} />
@@ -87,3 +93,6 @@ export default function App() {
     </QueryClientProvider>
   );
 }
+
+
+

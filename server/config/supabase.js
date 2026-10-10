@@ -15,9 +15,10 @@ export function createUserClient(token) {
   });
 }
 
-// RLS 우회. 사용처는 services/crewStats.js · services/feedback.js 두 파일만 (routes/ import 금지).
+// RLS 우회. 사용처는 services/crewStats.js · services/feedback.js · services/partners.js만 (routes/ import 금지).
 export const supabaseAdmin = createClient(
   url,
   process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder',
   noSession
 );
+

@@ -14,7 +14,7 @@ export function matchCriteria(profile, settings) {
 }
 
 export function matchedOn(crew, profile, settings) {
-  return ['sport',
+  return [...((settings?.interested_sports ?? (profile.main_sport ? [profile.main_sport] : [])).includes(crew.sport) ? ['sport'] : []),
     ...(crew.region_sido === settings?.region_sido && crew.region_sigungu === settings?.region_sigungu ? ['region'] : []),
     ...(crew.activity_days?.some(day => settings?.preferred_days?.includes(day)) ? ['days'] : []),
     ...(profile.level && crew.level === profile.level ? ['level'] : []),
@@ -25,10 +25,11 @@ export async function matchCrews(db, userId) {
   if (!userId) throw failure(401, 'UNAUTHORIZED', '로그인이 필요해요.');
   const [p, s] = await Promise.all([
     db.from('profiles').select('main_sport,level').eq('id', userId).maybeSingle(),
-    db.from('user_settings').select('region_sido,region_sigungu,preferred_days').eq('user_id', userId).maybeSingle(),
+    db.from('user_settings').select('*').eq('user_id', userId).maybeSingle(),
   ]);
   const profile = checked(p), settings = checked(s);
-  if (!profile?.main_sport) throw failure(400, 'SETTINGS_REQUIRED', '추천을 받으려면 주종목을 설정해 주세요.');
+  if (!profile) throw failure(400, 'SETTINGS_REQUIRED', '프로필을 먼저 확인해 주세요.');
+  const interests = settings?.interested_sports ?? (profile.main_sport ? [profile.main_sport] : []);
   const excluded = new Set();
   // Paginate own memberships so pending and approved crews are both excluded beyond the API row cap.
   for (let offset = 0; ; offset += 100) {
@@ -41,7 +42,8 @@ export async function matchCrews(db, userId) {
   for (;;) {
     const matches = [];
     for (let offset = 0; matches.length < 20; offset += 100) {
-      let query = db.from('crews').select(fields).eq('sport', profile.main_sport).neq('owner_id', userId);
+      let query = db.from('crews').select(fields).neq('owner_id', userId);
+      if (interests.length) query = query.in('sport', interests);
       if (active.includes('region')) query = query.eq('region_sido', settings.region_sido).eq('region_sigungu', settings.region_sigungu);
       if (active.includes('days')) query = query.overlaps('activity_days', settings.preferred_days);
       if (active.includes('level')) query = query.eq('level', profile.level);
@@ -59,3 +61,4 @@ export async function matchCrews(db, userId) {
     relaxed.push(active.pop());
   }
 }
+

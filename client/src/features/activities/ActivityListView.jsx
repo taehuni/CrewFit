@@ -55,7 +55,7 @@ export default function ActivityListView({ filters, filterMessage, records, onFi
     <Suspense fallback={<p>보관한 측정 확인 중…</p>}><GpsDraftList /></Suspense>
     <div className="record-history-heading"><h2>내 운동 모아보기</h2><Link to="/activities/exercises" state={{activitiesReturnTo:returnTo}}>운동명 관리 ↗</Link></div>
     <div className="record-sport-filters" role="group" aria-label="종목 빠른 선택">{['',...LIST_SPORTS].map(sport=><button type="button" key={sport} aria-pressed={filters.sport===sport} onClick={()=>onFilter({...filters,sport})}>{sport&&<SportIcon sport={sport}/>}<span>{SPORT_LABEL[sport]||'전체'}</span></button>)}</div>
-    <details className="record-date-filter" open={filtered||undefined}><summary>날짜 · 상세 필터{filtered?' · 적용 중':''}</summary><Filters key={returnTo} filters={filters} onFilter={onFilter} /></details>
+    <section className="record-date-filter"><h3>날짜 · 상세 필터{filtered?' · 적용 중':''}</h3><Filters key={returnTo} filters={filters} onFilter={onFilter} /></section>
     <section className="activity-library-results" aria-label="운동 기록 목록" aria-busy={records.isFetching}>
       <div className="activity-library-caption"><span>최신 날짜순</span><span role="status">{!filterMessage && records.data ? items.length + '건 표시' + (records.hasNextPage ? ' · 더 있음' : '') : ''}</span></div>
       {filterMessage ? <p className="activity-list-message" role="alert">{filterMessage}</p>

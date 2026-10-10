@@ -77,6 +77,11 @@ export async function loadMealDetail(db, userId, id) {
 }
 export async function createMeal(db, userId, meal) {
   const { data, error } = await db.from('meals').insert({ ...meal, user_id: userId }).select('id').maybeSingle();
+  if (error?.code === '23505' && meal.source_meal_plan_id) {
+    const existing = await db.from('meals').select('id').eq('user_id', userId).eq('source_meal_plan_id', meal.source_meal_plan_id).maybeSingle();
+    if (existing.error) throw existing.error;
+    if (existing.data) return existing.data.id;
+  }
   if (error) throw error;
   if (!data) throw new Error('식단 저장 결과를 확인하지 못했어요.');
   return data.id;

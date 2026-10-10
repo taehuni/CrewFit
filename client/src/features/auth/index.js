@@ -10,3 +10,5 @@ export const ResetPasswordPage = lazy(() => import('./ResetPasswordPage.jsx'));
 export const VerifyEmailPage = lazy(() => import('./VerifyEmailPage.jsx'));
 export const AuthCallbackPage = lazy(() => import('./AuthCallbackPage.jsx'));
 export { initialAuthLink } from './authLinks.js';
+export const GoogleCallbackPage = lazy(() => import('./GoogleCallbackPage.jsx'));
+export {useCalendarConnection} from './useCalendarConnection.js';

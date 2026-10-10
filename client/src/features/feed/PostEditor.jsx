@@ -59,7 +59,7 @@ function EditorForm({userId,crewId,crew,existing}){
         {(photo || (!removed && existing?.image_path)) && <button type="button" className="btn btn-ghost" onClick={()=>{setPhoto(null);setRemoved(true);uploaded.current=null;if(fileInput.current)fileInput.current.value='';}}>사진 제거</button>}
         {removed && existing?.image_path && <><p className="feed-note">수정 저장 시 사진 첨부가 해제됩니다.</p><button type="button" className="btn btn-ghost" onClick={()=>setRemoved(false)}>기존 사진 유지</button></>}
       </div>
-      <details className="post-options"><summary>공개 범위 · 운동 기록 · 추가 설정</summary><div>
+      <section className="post-options"><h2>공개 범위 · 운동 기록 · 추가 설정</h2><div>
       <label>글 종류<select name="kind" value={form.kind} onChange={change}>{Object.entries(KINDS).map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label>
       <label>공개 범위<select name="visibility" value={form.visibility} onChange={change}><option value="public">전체 공개 · 로그인한 모든 회원</option>{crewId && <option value="crew">크루 전용 · 승인된 크루원</option>}</select></label>
       {crewId && form.visibility==='public' && <p className="feed-note">크루 밖 회원도 전체 피드에서 이 글을 볼 수 있어요.</p>}
@@ -68,7 +68,7 @@ function EditorForm({userId,crewId,crew,existing}){
       {includeRoute && <p className="feed-note" role="status">{form.visibility==='public'?'전체 공개 글이므로 크루 밖 회원도 경로와 출발·도착 위치를 볼 수 있어요.':'승인된 크루원이 경로와 출발·도착 위치를 볼 수 있어요.'} GPS로 측정한 기록만 경로를 첨부할 수 있어요.</p>}
       <label>종목 · 선택<select name="sport" value={form.sport} disabled={!!activityId} onChange={change}><option value="">선택 안 함</option>{Object.entries(SPORTS).map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label>
 
-      </div></details>
+      </div></section>
       {error && <p role="alert" className="feed-error">{error}</p>}
       <button className="btn btn-primary" type="submit">{busy?'저장 중…':existing?'수정 저장':'게시하기'}</button>
     </fieldset></form></div>;

@@ -1,3 +1,4 @@
+import SportIcon from '../../shared/SportIcon.jsx';
 import { useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../shared/supabaseClient.js';
@@ -8,7 +9,7 @@ import '../crews/crews.css';
 
 export default function CrewPreferencesForm({ userId, profile, settings }) {
   const cache = useQueryClient(), running = useRef(false);
-  const [form, setForm] = useState({ main_sport: profile.main_sport || '', level: profile.level || '',
+  const [form, setForm] = useState({ interested_sports: settings?.interested_sports ?? (profile.main_sport ? [profile.main_sport] : []), level: profile.level || '',
     region_sido: settings?.region_sido || '', region_sigungu: settings?.region_sigungu || '', preferred_days: settings?.preferred_days || [] });
   const [busy, setBusy] = useState(false), [error, setError] = useState(''), [message, setMessage] = useState('');
   const regions = useQuery({queryKey:queryKeys.regions(userId), queryFn:()=>loadRegions(supabase), retry:false});
@@ -18,7 +19,7 @@ export default function CrewPreferencesForm({ userId, profile, settings }) {
     event.preventDefault();
     if (running.current) return;
     running.current = true; setBusy(true); setError(''); setMessage('');
-    try { await saveCrewPreferences(supabase, userId, form, rows); setMessage('추천 설정을 저장했어요. 크루 탭에서 추천을 확인해 보세요.'); }
+    try { await saveCrewPreferences(supabase, userId, form, rows); setMessage('관심 운동과 활동 지역을 저장했어요.'); }
     catch (cause) { setError(cause.message); }
     finally {
       await Promise.all([cache.invalidateQueries({queryKey:queryKeys.me(userId)}), cache.invalidateQueries({queryKey:queryKeys.crewMatches(userId)})]);
@@ -26,13 +27,13 @@ export default function CrewPreferencesForm({ userId, profile, settings }) {
     }
   }
   return <section id="crew-preferences" className="card stack" aria-labelledby="crew-preferences-title">
-    <h2 id="crew-preferences-title">크루 추천 설정</h2>
-    <p className="crew-form-note">주종목은 필수이며 나머지는 선택입니다. 지역·요일은 공개 프로필에 노출하지 않고 추천에 사용해요.</p>
+    <h2 id="crew-preferences-title">관심 운동과 활동 지역</h2>
+    <p className="crew-form-note">해보고 싶거나 좋아하는 운동을 여러 개 골라 주세요. 아직 정하지 않았다면 선택하지 않아도 괜찮아요. 관심 운동·지역·요일은 비공개이며 크루 추천에 사용해요.</p>
     {regions.isPending && <p role="status">지역 목록을 불러오고 있어요.</p>}
     {regions.isError && <div role="alert"><p>지역 목록을 불러오지 못했어요.</p><button className="btn btn-ghost" onClick={() => regions.refetch()}>다시 조회</button></div>}
     <form className="crew-form" onSubmit={submit}><fieldset disabled={busy || !regions.isSuccess}>
       <div className="crew-form-pair">
-        <label>주종목<select required value={form.main_sport} onChange={event => change('main_sport', event.target.value)}><option value="">종목 선택</option>{Object.entries(SPORTS).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+        <fieldset className="interest-sports"><legend>관심 운동 · 여러 개 선택 가능</legend>{Object.entries(SPORTS).map(([value,label])=><label key={value} className={form.interested_sports.includes(value)?"selected":""}><input type="checkbox" checked={form.interested_sports.includes(value)} onChange={event=>change("interested_sports",event.target.checked?[...form.interested_sports,value]:form.interested_sports.filter(sport=>sport!==value))}/><SportIcon sport={value}/><span>{label}</span></label>)}<p className="muted small">{form.interested_sports.length?`${form.interested_sports.length}개 선택했어요.`:"아직 찾는 중이에요. 다양한 운동의 크루를 둘러볼 수 있어요."}</p></fieldset>
         <label>운동 레벨<select value={form.level} onChange={event => change('level', event.target.value)}><option value="">선택 안 함</option>{Object.entries(LEVELS).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label>
       </div>
       <div className="crew-form-pair">
@@ -41,7 +42,8 @@ export default function CrewPreferencesForm({ userId, profile, settings }) {
       </div>
       <fieldset className="crew-days"><legend>선호 요일 · 선택하지 않으면 요일 제한 없음</legend>{DAYS.map((day,index)=><label key={day}><input type="checkbox" checked={form.preferred_days.includes(index)} onChange={event=>change('preferred_days', event.target.checked ? [...form.preferred_days,index] : form.preferred_days.filter(value=>value!==index))}/>{day}</label>)}</fieldset>
       {error && <p className="crew-error" role="alert">{error}</p>}{message && <p role="status">{message}</p>}
-      <button className="btn btn-primary" type="submit">{busy ? '저장 중…' : '추천 설정 저장'}</button>
+      <button className="btn btn-primary" type="submit">{busy ? '저장 중…' : '관심 운동·지역 저장'}</button>
     </fieldset></form>
   </section>;
 }
+

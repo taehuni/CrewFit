@@ -26,6 +26,7 @@
 .activity-list-message p { color: var(--ink-2); margin-top: 8px; }
 .activity-list-message .btn { margin-top: 16px; }
 .activity-list-more { display: flex; margin: 24px auto 0; min-width: 160px; }
+@media(max-width:479px) { .activity-filters { grid-template-columns:minmax(0,1fr); }.activity-filters > .field { grid-column:1; } }
 @media (min-width: 640px) {
   .activity-library-heading h1 { font-size: 2rem; }
   .activity-filters { grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 20px; gap: 16px; }

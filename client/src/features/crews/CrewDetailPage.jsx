@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router';
+import {useState} from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../auth/index.js';
 import { supabase } from '../../shared/supabaseClient.js';
@@ -13,6 +14,7 @@ import { CrewFeed } from '../feed/index.js';
 import {CrewCover,MediaEditor} from '../../shared/CommunityMedia.jsx';
 
 export default function CrewDetailPage() {
+  const [managementTab,setManagementTab]=useState('members');
   const { user } = useAuth(), {crewId} = useParams();
   const query = useQuery({queryKey:queryKeys.crewDetail(user.id,crewId),queryFn:()=>loadCrew(supabase,crewId,user.id),retry:false,staleTime:0});
   const crew = query.data;
@@ -21,12 +23,13 @@ export default function CrewDetailPage() {
     {query.isPending ? <p role="status">크루를 불러오고 있어요.</p> : query.error ? <div role="alert"><p>크루 정보를 불러오지 못했어요.</p><button className="btn btn-ghost" onClick={()=>query.refetch()}>다시 조회</button></div>
       : !crew ? <p>크루를 찾을 수 없어요. 삭제되었거나 잘못된 주소입니다.</p>
       : <><section className="crew-header-card"><CrewCover crew={crew}/><div className="crew-header-content"><div className="crew-identity"><CrewMark name={crew.name} sport={crew.sport} large/><div><p className="eyebrow">{SPORTS[crew.sport]} · {crew.region_sido} {crew.region_sigungu}</p><h2>{crew.name}</h2><p className="muted small">{crew.member_count}명 · {LEVELS[crew.level] || '레벨 무관'} · {dayLabel(crew.activity_days)}</p></div></div><div className="crew-header-action">{crew.membership==='approved'?<span className="membership-badge">{crew.owner_id===user.id?'내가 운영하는 크루':'함께하는 크루'}</span>:<CrewMembership key={crew.id} crew={crew}/>}</div></div></section>
+        {crew.owner_id === user.id && <section className="crew-admin-panel" aria-label="크루 관리"><header><div><span className="section-eyebrow">크루장 전용</span><h2>크루 관리</h2><p>가입 요청을 확인하고, 함께할 크루원을 관리해요.</p></div><span className="membership-badge">관리 권한 있음</span></header><div className="crew-admin-tabs" role="group" aria-label="관리 메뉴"><button type="button" aria-pressed={managementTab==='members'} onClick={()=>setManagementTab('members')}>회원·가입 요청</button><button type="button" aria-pressed={managementTab==='cover'} onClick={()=>setManagementTab('cover')}>대표 사진 설정</button></div><div hidden={managementTab!=='members'}><CrewManagement key={`${user.id}:${crew.id}`} crew={crew}/></div><div hidden={managementTab!=='cover'}><MediaEditor crew={crew}/></div></section>}
         <CrewStats key={crew.id} crewId={crew.id} />
         <div className="crew-content-layout"><div className="crew-main-feed">
         <CrewFeed key={crew.id} embeddedCrewId={crew.id}/>
         </div><aside className="crew-sidebar"><div className="crew-detail-body"><section><h2>크루 소개</h2><p className="crew-description">{crew.description || '아직 소개가 등록되지 않았어요.'}</p></section>
           <section><h2>활동 정보</h2><dl><dt>활동 요일</dt><dd>{dayLabel(crew.activity_days)}</dd><dt>크루장</dt><dd>{crew.owner_nickname}</dd><dt>내 상태</dt><dd>{crew.owner_id===user.id ? '크루장' : crew.membership==='approved' ? '크루원' : crew.membership==='pending' ? '승인 대기' : '가입 전'}</dd></dl>
           {crew.membership==='approved'&&<CrewMembership key={crew.id} crew={crew}/>}</section></div></aside></div>
-        {crew.owner_id === user.id && <details className="card crew-owner-tools"><summary>크루 관리</summary><MediaEditor crew={crew}/><CrewManagement key={`${user.id}:${crew.id}`} crew={crew} /></details>}</>}
+        </>}
   </div>;
 }

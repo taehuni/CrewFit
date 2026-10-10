@@ -97,3 +97,4 @@
   .home-coaching { align-items: stretch; flex-direction: column; padding: 18px 16px; }
   .home-coaching .btn { width: 100%; }
 }
+.home-partners-link{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;background:white;border:1px solid #e0e5e8;border-radius:16px;color:#1e2229;text-decoration:none;margin:14px 0}.home-partners-link strong{font-size:14px}.home-partners-link small{display:block;font-size:11px;color:#75808a;margin-top:5px}

@@ -6,6 +6,7 @@ import { activityPayload } from './record.js';
 import { ACTIVITY_SPORTS, distanceUnit, hasDistance, initialActivitySport } from './sports.js';
 import ExerciseNameInput from './ExerciseNameInput.jsx';
 import './activities.css';
+import SportIcon from '../../shared/SportIcon.jsx';
 
 const emptySet = () => ({ name: '', reps: '', weight: '' });
 
@@ -53,7 +54,7 @@ export default function ActivityForm({ today, onSave, initialSport = 'running', 
     }
   }
   return <div className="activity-page">
-    <header className="activity-heading"><Link to={cancelTo} state={location.state}>{editing ? '기록 상세로' : cancelTo === '/home' ? '홈으로' : '기록 목록으로'}</Link><h1>{editing ? '운동 기록 수정' : '운동 기록하기'}</h1></header>
+    <header className="activity-heading"><Link to={cancelTo} state={location.state}>{editing ? '기록 상세로' : cancelTo === '/home' ? '홈으로' : '기록 목록으로'}</Link><h1>{editing ? '운동 기록 수정' : '운동 기록하기'}</h1><p className="activity-form-intro">오늘의 움직임을 남겨 주세요. 작은 기록도 차곡차곡 쌓여요.</p></header>
     <form ref={formRef} onSubmit={submit} noValidate>
       <fieldset disabled={busy} className="activity-fields">
         <legend className="sr-only">운동 기록</legend>
@@ -61,7 +62,7 @@ export default function ActivityForm({ today, onSave, initialSport = 'running', 
         {gpsDraft && <Suspense fallback={<p>경로를 불러오는 중…</p>}><GpsRouteMap points={gpsDraft.points} /></Suspense>}
         <fieldset className="activity-sports" disabled={editing || Boolean(gpsDraft)}><legend>{editing || gpsDraft ? '종목 · 변경할 수 없어요' : '종목'}</legend>
           {ACTIVITY_SPORTS.map(value => <label key={value} data-selected={form.sport === value}>
-            <input type="radio" name="sport" value={value} checked={form.sport === value} onChange={() => changeSport(value)} />{SPORT_LABEL[value]}
+            <input type="radio" name="sport" value={value} checked={form.sport === value} onChange={() => changeSport(value)} /><SportIcon sport={value}/><span>{SPORT_LABEL[value]}</span>
           </label>)}
         </fieldset>
         {!editing && !gpsDraft && onSelectDraft && <Suspense fallback={<p>보관한 GPS 측정 확인 중…</p>}><GpsDraftList date={form.date} sport={form.sport} onSelect={onSelectDraft} /></Suspense>}

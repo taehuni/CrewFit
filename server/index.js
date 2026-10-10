@@ -1,3 +1,6 @@
+import {createCalendarRouter} from './routes/calendar.js';
+import {createPartnersRouter} from './routes/partners.js';
+import { createCoachRouter } from './routes/coach.js';
 import express from 'express';
 import cors from 'cors';
 import meRouter from './routes/me.js';
@@ -16,6 +19,9 @@ app.use(express.json());
 app.get('/health', (req, res) => res.json({ ok: true }));
 
 app.use('/api/me', meRouter);
+app.use('/api/calendar',createCalendarRouter(requireAuth));
+app.use('/api/partners',createPartnersRouter(requireAuth));
+app.use('/api/coach', createCoachRouter(requireAuth));
 app.use('/api/dashboard', dashboardRouter);
 app.use('/api/exercises', createExercisesRouter(requireAuth));
 app.use('/api/feedback', createFeedbackRouter(requireAuth));
@@ -27,3 +33,5 @@ if (process.env.NODE_ENV === 'production') {
 
 const port = process.env.PORT || 4000;
 app.listen(port, () => console.log(`crewfit server on http://localhost:${port}`));
+
+

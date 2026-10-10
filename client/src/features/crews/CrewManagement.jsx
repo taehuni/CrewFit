@@ -5,6 +5,7 @@ import { api } from '../../shared/api.js';
 import { supabase } from '../../shared/supabaseClient.js';
 import { queryKeys } from '../../shared/queryKeys.js';
 import { loadCrewMembers, updateCrewMember } from './crewManagement.js';
+import {MemberAvatar} from '../../shared/CommunityMedia.jsx';
 
 export default function CrewManagement({ crew }) {
   const { user, token } = useAuth(), cache = useQueryClient();
@@ -49,10 +50,10 @@ export default function CrewManagement({ crew }) {
     {error && <p className="crew-error" role="alert">{error}</p>}
     {query.isPending ? <p role="status">회원 목록을 불러오고 있어요.</p> : query.isError ? <p role="alert">회원 목록을 불러오지 못했어요. 새로고침해 주세요.</p> : <>
       {['pending', 'approved'].map(status => <section key={status} className="crew-member-group">
-        <h3>{status === 'pending' ? '가입 대기' : '가입한 크루원'}</h3>
+        <h3>{status === 'pending' ? '가입 요청' : '함께하는 크루원'} <span className="crew-group-count">{members.filter(m=>m.status===status).length}{query.hasNextPage?'+':''}</span></h3>
         {!members.some(member => member.status === status) && <p>{status === 'pending' ? '불러온 목록에 대기 중인 요청이 없어요.' : '불러온 목록에 가입한 크루원이 없어요.'}</p>}
         <ul>{members.filter(member => member.status === status).map(member => <li key={member.user_id}>
-          <div><strong>{member.nickname}</strong>{status === 'approved' && <span className="crew-member-name">{member.real_name || '이름 미등록'}</span>}</div>
+          <div className="crew-managed-person"><MemberAvatar id={member.user_id} name={member.nickname}/><div><span className="person-role-label">회원 닉네임</span><strong>{member.nickname}</strong>{status === 'approved' && <span className="crew-member-name">실명 · {member.real_name || '미등록'}</span>}</div></div>
           {member.user_id === user.id ? <span>크루장</span> : <div className="crew-member-actions">
             {status === 'pending' ? <><button className="btn btn-primary" disabled={busy} onClick={() => act(member, 'approve')}>승인</button><button className="btn btn-ghost" disabled={busy} onClick={() => setConfirmation({member, action:'reject'})}>거절</button></> : <>
               <button className="btn btn-ghost" aria-pressed={member.can_post} disabled={busy} onClick={() => act(member, 'permission')}>글 작성 {member.can_post ? '허용됨' : '제한됨'}</button>

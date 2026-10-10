@@ -25,6 +25,6 @@ export default function CrewStats({ crewId }) {
           <div><dt>운동 횟수</dt><dd><strong>{data.activity_count.toLocaleString()}</strong><span>회</span></dd></div>
         </dl>
       </>}
-    <details className="crew-form-note"><summary>집계 기준</summary><p>현재 승인된 크루원의 선택 기간 내 전체 종목 합계입니다. 나만 공개 기록은 제외하며 개인별 기록은 표시하지 않아요.</p></details>
+    <section className="crew-form-note"><h2>집계 기준</h2><p>현재 승인된 크루원의 선택 기간 내 전체 종목 합계입니다. 나만 공개 기록은 제외하며 개인별 기록은 표시하지 않아요.</p></section>
   </section>;
 }

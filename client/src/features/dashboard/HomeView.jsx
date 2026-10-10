@@ -22,7 +22,7 @@ export default function HomeView({ log, days, today, offset, onWeekChange }) {
         <div><span className="section-eyebrow">하루하루, 나의 페이스로</span><h1>내 운동</h1></div>
         <Link to="/activities/new" className="btn btn-primary home-record-link"><span aria-hidden="true">＋</span> 운동 기록하기</Link>
       </header>
-      <div className="home-today-cue"><span className="home-today-dot" aria-hidden="true"/><div><strong>{streak?.today_done?'오늘의 운동을 남겼어요':ready?'오늘은 어떻게 움직여 볼까요?':'나의 운동을 확인하고 있어요'}</strong><p>{streak?.today_done?'쌓아온 기록을 돌아보고, 크루와 오늘의 성취를 나눠 보세요.':'완벽한 기록보다, 나에게 맞는 작은 시작.'}</p></div><Link to={streak?.today_done?'/feed/new':'/activities'}>{streak?.today_done?'이야기 쓰기':'기록 탭으로'} <span aria-hidden="true">↗</span></Link></div>
+      <Link to="/store?category=facilities" className="home-partners-link"><span><strong>운동할 곳 찾기</strong><small>헬스·PT·체험 수업 · 제휴 서비스 미리보기</small></span><span aria-hidden="true">↗</span></Link><div className="home-today-cue"><span className="home-today-dot" aria-hidden="true"/><div><strong>{streak?.today_done?'오늘의 운동을 남겼어요':ready?'오늘은 어떻게 움직여 볼까요?':'나의 운동을 확인하고 있어요'}</strong><p>{streak?.today_done?'쌓아온 기록을 돌아보고, 크루와 오늘의 성취를 나눠 보세요.':'완벽한 기록보다, 나에게 맞는 작은 시작.'}</p></div><Link to={streak?.today_done?'/feed/new':'/activities'}>{streak?.today_done?'이야기 쓰기':'기록 탭으로'} <span aria-hidden="true">↗</span></Link></div>
 
       <section className="home-week-section" aria-labelledby="week-title">
         <div className="home-section-head">
@@ -90,3 +90,6 @@ export default function HomeView({ log, days, today, offset, onWeekChange }) {
     </div>
   );
 }
+
+
+

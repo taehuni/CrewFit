@@ -1,3 +1,4 @@
+import GoogleLoginButton from './GoogleLoginButton.jsx';
 import { useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { supabase } from '../../shared/supabaseClient.js';
@@ -46,7 +47,7 @@ export default function SignupPage() {
       description="무료 계정을 만들고 오늘 운동부터 기록하세요."
       footer={<p>이미 계정이 있나요? <Link to="/login">로그인</Link></p>}
     >
-      <form className="form" onSubmit={onSubmit}>
+      <GoogleLoginButton disabled={busy}/><p className="muted small" style={{marginBottom:16}}>이미 가입했다면 기존 계정으로 로그인해 주세요. 같은 이메일의 구글 로그인은 기존 계정에 연결됩니다. 이름이나 닉네임만으로 계정을 합치지는 않아요.</p><form className="form" onSubmit={onSubmit}>
         <Field id="nickname" name="nickname" type="text" label="닉네임" autoComplete="nickname" spellCheck={false} placeholder="활동할 때 쓸 닉네임" minLength={2} maxLength={20} required hint="2~20자. 프로필과 글에는 실명 대신 닉네임이 보여요." />
         <Field id="real-name" name="real_name" type="text" label="이름 (실명)" autoComplete="name" spellCheck={false} placeholder="실명을 입력하세요" maxLength={50} required hint="본인과 가입이 승인된 크루의 크루장만 볼 수 있어요." />
         <Field id="email" name="email" type="email" label="이메일" autoComplete="email" inputMode="email" spellCheck={false} placeholder="name@example.com" required />
@@ -57,3 +58,5 @@ export default function SignupPage() {
     </AuthLayout>
   );
 }
+
+

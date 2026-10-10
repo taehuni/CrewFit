@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { useId, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../auth/index.js';
 import { supabase } from '../../shared/supabaseClient.js';
@@ -10,8 +10,7 @@ import { TRACKING_SPORTS } from './tracking.js';
 import './tracking.css';
 export default function GpsDraftList({ date, sport, onSelect }) {
   const {user} = useAuth();
-  const cache = useQueryClient(), listId = useId(), lock = useRef(false);
-  const [expanded, setExpanded] = useState(Boolean(date));
+  const cache = useQueryClient(), lock = useRef(false);
   const [confirmId, setConfirmId] = useState(null), [busy, setBusy] = useState(false), [error, setError] = useState('');
   const drafts = useQuery({queryKey:queryKeys.gpsDrafts(user.id,{date:date || '',sport:sport || ''}),
     queryFn:({signal})=>listGpsDrafts(supabase,user.id,{date,sport},signal),
@@ -30,9 +29,9 @@ export default function GpsDraftList({ date, sport, onSelect }) {
   if (drafts.isPending) return <p role="status">보관한 GPS 측정 확인 중…</p>;
   if (drafts.isError) return <p className="muted">보관한 GPS 측정을 불러오지 못했어요. <button type="button" onClick={()=>drafts.refetch()}>다시 확인</button></p>;
   if (!drafts.data?.length) return null;
-  return <section className="gps-drafts" aria-label="보관한 GPS 측정"><h2><button type="button" className="gps-drafts-toggle" aria-expanded={expanded} aria-controls={listId} disabled={busy} onClick={()=>setExpanded(value=>!value)}>
-    {date ? '이날 보관한 GPS 측정' : '보관한 GPS 측정'} · {drafts.data.length}{drafts.data.length===50 ? '+' : ''}건 <span>{expanded ? '접기' : '펼치기'}</span></button></h2>
-    <div id={listId} hidden={!expanded}>
+  return <section className="gps-drafts" aria-label="보관한 GPS 측정"><h2>
+    {date ? '이날 보관한 GPS 측정' : '보관한 GPS 측정'} · {drafts.data.length}{drafts.data.length===50 ? '+' : ''}건</h2>
+    <div>
     <p>아직 운동 기록에 포함되지 않은 측정이에요. 불러와 저장하면 기록에 반영돼요.</p>
     <ul>{drafts.data.map(draft=><li key={draft.id}><div><strong>{SPORT_LABEL[draft.sport]} · {draft.performed_on}</strong>
       <p>{new Date(draft.started_at).toLocaleTimeString('ko-KR',{timeZone:'Asia/Seoul',hour:'2-digit',minute:'2-digit'})} · {(draft.distance_m/1000).toFixed(2)}km · {Math.floor(draft.duration_sec/60)}분 {draft.duration_sec%60}초</p></div>

@@ -59,3 +59,9 @@
 @media (prefers-reduced-motion: reduce) {
   .auth-photo { transition: none; }
 }
+
+.google-login-button{background:#fff;color:#1f1f1f;border:1px solid #747775;border-radius:24px;gap:12px;font-weight:600;min-height:48px}
+.google-login-button:hover{background:#f2f4f7}.google-login-button svg{flex:none}
+.google-login-error{font-size:14px;color:#9c341d;line-height:1.6;margin-top:12px}
+.auth-divider{display:flex;align-items:center;gap:14px;margin:24px 0;color:#687078;font-size:12px}
+.auth-divider:before,.auth-divider:after{content:'';height:1px;background:#dfe3e7;flex:1}

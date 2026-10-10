@@ -20,7 +20,7 @@
 ```
 
 - **어디로 가나 규칙 (D-10)**: 한 유저 범위의 단일 테이블 CRUD → ①. 비밀키·다중 유저 데이터·집계·일괄 UPDATE → ②.
-- **서버도 사용자 토큰 (D-15)**: ②도 기본은 요청의 JWT로 RLS 적용 클라이언트. `supabaseAdmin`은 크루 집계(`services/crewStats.js`)와 AI 피드백 저장(`services/feedback.js`) 둘만.
+- **서버도 사용자 토큰 (D-15)**: ②도 기본은 요청의 JWT로 RLS 적용 클라이언트. `supabaseAdmin`은 크루 집계(`services/crewStats.js`)· AI 피드백 저장(`services/feedback.js`) · 데모 예약/결제 상태 저장(`services/partners.js`)만.
 - **세션 (D-12)**: supabase-js가 localStorage에 관리. 서버는 `requireAuth`에서 `getUser(token)` 검증만.
 
 ## 2. 도메인 요약
@@ -88,7 +88,7 @@ GPS 측정은 기록 탭의 독립 진입점에서 종목(러닝·걷기·자전
 - 값 범위·행 간 관계는 DB 제약 (CHECK·FK·트리거). 함수 경로만 믿지 않음.
 - 자식 테이블은 부모 RLS 상속(`exists` 서브쿼리). crew_members 참조는 security definer 헬퍼 경유.
 - 사진: 비공개 버킷, storage 정책이 posts 가시성 상속.
-- 서버: 라우트마다 `requireAuth`, `supabaseAdmin`은 services 2파일만.
+- 서버: 라우트마다 `requireAuth`, `supabaseAdmin`은 services/crewStats.js, services/feedback.js, services/partners.js만.
 
 ## 6. 구현 순서와 일정 (확정 — `개발계획.md` 3·4절과 동일)
 
@@ -113,3 +113,4 @@ GPS 측정은 기록 탭의 독립 진입점에서 종목(러닝·걷기·자전
 - 기록 탭의 보관 목록은 기본 접힘으로 건수를 표시하고, 직접 기록 화면의 날짜·종목 일치 목록은 펼쳐 둔다. 좌표를 추가로 조회하지 않는다.
 - 보관 측정 삭제는 항목별 확인 후 본인·미완료 조건부 DELETE로 수행한다. 이미 최종 저장된 측정은 삭제하지 않으며 실패 시 목록과 재시도 버튼을 유지한다.
 - 본인 운동 목록·상세는 기존 activity_routes 관계의 activity_id만 함께 조회하여 GPS 측정/직접 입력을 구분한다. 시작 시각으로 추정하지 않고 이전 GPS 기록도 포함한다. 추가 DB 변경은 없다.
+

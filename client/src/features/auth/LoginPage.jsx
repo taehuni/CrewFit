@@ -1,3 +1,4 @@
+import GoogleLoginButton from './GoogleLoginButton.jsx';
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
 import { supabase } from '../../shared/supabaseClient.js';
@@ -28,9 +29,9 @@ export default function LoginPage() {
     <AuthLayout
       title={<>다시 운동할<br />시간이에요.</>}
       heading="로그인"
-      description="가입한 이메일로 로그인해 기록을 이어가세요."
+      description="이메일 또는 구글 계정으로 기록을 이어가세요."
     >
-      <form className="form" onSubmit={onSubmit}>
+      <GoogleLoginButton disabled={busy} next={from}/><form className="form" onSubmit={onSubmit}>
         <Field id="email" name="email" type="email" label="이메일" autoComplete="email" inputMode="email" spellCheck={false} placeholder="name@example.com" required />
         <Field id="password" name="password" type="password" label="비밀번호" labelAction={<Link to="/forgot">비밀번호 찾기</Link>} autoComplete="current-password" required />
         <FormMessage>{error}</FormMessage>
@@ -41,3 +42,4 @@ export default function LoginPage() {
     </AuthLayout>
   );
 }
+
