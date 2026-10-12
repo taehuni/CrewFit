@@ -223,3 +223,8 @@
   .workspace .feed-page:not(.crew-inline-feed) { max-width:none; }
   .workspace .post-image-button .post-image { max-width:100%; }
 }
+
+/* Keep crew photos legible at card scale. */
+.crew-cover.crew-cover-compact{height:160px}
+.crew-cover img{display:block;object-position:center 45%}
+@media(min-width:760px){.crew-cover.crew-cover-compact{height:176px}}

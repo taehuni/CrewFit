@@ -6,6 +6,7 @@ import { supabase } from '../../shared/supabaseClient.js';
 import { queryKeys } from '../../shared/queryKeys.js';
 import { KINDS,feedContext,loadPosts } from './posts.js';
 import './feed.css';
+import './feed-polish.css';
 import { PostImage,usePostImages } from './PostImage.jsx';
 import CrewMark from '../../shared/CrewMark.jsx';
 import PostAuthor from './PostAuthor.jsx';

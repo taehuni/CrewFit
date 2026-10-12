@@ -1,14 +1,12 @@
+import ActivityTimeline from './ActivityTimeline.jsx';
 import { Suspense, useRef, useState } from 'react';
 import { Link } from 'react-router';
 import { Button, Field, SPORT_LABEL } from '../../shared/ui.jsx';
-import { detailDuration } from './activityDetail.js';
 import { filterError, LIST_SPORTS, listURL } from './activityList.js';
-import { distanceFactor, distanceUnit } from './sports.js';
 import './activity-list.css';
 import './exercise-merge.css';
 import RecordTabs from '../../shared/RecordTabs.jsx';
 import { GpsDraftList } from '../tracking/index.js';
-import { recordSource } from './recordSource.js';
 import SportIcon from '../../shared/SportIcon.jsx';
 import './record-polish.css';
 
@@ -62,15 +60,7 @@ export default function ActivityListView({ filters, filterMessage, records, onFi
         : records.isPending ? <p className="activity-list-message" role="status">운동 기록을 불러오고 있어요.</p>
         : !records.data && records.isError ? <div className="activity-list-message" role="alert"><p>기록을 불러오지 못했어요.</p><Button variant="ghost" onClick={() => records.refetch()}>다시 불러오기</Button></div>
         : <>
-          {items.length ? <ul className="activity-library-list">{items.map(record => <li key={record.id} data-sport={record.sport}>
-            <Link to={'/activities/' + record.id} state={{ activitiesReturnTo: returnTo }} className="activity-library-row">
-              <SportIcon sport={record.sport}/><div className="activity-library-name"><time dateTime={record.performed_on}>{record.performed_on.replaceAll('-', '.')}</time><strong>{SPORT_LABEL[record.sport] || '운동'}</strong><span className="record-source-label">{recordSource(record)}</span>{record.note?.trim() && <p>{record.note.trim().split(/\r?\n/)[0]}</p>}</div>
-              <div className="activity-library-metrics">
-                {record.distance_m != null && <span><b>{(record.distance_m / distanceFactor(record.sport)).toLocaleString('ko-KR', { maximumFractionDigits: 3 })}</b><small>{distanceUnit(record.sport)}</small></span>}
-                <span>{detailDuration(record.duration_sec)}</span>
-              </div><span className="activity-library-chevron" aria-hidden="true">›</span>
-            </Link>
-          </li>)}</ul> : <div className="activity-list-message"><h2>{filtered ? '조건에 맞는 기록이 없어요.' : '아직 운동 기록이 없어요.'}</h2><p>{filtered ? '종목이나 날짜 범위를 바꿔 확인해 보세요.' : '첫 운동을 기록하면 이곳에 차곡차곡 모입니다.'}</p>
+          {items.length ? <ActivityTimeline items={items} returnTo={returnTo}/> : <div className="activity-list-message"><h2>{filtered ? '조건에 맞는 기록이 없어요.' : '아직 운동 기록이 없어요.'}</h2><p>{filtered ? '종목이나 날짜 범위를 바꿔 확인해 보세요.' : '첫 운동을 기록하면 이곳에 차곡차곡 모입니다.'}</p>
             {filtered ? <Button variant="ghost" onClick={() => onFilter({ sport: '', from: '', to: '' })}>전체 기록 보기</Button> : <Link className="btn btn-ghost" to="/activities/new" state={{ activitiesReturnTo: returnTo }}>첫 운동 기록하기</Link>}</div>}
           {records.isError && records.data && <div className="activity-list-message" role="alert"><p>{records.isFetchNextPageError ? '다음 기록을 불러오지 못했어요. 현재 목록은 유지됩니다.' : '최신 기록을 확인하지 못했어요. 이전 조회 결과입니다.'}</p>
             <Button variant="ghost" disabled={records.isFetching} onClick={records.isFetchNextPageError ? more : () => records.refetch()}>다시 불러오기</Button></div>}

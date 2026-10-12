@@ -1,0 +1,77 @@
+{
+  "generator": "Built-in image_gen",
+  "prompts": [
+    {
+      "file": "run-rest-v1.webp",
+      "prompt": "Use case: photorealistic-natural. Create one high-quality candid editorial photograph for a fictional Korean exercise community social feed. Scene: A pair of worn running shoes beside a park bench, a light jacket and clear water bottle, soft dawn on a Korean riverside trail, intimate candid detail, no people. Landscape 3:2 composition, authentic everyday textures and natural colors. No typography, brands, logos, watermarks, collage, interface, or exaggerated fitness advertising. Food and people are illustrative demo content."
+    },
+    {
+      "file": "run-path-v1.webp",
+      "prompt": "Use case: photorealistic-natural. Create one high-quality candid editorial photograph for a fictional Korean exercise community social feed. Scene: Two adult friends jogging at an easy pace on a tree-lined park path, side view from a distance, overcast autumn morning, naturally dressed everyday runners. Landscape 3:2 composition, authentic everyday textures and natural colors. No typography, brands, logos, watermarks, collage, interface, or exaggerated fitness advertising. Food and people are illustrative demo content."
+    },
+    {
+      "file": "gym-bag-v1.webp",
+      "prompt": "Use case: photorealistic-natural. Create one high-quality candid editorial photograph for a fictional Korean exercise community social feed. Scene: An open canvas gym bag with towel and water bottle beside a pair of dumbbells on a rubber gym floor, warm evening light, candid workout diary detail. Landscape 3:2 composition, authentic everyday textures and natural colors. No typography, brands, logos, watermarks, collage, interface, or exaggerated fitness advertising. Food and people are illustrative demo content."
+    },
+    {
+      "file": "gym-training-v1.webp",
+      "prompt": "Use case: photorealistic-natural. Create one high-quality candid editorial photograph for a fictional Korean exercise community social feed. Scene: An adult woman practicing a light goblet squat with a kettlebell, side view, ordinary bright neighborhood gym, realistic safe neutral posture and both feet on floor. Landscape 3:2 composition, authentic everyday textures and natural colors. No typography, brands, logos, watermarks, collage, interface, or exaggerated fitness advertising. Food and people are illustrative demo content."
+    },
+    {
+      "file": "cycle-break-v1.webp",
+      "prompt": "Use case: photorealistic-natural. Create one high-quality candid editorial photograph for a fictional Korean exercise community social feed. Scene: Two parked road bicycles leaning securely against a low wooden fence at a riverside rest stop, paper coffee cups on a picnic table, clear autumn morning. Landscape 3:2 composition, authentic everyday textures and natural colors. No typography, brands, logos, watermarks, collage, interface, or exaggerated fitness advertising. Food and people are illustrative demo content."
+    },
+    {
+      "file": "cycle-detail-v1.webp",
+      "prompt": "Use case: photorealistic-natural. Create one high-quality candid editorial photograph for a fictional Korean exercise community social feed. Scene: Close-up of gloved hands checking a bicycle tire beside a quiet cycle path, helmet resting on handlebar, natural morning light, realistic equipment detail. Landscape 3:2 composition, authentic everyday textures and natural colors. No typography, brands, logos, watermarks, collage, interface, or exaggerated fitness advertising. Food and people are illustrative demo content."
+    },
+    {
+      "file": "swim-kit-v1.webp",
+      "prompt": "Use case: photorealistic-natural. Create one high-quality candid editorial photograph for a fictional Korean exercise community social feed. Scene: Swimming goggles, cap, mesh swim bag and neatly folded blue towel on a dry wooden changing-room bench, quiet practical beginner swimming diary, no people. Landscape 3:2 composition, authentic everyday textures and natural colors. No typography, brands, logos, watermarks, collage, interface, or exaggerated fitness advertising. Food and people are illustrative demo content."
+    },
+    {
+      "file": "swim-lanes-v1.webp",
+      "prompt": "Use case: photorealistic-natural. Create one high-quality candid editorial photograph for a fictional Korean exercise community social feed. Scene: Overhead diagonal view of blue swimming lanes with a lone distant adult doing a relaxed freestyle lap, sparkling indoor pool reflections, spacious geometric composition. Landscape 3:2 composition, authentic everyday textures and natural colors. No typography, brands, logos, watermarks, collage, interface, or exaggerated fitness advertising. Food and people are illustrative demo content."
+    },
+    {
+      "file": "walk-autumn-v1.webp",
+      "prompt": "Use case: photorealistic-natural. Create one high-quality candid editorial photograph for a fictional Korean exercise community social feed. Scene: A quiet Korean residential pedestrian lane with golden autumn leaves and a small cafe facade without legible signs, gentle late afternoon light, intimate everyday walking diary. Landscape 3:2 composition, authentic everyday textures and natural colors. No typography, brands, logos, watermarks, collage, interface, or exaggerated fitness advertising. Food and people are illustrative demo content."
+    },
+    {
+      "file": "walk-river-v1.webp",
+      "prompt": "Use case: photorealistic-natural. Create one high-quality candid editorial photograph for a fictional Korean exercise community social feed. Scene: A person seen from behind walking along a river promenade under soft pink twilight sky, comfortable casual jacket, peaceful rippling water, wide calm composition. Landscape 3:2 composition, authentic everyday textures and natural colors. No typography, brands, logos, watermarks, collage, interface, or exaggerated fitness advertising. Food and people are illustrative demo content."
+    },
+    {
+      "file": "stretch-kit-v1.webp",
+      "prompt": "Use case: photorealistic-natural. Create one high-quality candid editorial photograph for a fictional Korean exercise community social feed. Scene: A rolled sage yoga mat, cork blocks and cotton towel beside a sunlit apartment window with a houseplant, warm wooden floor, realistic simple home stretching routine. Landscape 3:2 composition, authentic everyday textures and natural colors. No typography, brands, logos, watermarks, collage, interface, or exaggerated fitness advertising. Food and people are illustrative demo content."
+    },
+    {
+      "file": "stretch-hands-v1.webp",
+      "prompt": "Use case: photorealistic-natural. Create one high-quality candid editorial photograph for a fictional Korean exercise community social feed. Scene: Close detail of an adult seated on a mat gently stretching their calf with a yoga strap, modest loose athletic clothing, soft home window light, realistic anatomy. Landscape 3:2 composition, authentic everyday textures and natural colors. No typography, brands, logos, watermarks, collage, interface, or exaggerated fitness advertising. Food and people are illustrative demo content."
+    },
+    {
+      "file": "meal-oats-v1.webp",
+      "prompt": "Use case: photorealistic-natural. Create one high-quality candid editorial photograph for a fictional Korean exercise community social feed. Scene: A bowl of oatmeal topped with sliced banana and walnuts, a boiled egg and a glass of water on a small breakfast table, candid homemade food photo, soft morning light. Landscape 3:2 composition, authentic everyday textures and natural colors. No typography, brands, logos, watermarks, collage, interface, or exaggerated fitness advertising. Food and people are illustrative demo content."
+    },
+    {
+      "file": "meal-tofu-v1.webp",
+      "prompt": "Use case: photorealistic-natural. Create one high-quality candid editorial photograph for a fictional Korean exercise community social feed. Scene: Home-cooked lunch of golden pan-seared tofu, multigrain rice and steamed broccoli on ceramic dishes, plain kitchen table, appetizing realistic portions, window light. Landscape 3:2 composition, authentic everyday textures and natural colors. No typography, brands, logos, watermarks, collage, interface, or exaggerated fitness advertising. Food and people are illustrative demo content."
+    },
+    {
+      "file": "meal-chicken-v1.webp",
+      "prompt": "Use case: photorealistic-natural. Create one high-quality candid editorial photograph for a fictional Korean exercise community social feed. Scene: A simple homemade dinner plate of sliced cooked chicken breast, roasted sweet potato and colorful roasted vegetables, fork on linen napkin, warm natural light. Landscape 3:2 composition, authentic everyday textures and natural colors. No typography, brands, logos, watermarks, collage, interface, or exaggerated fitness advertising. Food and people are illustrative demo content."
+    },
+    {
+      "file": "meal-rice-v1.webp",
+      "prompt": "Use case: photorealistic-natural. Create one high-quality candid editorial photograph for a fictional Korean exercise community social feed. Scene: A shallow bowl of egg fried rice with scallions, diced vegetables and a small side dish of cucumber, modest homemade lunch setting, natural overhead photo. Landscape 3:2 composition, authentic everyday textures and natural colors. No typography, brands, logos, watermarks, collage, interface, or exaggerated fitness advertising. Food and people are illustrative demo content."
+    },
+    {
+      "file": "meal-fish-v1.webp",
+      "prompt": "Use case: photorealistic-natural. Create one high-quality candid editorial photograph for a fictional Korean exercise community social feed. Scene: Korean home dinner with a grilled fish fillet, white rice, clear radish soup and a small vegetable side dish, carefully arranged on wooden table, warm evening light. Landscape 3:2 composition, authentic everyday textures and natural colors. No typography, brands, logos, watermarks, collage, interface, or exaggerated fitness advertising. Food and people are illustrative demo content."
+    },
+    {
+      "file": "meal-snack-v1.webp",
+      "prompt": "Use case: photorealistic-natural. Create one high-quality candid editorial photograph for a fictional Korean exercise community social feed. Scene: Apple slices and a small handful of almonds on a small ceramic plate beside a mug of tea, afternoon snack at a tidy home table, gentle natural sunlight. Landscape 3:2 composition, authentic everyday textures and natural colors. No typography, brands, logos, watermarks, collage, interface, or exaggerated fitness advertising. Food and people are illustrative demo content."
+    }
+  ]
+}

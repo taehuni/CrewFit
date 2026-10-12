@@ -11,6 +11,7 @@ import {preparePhoto,validatePhoto} from '../../shared/community.js';
 import StoredPostImage from './PostImage.jsx';
 import { ActivityPicker } from './ActivityAttachment.jsx';
 import './feed.css';
+import './feed-polish.css';
 
 export default function PostEditor(){
   const {user}=useAuth(),{postId}=useParams(),[params]=useSearchParams();
@@ -49,11 +50,12 @@ function EditorForm({userId,crewId,crew,existing}){
       }
       const post=await savePost(supabase,userId,form,crewId,existing,imagePath,activityId,includeRoute);await cache.invalidateQueries({queryKey:queryKeys.postsRoot(userId)});navigate(`/feed/${post.id}`,{replace:true,state:{feedFrom:location.state?.feedFrom}});}
     catch(cause){setError(cause.message);}finally{running.current=false;setBusy(false);}}
-  return <div className="feed-page"><header className="feed-heading"><h1>{existing?'글 수정':'글 쓰기'}</h1><Link to={existing?`/feed/${existing.id}`:feedBack} state={existing?{feedFrom:feedBack}:{restoreFeed:true}}>취소</Link></header>
+  return <div className="feed-page post-editor-page"><header className="feed-heading"><h1>{existing?'글 수정':'글 쓰기'}</h1><Link to={existing?`/feed/${existing.id}`:feedBack} state={existing?{feedFrom:feedBack}:{restoreFeed:true}}>취소</Link></header>
+    <p className="post-editor-intro">운동의 결과도, 과정도 좋아요. 오늘의 이야기를 함께 나눠요.</p>
     <form className="post-form" onSubmit={submit}><fieldset disabled={busy}>
       {crew && <p>{crew.name} · 크루는 작성 후 바꿀 수 없어요.</p>}
       <label>오늘 운동은 어땠나요?<textarea placeholder="함께 나누고 싶은 오늘의 운동 이야기를 적어 주세요." name="content" required maxLength={5000} rows={6} value={form.content} onChange={change}/></label><small>{form.content.length.toLocaleString()} / 5,000자</small>
-      <div className="post-photo-editor"><label>사진 1장 · 선택<input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp" onChange={choosePhoto}/></label>
+      <div className="post-photo-editor"><div className="post-photo-heading"><div><h2>오늘의 한 장</h2><p>운동 풍경이나 식사를 사진으로 남겨 보세요.</p></div><span>선택 사항</span></div><input ref={fileInput} type="file" aria-label="게시물 사진 선택" hidden accept="image/jpeg,image/png,image/webp" onChange={choosePhoto}/><button type="button" className={'post-photo-select'+(preview||(!removed&&existing?.image_path)?' has-photo':'')} onClick={()=>fileInput.current?.click()}><span aria-hidden="true">＋</span>{preview||(!removed&&existing?.image_path)?'다른 사진 선택':'사진 추가하기'}</button>
         <p className="feed-note">JPG·PNG·WebP · 최대 20MB. 사진 크기를 줄이고 위치 메타데이터를 제거해 저장해요.</p>
         {preview?<img className="post-image" src={preview} alt="첨부할 사진 미리보기"/>:!photo && !removed && existing?.image_path?<StoredPostImage path={existing.image_path}/>:null}
         {(photo || (!removed && existing?.image_path)) && <button type="button" className="btn btn-ghost" onClick={()=>{setPhoto(null);setRemoved(true);uploaded.current=null;if(fileInput.current)fileInput.current.value='';}}>사진 제거</button>}
@@ -70,6 +72,6 @@ function EditorForm({userId,crewId,crew,existing}){
 
       </div></section>
       {error && <p role="alert" className="feed-error">{error}</p>}
-      <button className="btn btn-primary" type="submit">{busy?'저장 중…':existing?'수정 저장':'게시하기'}</button>
+      <div className="post-publish-bar"><p><strong>{form.visibility==='crew'?'크루 전용':'전체 공개'}</strong><span>{form.visibility==='crew'?'승인된 크루원에게 보여요.':'로그인한 모든 회원에게 보여요.'}</span></p><button className="btn btn-primary" type="submit">{busy?'저장 중…':existing?'수정 저장':'게시하기'}</button></div>
     </fieldset></form></div>;
 }

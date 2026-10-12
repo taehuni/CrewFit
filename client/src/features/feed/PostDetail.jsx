@@ -6,6 +6,7 @@ import { supabase } from '../../shared/supabaseClient.js';
 import { queryKeys } from '../../shared/queryKeys.js';
 import { KINDS,feedUrl,loadPost,deletePost,canPinPost,setPostPinned } from './posts.js';
 import './feed.css';
+import './feed-polish.css';
 import StoredPostImage from './PostImage.jsx';
 import ActivityAttachment from './ActivityAttachment.jsx';
 import PostInteractions from './PostInteractions.jsx';
@@ -32,7 +33,7 @@ export default function PostDetail(){
     {query.isPending?<p role="status">글을 불러오고 있어요.</p>:query.isError?<div role="alert"><p>{query.error.message}</p><button className="btn btn-ghost" onClick={()=>query.refetch()}>다시 조회</button></div>:!post?<p>글이 삭제되었거나 볼 수 있는 권한이 없어요.</p>:<>
       <article className="feed-post"><header className="post-card-heading"><PostAuthor authorId={post.author_id} nickname={post.profiles?.nickname || '회원'} createdAt={post.created_at} visibility={post.visibility}/><span className="post-kind">{KINDS[post.kind] || '인증'} 글</span></header>
         {post.is_pinned && <p className="post-pin-label">크루 고정글</p>}
-        {post.crews && <Link to={feedUrl(post.crew_id)}>{post.crews.name}</Link>}<p className="post-content">{post.content}</p>
+        {post.crews && <Link className="post-detail-crew" to={'/crews/'+post.crew_id}><span>크루</span>{post.crews.name} ↗</Link>}<p className="post-content">{post.content}</p>
         {post.activity_id && <ActivityAttachment key={post.activity_id} postId={post.id}/>}
         {post.activity_id && post.include_route && <SavedRoute key={`route:${post.id}:${post.activity_id}`} postId={post.id}/>}
         {!post.activity_id && post.kind==='log' && <p className="feed-note">첨부된 운동 기록이 없어요.</p>}

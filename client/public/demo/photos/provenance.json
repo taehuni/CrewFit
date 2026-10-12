@@ -1,0 +1,16 @@
+{
+  "generator": "Built-in image_gen",
+  "purpose": "Fictional CrewFit demo crew covers and social posts; generated people and locations are illustrative.",
+  "processing": "1200px wide WebP, quality 82, no composition edits",
+  "prompts": {
+    "gym": "Photorealistic natural editorial photograph for a fictional Korean fitness community app crew cover and social feed. Warm sunlit neighborhood gym, two adult friends seen from behind and side in modest athletic clothing taking a relaxed break near neatly arranged dumbbells, authentic everyday workout atmosphere, attractive balanced composition, textured rubber floor and warm natural light, landscape 3:2 composition with subjects centered safely for wide crops. No lettering, logos, watermark, collage or interface.",
+    "cycling": "Photorealistic natural editorial photograph for a fictional Korean cycling community crew cover and social feed. Three adult friends wearing bicycle helmets riding safely and leisurely on a dedicated riverside cycling path in Seoul, autumn trees and quiet river in background, candid rear three-quarter view, soft morning sunshine, refreshing natural muted colors, high quality lifestyle photography, landscape 3:2 frame with central subject safe for wide crop. No text, branding, watermark, collage or interface.",
+    "swimming": "Photorealistic natural editorial photograph for a fictional swimming community crew cover and social feed. Beautiful quiet indoor lap swimming pool with turquoise water and soft window reflections, a distant adult swimmer in one lane, a neatly folded white towel and swimming goggles on dry poolside in foreground. Peaceful approachable beginner swimming atmosphere, premium but natural everyday editorial photography. Landscape 3:2 frame, safe central composition for wide crop. No text, logos, watermark, collage or interface.",
+    "stretching": "Photorealistic natural editorial photograph for a fictional stretching community crew cover and social feed. Two adult friends in modest comfortable athletic clothes gently stretching on yoga mats in a bright small studio, side and back view, indoor plants, warm wood floor, soft morning window light, calm approachable everyday movement rather than athletic performance, candid editorial lifestyle photography. Landscape 3:2 frame, centered safe composition for wide crop. No text, logos, watermark, collage or interface."
+  },
+  "reused": [
+    "running-v1.webp: earlier generated morning.png",
+    "walking-v1.webp: earlier generated sunset.png",
+    "breakfast-v1.webp: earlier generated breakfast.png"
+  ]
+}
