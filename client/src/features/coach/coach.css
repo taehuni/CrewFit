@@ -2,3 +2,25 @@
 .coach-plan-editor label.coach-select{display:flex;justify-content:flex-start;width:100%;flex-wrap:nowrap}.coach-plan-editor .coach-select input{flex:0 0 18px;width:18px;max-width:18px;padding:0;margin:0;height:18px}.coach-plan-editor .coach-select{white-space:nowrap}
 .calendar-connect{padding:12px;border:1px solid #e2e6e9;border-radius:14px;background:#f6f7f8;margin:16px 0}.calendar-connect p,.calendar-action p{font-size:12px;line-height:1.7}.calendar-connect button,.calendar-action button{font-size:12px;padding:9px 12px}.calendar-action{margin:12px 0}.calendar-added{display:block;margin:12px 0;color:#267153!important;font-size:12px}
 .coach-settings{display:none}.coach-settings-active>.coach-settings{display:block}.coach-settings-active>.coach-layout{display:none}.coach-page-actions{display:flex;gap:8px;flex-wrap:wrap}.coach-prompts button{cursor:pointer}.coach-prompts button span{margin-left:8px}.coach-thinking{padding:16px;background:#eef3e9;border-radius:14px;font-size:13px;color:#48633c;line-height:1.7}.coach-history{min-width:0}.coach-composer [role=status]:empty{display:none}.coach-page button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+/* Keep headings readable when the desktop action row becomes a mobile stack. */
+.coach-page>.page-head>div:first-child{min-width:0}.coach-page-actions>*{white-space:nowrap}
+@media(max-width:600px){
+ .coach-page>.page-head{flex-direction:column;align-items:stretch;gap:16px}
+ .coach-page-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;gap:8px}
+ .coach-page-actions>.btn{min-width:0;padding:10px 8px;font-size:13px}
+ .coach-intro,.coach-composer,.coach-saved{padding:20px}
+ .coach-composer>div{flex-wrap:wrap}.coach-composer>div>.btn{margin-left:auto;flex-shrink:0}
+ .coach-fields input[type=date],.coach-fields input[type=time]{min-width:0;width:100%;max-width:100%;box-sizing:border-box}
+ .coach-plan-editor,.coach-answer,.coach-saved{overflow-wrap:anywhere}
+}
+@media(max-width:600px){
+ .coach-proposals,.coach-proposals>fieldset,.coach-plan-editor>fieldset{min-inline-size:0;max-width:100%}
+ .coach-fields{grid-template-columns:minmax(0,1fr);gap:0}
+ .coach-plan-editor label{min-width:0;max-width:100%;gap:8px;margin:14px 0}
+ .coach-plan-editor input:not([type=checkbox]),.coach-plan-editor select,.coach-plan-editor textarea{display:block;box-sizing:border-box;width:100%;min-inline-size:0;max-inline-size:100%;min-height:44px;font-size:16px}
+ .coach-plan-editor input[type=date],.coach-plan-editor input[type=time]{appearance:none;-webkit-appearance:none}
+ .coach-plan-editor input::-webkit-date-and-time-value{text-align:left;min-width:0}
+ .coach-proposals>.btn{width:100%;white-space:normal}
+ .coach-answer{padding:16px}.coach-plan-editor{padding:14px}
+}
+.plan-save-success{display:grid;gap:10px;margin-top:14px;padding:16px;border:1px solid #cbdcc9;border-radius:14px;background:#eef6eb;color:#305b30;font-size:14px}.plan-save-success a{text-decoration:underline;font-weight:700}#saved-workout-plans{scroll-margin-top:24px}

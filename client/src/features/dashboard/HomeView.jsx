@@ -61,11 +61,6 @@ export default function HomeView({ log, days, today, offset, onWeekChange }) {
 
       <GoalProgress log={log} />
 
-      <section className="home-coaching" aria-labelledby="coaching-title">
-        <div><span aria-hidden="true">AI</span><div><h2 id="coaching-title">이번 주 코칭</h2><p>운동·식단·목표를 함께 읽고 다음 행동을 제안해요.</p></div></div>
-        <Link to="/feedback" className="btn btn-ghost">코칭 보기 <span aria-hidden="true">›</span></Link>
-      </section>
-
       <section className="home-records" aria-labelledby="records-title">
         <div className="home-records-head"><h2 id="records-title">운동 기록</h2><span>{ready ? `총 ${totals.activity_count}건${totals.activity_count > 50 ? ' · 최근 50건 표시' : ''}` : '선택한 주'}</span></div>
         {log.isPending ? <div className="home-log-message" role="status">운동 기록을 불러오고 있어요.</div>

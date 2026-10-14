@@ -12,10 +12,10 @@ import {NotificationLink} from '../features/social/index.js';
 import {MemberAvatar} from './CommunityMedia.jsx';
 
 const TABS = [
-  { to: '/home', paths: ['/home', '/goals', '/feedback'], label: '홈', d: 'M3 11.5 12 4l9 7.5M5 10v10h14V10' },
+  { to: '/home', paths: ['/home', '/goals'], label: '홈', d: 'M3 11.5 12 4l9 7.5M5 10v10h14V10' },
   { to: '/activities', paths: ['/activities', '/meals'], label: '기록', d: 'M4 17h3l3-9 4 12 3-7h3' },
   { to: '/feed', paths: ['/feed','/crews'], label: '커뮤니티', d: 'M8 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm8 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3 20c0-3 2-5 5-5s5 2 5 5M13 20c0-3 2-5 5-5s3 1 3 5' },
-  { to: '/coach', label: '코치', d: 'M5 4h14v16H5zM8 9h8M8 13h8M8 17h5' },
+  { to: '/coach', paths: ['/coach', '/feedback'], label: '코칭', d: 'M5 4h14v16H5zM8 9h8M8 13h8M8 17h5' },
   { to: '/store', label: '스토어', d: 'M5 8h14l2 12H3L5 8Zm3 0V6a4 4 0 0 1 8 0v2' },
 ];
 
