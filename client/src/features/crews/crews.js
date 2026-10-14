@@ -1,8 +1,9 @@
 export const SPORTS = { running: '러닝', walking: '걷기', cycling: '자전거', swimming: '수영', gym: '헬스', other: '기타' };
 export const LEVELS = { beginner: '입문', intermediate: '중급', advanced: '상급' };
 export const DAYS = ['일', '월', '화', '수', '목', '금', '토'];
+export const WEEK_DAYS = [1,2,3,4,5,6,0].map(value=>({value,label:DAYS[value]}));
 export const CREW_FIELDS = 'id,owner_id,name,description,sport,level,region_sido,region_sigungu,activity_days,join_mode,created_at';
-export function dayLabel(days = []) { return days.length ? days.map(day => DAYS[day]).join(' · ') : '요일 협의'; }
+export function dayLabel(days = []) { return days.length ? WEEK_DAYS.filter(day=>days.includes(day.value)).map(day=>day.label).join(' · ') : '요일 협의'; }
 export function validCrewId(id) { return typeof id === 'string' && /^[1-9]\d*$/.test(id) && BigInt(id) <= 9223372036854775807n; }
 
 export function crewInput(form, regions) {

@@ -13,7 +13,7 @@ export default function MemberBlockAction({profile}){
  async function change(){if(lock.current)return;lock.current=true;setBusy(true);setError('');setMessage('');const wasBlocked=state.data;try{
   if(wasBlocked)await saveResult(supabase.from('member_blocks').delete().eq('user_id',user.id).eq('blocked_id',profile.id));
   else{const result=await supabase.from('member_blocks').insert({user_id:user.id,blocked_id:profile.id});if(result.error?.code!=='23505')await saveResult(Promise.resolve(result));}
-  await Promise.all([cache.invalidateQueries({queryKey:['community',user.id]}),cache.invalidateQueries({queryKey:queryKeys.postsRoot(user.id)}),cache.invalidateQueries({queryKey:queryKeys.memberRoot(user.id)}),...['direct-chat-rooms','direct-chat-messages','crew-chat-rooms','crew-chat-messages'].map(key=>cache.invalidateQueries({queryKey:[key,user.id]}))]);
+  await Promise.all([cache.invalidateQueries({queryKey:['community',user.id]}),cache.invalidateQueries({queryKey:queryKeys.postsRoot(user.id)}),cache.invalidateQueries({queryKey:queryKeys.memberRoot(user.id)}),...['follows','direct-chat-rooms','direct-chat-messages','crew-chat-rooms','crew-chat-messages'].map(key=>cache.invalidateQueries({queryKey:[key,user.id]}))]);
   setConfirm(false);setMessage(wasBlocked?'차단을 해제했어요.':'차단했어요. 서로의 게시글·댓글·메시지가 숨겨지고 개인 메시지 전송이 제한됩니다.');
  }catch(e){setError(e.message);}finally{lock.current=false;setBusy(false);}}
  return <section className="member-safety" aria-label="회원 차단 관리">

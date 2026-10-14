@@ -1,4 +1,6 @@
 import { lazy } from 'react';
+const ProfileEditor = lazy(() => import('./features/profile/ProfileEditor.jsx'));
+
 const StorePage = lazy(() => import('./features/store/StorePage.jsx'));
 const CoachPage = lazy(() => import('./features/coach/CoachPage.jsx'));
 import { Suspense, useEffect, useRef } from 'react';
@@ -80,7 +82,7 @@ export default function App() {
                 <Route path="/feed/new" element={<PostEditor />} />
                 <Route path="/feed/:postId" element={<PostDetail />} />
                 <Route path="/feed/:postId/edit" element={<PostEditor />} />
-                <Route path="/me" element={<MePage />} />
+                <Route path="/me" element={<MePage />} /><Route path="/me/edit" element={<ProfileEditor />} /><Route path="/me/settings" element={<ProfileEditor settings />} />
                 <Route path="/users/:id" element={<MemberPage />} />
               </Route>
             </Route>

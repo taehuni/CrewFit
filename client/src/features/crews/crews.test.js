@@ -15,7 +15,7 @@ test('crew form trims, validates region pair and enumerations, strips supplied o
   const row=crewInput(form,regions);
   assert.equal(row.name,'크루 이름'); assert.deepEqual(row.activity_days,[1,3]); assert.equal(row.level,null); assert.equal('owner_id' in row,false);
   for(const patch of [{name:' '},{name:'a'.repeat(41)},{description:'x'.repeat(1001)},{sport:'unknown'},{level:'elite'},{join_mode:'bad'},{region_sigungu:'강남구'},{activity_days:[7]},{activity_days:['1']}]) assert.throws(()=>crewInput({...form,...patch},regions));
-  assert.equal(dayLabel([]),'요일 협의'); assert.equal(dayLabel([0,6]),'일 · 토');
+  assert.equal(dayLabel([]),'요일 협의'); assert.equal(dayLabel([0,6]),'토 · 일');
 });
 test('creation uses authenticated owner and preserves errors instead of returning false success',async()=>{
   let inserted;

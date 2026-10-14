@@ -3,7 +3,7 @@ import { useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../shared/supabaseClient.js';
 import { queryKeys } from '../../shared/queryKeys.js';
-import { SPORTS, LEVELS, DAYS, loadRegions } from '../crews/crews.js';
+import { SPORTS, LEVELS, WEEK_DAYS, loadRegions } from '../crews/crews.js';
 import { saveCrewPreferences } from './crewPreferences.js';
 import '../crews/crews.css';
 
@@ -40,7 +40,7 @@ export default function CrewPreferencesForm({ userId, profile, settings }) {
         <label>시/도<select value={form.region_sido} onChange={event => {setForm(previous => ({...previous, region_sido:event.target.value, region_sigungu:''}));setMessage('');setError('');}}><option value="">지역 제한 없음</option>{[...new Set(rows.map(row=>row.sido))].map(sido=><option key={sido}>{sido}</option>)}</select></label>
         <label>시/군/구<select value={form.region_sigungu} disabled={!form.region_sido} onChange={event=>change('region_sigungu',event.target.value)}><option value="">선택 안 함</option>{rows.filter(row=>row.sido===form.region_sido).map(row=><option key={row.sigungu}>{row.sigungu}</option>)}</select></label>
       </div>
-      <fieldset className="crew-days"><legend>선호 요일 · 선택하지 않으면 요일 제한 없음</legend>{DAYS.map((day,index)=><label key={day}><input type="checkbox" checked={form.preferred_days.includes(index)} onChange={event=>change('preferred_days', event.target.checked ? [...form.preferred_days,index] : form.preferred_days.filter(value=>value!==index))}/>{day}</label>)}</fieldset>
+      <fieldset className="crew-days"><legend>선호 요일 · 선택하지 않으면 요일 제한 없음</legend>{WEEK_DAYS.map(({label:day,value:index})=><label key={day}><input type="checkbox" checked={form.preferred_days.includes(index)} onChange={event=>change('preferred_days', event.target.checked ? [...form.preferred_days,index] : form.preferred_days.filter(value=>value!==index))}/>{day}</label>)}</fieldset>
       {error && <p className="crew-error" role="alert">{error}</p>}{message && <p role="status">{message}</p>}
       <button className="btn btn-primary" type="submit">{busy ? '저장 중…' : '관심 운동·지역 저장'}</button>
     </fieldset></form>

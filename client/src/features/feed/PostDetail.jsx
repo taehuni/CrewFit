@@ -21,7 +21,7 @@ export default function PostDetail(){
   const query=useQuery({queryKey:queryKeys.post(user.id,postId),queryFn:()=>loadPost(supabase,postId),retry:false,staleTime:0,gcTime:0});
   const post=query.data;
   const from=location.state?.feedFrom;
-  const back=typeof from==='string'&&/^\/(crews\/[1-9]\d*|feed)(\?[^#]*)?$/.test(from)?from:post?.crew_id?`/crews/${post.crew_id}`:'/feed';
+  const back=typeof from==='string'&&/^\/(crews\/[1-9]\d*|feed|me)(\?[^#]*)?$/.test(from)?from:post?.crew_id?`/crews/${post.crew_id}`:'/feed';
   const [message,setMessage]=useState('');
   async function pin(){if(running.current)return;running.current=true;setBusy(true);setError('');setMessage('');
     try{await setPostPinned(supabase,user.id,post,!post.is_pinned);setMessage(post.is_pinned?'고정을 해제했어요.':'크루 피드 상단에 고정했어요.');await cache.invalidateQueries({queryKey:queryKeys.postsRoot(user.id)});}

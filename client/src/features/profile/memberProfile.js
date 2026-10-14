@@ -10,9 +10,11 @@ export function profileInput(form) {
   if (!Object.hasOwn(RECORD_VISIBILITY, form.activity_visibility) || typeof form.show_crews !== 'boolean') throw new Error('공개 범위를 다시 선택해 주세요.');
   return { nickname, activity_visibility: form.activity_visibility, show_crews: form.show_crews };
 }
-export async function savePublicProfile(db, userId, form) {
+export async function savePublicProfile(db, userId, form, mode='all') {
   requireMember(userId);
-  const { data, error } = await db.from('profiles').update(profileInput(form)).eq('id', userId).select(PUBLIC_PROFILE_FIELDS).single();
+  const input=profileInput(form);
+  const patch=mode==='nickname'?{nickname:input.nickname}:mode==='privacy'?{activity_visibility:input.activity_visibility,show_crews:input.show_crews}:input;
+  const { data, error } = await db.from('profiles').update(patch).eq('id', userId).select(PUBLIC_PROFILE_FIELDS).single();
   if (error || !data) throw new Error('프로필을 저장하지 못했어요. 입력을 유지했으니 다시 시도해 주세요.');
   return data;
 }

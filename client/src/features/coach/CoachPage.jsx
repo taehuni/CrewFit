@@ -1,7 +1,7 @@
 import {NutritionPreferences,MealProposals,SavedMealPlans} from './NutritionCoach.jsx';
 import {useCalendarPlans,CalendarPlanAction} from './CalendarPlans.jsx';
 import {useRef,useState,useEffect,useId} from 'react';
-import {Link} from 'react-router';
+import {Link,useLocation} from 'react-router';
 import {useQuery,useQueryClient} from '@tanstack/react-query';
 import {useAuth} from '../auth/index.js';
 import {api} from '../../shared/api.js';
@@ -16,11 +16,11 @@ function Proposal({turn,plans,onSave}){
  return <form className="coach-proposals" onSubmit={submit}><h3>제안받은 운동 계획</h3><p>날짜·시각은 한국시간이에요. 원하는 일정만 선택해 수정한 뒤 저장해 주세요.</p><fieldset disabled={busy}>{items.map((item,i)=><div key={i} className="coach-plan-editor"><label className="coach-select"><input type="checkbox" checked={item.selected} disabled={saved.has(i)} onChange={e=>change(i,'selected',e.target.checked)}/>{saved.has(i)?'저장 완료':`일정 ${i+1}`}</label><fieldset disabled={saved.has(i)}><label>운동 이름<input required maxLength={100} value={item.title} onChange={e=>change(i,'title',e.target.value)}/></label><div className="coach-fields"><label>종목<select value={item.sport} onChange={e=>change(i,'sport',e.target.value)}>{Object.entries(SPORT_LABEL).map(([v,label])=><option key={v} value={v}>{label}</option>)}</select></label><label>날짜<input type="date" required min="2000-01-01" max="2100-12-31" value={item.scheduled_on} onChange={e=>change(i,'scheduled_on',e.target.value)}/></label><label>시작 시각<input type="time" required value={item.start_time} onChange={e=>change(i,'start_time',e.target.value)}/></label><label>운동 시간 · 분<input type="number" required min={5} max={240} value={item.minutes} onChange={e=>change(i,'minutes',Number(e.target.value))}/></label></div><label>운동 메모<textarea maxLength={1000} value={item.note} onChange={e=>change(i,'note',e.target.value)}/></label></fieldset></div>)}</fieldset>{error&&<p role="alert">{error}</p>}<button className="btn btn-primary" disabled={busy||!items.some(p=>p.selected&&!saved.has(p.position))}>{busy?'저장 중…':'선택한 계획 저장'}</button></form>;
 }
 export default function CoachPage({embedded=false}){
- const calendar=useCalendarPlans();
+ const calendar=useCalendarPlans();const location=useLocation();
  const [settings,setSettings]=useState(false),history=useRef(null),input=useRef(null),messageId=useId();
  const {user,token}=useAuth(),cache=useQueryClient(),pending=useRef(null),lock=useRef(false);
  const key=['coach',user.id],query=useQuery({queryKey:key,queryFn:()=>api('/coach',{token}),retry:false});
- const [message,setMessage]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[deleting,setDeleting]=useState(null);
+ const [message,setMessage]=useState(()=>typeof location.state?.coachPrompt==='string'?location.state.coachPrompt:''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[deleting,setDeleting]=useState(null);
  useEffect(()=>{if(embedded&&history.current)history.current.scrollTop=history.current.scrollHeight;},[embedded,query.data?.turns.length,busy]);
  function choosePrompt(text){setMessage(text);input.current?.focus();}
  async function send(e){e.preventDefault();if(lock.current||!message.trim())return;lock.current=true;setBusy(true);setError('');setNotice('');const text=message.trim();if(pending.current?.message!==text)pending.current={id:crypto.randomUUID(),message:text};try{const turn=await api('/coach/chat',{token,body:pending.current});cache.setQueryData(key,old=>({...old,turns:[...(old?.turns||[]).filter(t=>t.id!==turn.id),turn].slice(-30)}));pending.current=null;setMessage('');setNotice('코치가 답변했어요.');}catch(err){setError(err.message);}finally{lock.current=false;setBusy(false);}}

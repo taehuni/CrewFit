@@ -1,3 +1,4 @@
+import Follows from './Follows.jsx';
 import {openDirectChat} from '../../shared/openDirectChat.js';
 import { Link, useParams } from 'react-router';
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
@@ -24,7 +25,7 @@ function MemberContent({ userId, profile }) {
   const records = useInfiniteQuery({ ...options, queryKey: queryKeys.memberRecords(userId, profile.id), queryFn: ({ pageParam, signal }) => loadMemberRecords(supabase, profile.id, pageParam, signal) });
   const crews = useInfiniteQuery({ ...options, queryKey: queryKeys.memberCrews(userId, profile.id), queryFn: ({ pageParam, signal }) => loadMemberCrews(supabase, profile.id, pageParam, signal) });
   return <div className="member-public-layout">
-    <aside className="member-public-intro"><MemberOverview profile={profile}/>{userId!==profile.id&&<button className="btn btn-primary" onClick={()=>openDirectChat(profile)}>메시지 보내기</button>}<MemberBlockAction profile={profile}/><p className="member-public-note">회원이 공유한 운동과 크루를 모아 봅니다.<br/>각 항목의 공개 설정에 따라 표시돼요.</p></aside><div className="member-public-content">
+    <aside className="member-public-intro"><MemberOverview profile={profile}/><Follows memberId={profile.id}/>{userId!==profile.id&&<button className="btn btn-primary" onClick={()=>openDirectChat(profile)}>메시지 보내기</button>}<MemberBlockAction profile={profile}/><p className="member-public-note">회원이 공유한 운동과 크루를 모아 봅니다.<br/>각 항목의 공개 설정에 따라 표시돼요.</p></aside><div className="member-public-content">
     <section className="card stack"><h2>가입 크루</h2><p className="muted">공개 설정에 따라 볼 수 있는 승인된 크루만 표시해요.</p>
       <QueryState query={crews} empty="표시할 수 있는 가입 크루가 없어요." />
       {!crews.isError && <ul className="member-list">{crews.data?.pages.flatMap(page => page.rows).filter(row => row.crews).map(row => <li key={row.crew_id}><Link className="crew-identity" to={`/crews/${row.crew_id}`}><CrewMark name={row.crews.name} sport={row.crews.sport}/><span><small className="crew-type-label">크루</small><strong>{row.crews.name}</strong></span></Link><span>{SPORT_LABEL[row.crews.sport]}</span></li>)}</ul>}

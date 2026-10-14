@@ -438,3 +438,17 @@ AI 코치 진입을 홈 CTA에서 로그인 셸 공통 우하단 채팅 패널�
 - 모바일 메시지 실행 버튼을 하단 메뉴의 오른쪽 전용 칸으로 이동하여 본문 예약/저장 버튼과 겹치지 않도록 수정. 데스크톱은 기존 도크 유지 및 마지막 콘텐츠 여백 확보.
 - 클라이언트 143개·서버 77개 테스트, 프로덕션 빌드 통과. 주요 7개 화면 320/390/1440px에서 가로 넘침·모바일 메뉴 겹침·런타임 오류 없음.
 - 채팅 설정/초안 유지 및 예약 생성·결제 시뮬레이션·취소 회귀 검증 통과(브라우저 테스트 응답, 실제 데이터 쓰기 없음).
+
+### 구글 가입 마무리·프로필 정보 구조 (2026-10-14)
+- 구글 계정의 닉네임(2~20자)과 실명(기존 이메일 가입 기준)이 누락/유효하지 않으면 보호 라우트에서 가입 마무리 화면을 표시한다. 구글 콜백 배너 대신 보호 라우트 공통 진입 검사로 직접 URL 접근/새로고침에도 같은 흐름을 적용.
+- 관심 운동·지역·레벨·요일·사진은 선택 사항을 유지한다. 이미 필수 정보가 있는 구글 연동 계정은 재입력을 요구하지 않는다.
+- 저장은 본인 JWT/RLS를 사용하며 닉네임 다음 실명 순으로 확인한다. 실패 시 입력 유지, 모든 저장 성공 후 본인 프로필 캐시 갱신. 프런트 진입 절차이며 기존 DB 권한 정책은 변경하지 않는다.
+- 프로필 순서: 개인 정보(이메일·닉네임·실명·자기소개), 운동 관심·목표(관심 운동·레벨·활동 지역·요일·목표 관리 링크), 공개 범위·커뮤니티, 연결 서비스. 닉네임/공개 설정은 각 필드만 저장해 서로 덮어쓰지 않는다.
+- 월~일 표시 순서를 공통 WEEK_DAYS로 사용(프로필/크루 생성/요일 설명). 저장 값은 기존 일=0, 월=1을 유지한다.
+- 검증: 클라이언트 145개 테스트 및 빌드 통과. 브라우저 테스트 응답으로 보호 라우트 3개 차단, 실패 후 입력 유지, 저장 후 진입/새로고침, 개인/공개 설정 분리, 일·월 선택 값 보존, 320/390/1440px 넘침 없음 확인. 실제 계정 정보 쓰기 없음.
+
+## 2026-10-14 — Navigation, social profile and follows
+- Main navigation is Home / Records / Community / Coach / Store. Community has Feed and Crews subnavigation and remembers the last list. Messages are a header action: desktop side panel with expansion, mobile fullscreen.
+- `/me` shows the owner's posts, activity summaries and approved crews; `/me/edit` groups personal information and exercise preferences; `/me/settings` holds privacy, community controls, connected services and sign-out. Calendar callbacks to the old `/me?calendar=` redirect to settings.
+- `20261014_member_follows.sql` adds directed follower/following edges with RLS, no self-follow, unique pairs, owner-only mutation and block-aware visibility/insertion. Blocking hides existing edges; unblocking makes them visible again. Following is not a requirement for direct messages; existing nickname search and conversations remain.
+- Authenticated demo checks verified follow insert/read/delete, impersonation/self-follow rejection and duplicate protection. Temporary demo edges were removed; no messages were sent. UI checks cover 320/390/1440px, profile tabs, editor/settings separation, mobile messages and community navigation memory.

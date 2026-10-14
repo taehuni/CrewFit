@@ -30,7 +30,7 @@ export default function GoogleCallbackPage() {
     supabase.from('profiles').select('main_sport,user_settings(*)').eq('id', session.user.id).single().then(({ data, error: failure }) => {
       if (!active) return;
       if (failure) return setError('로그인은 완료됐지만 프로필을 확인하지 못했어요. 다시 확인해 주세요.');
-      navigate((data.user_settings?.interested_sports != null || data.main_sport) ? next : '/me?welcome=google', { replace: true });
+      navigate(next, { replace: true });
     }).catch(() => { if (active) setError('프로필을 확인하지 못했어요. 다시 확인해 주세요.'); });
     return () => { active = false; };
   }, [loading, session, initializationError, navigate, next, attempt, calendar, calendarRequest]);

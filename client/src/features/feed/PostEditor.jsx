@@ -28,7 +28,7 @@ export default function PostEditor(){
 function EditorForm({userId,crewId,crew,existing}){
   const location=useLocation();
   const from=location.state?.feedFrom;
-  const feedBack=typeof from==='string'&&/^\/(crews\/[1-9]\d*|feed)(\?[^#]*)?$/.test(from)?from:crewId?`/crews/${crewId}`:'/feed';
+  const feedBack=typeof from==='string'&&/^\/(crews\/[1-9]\d*|feed|me)(\?[^#]*)?$/.test(from)?from:crewId?`/crews/${crewId}`:'/feed';
   const [includeRoute,setIncludeRoute]=useState(existing?.include_route===true);
   const [activityId,setActivityId]=useState(existing?.activity_id?String(existing.activity_id):null);
   const [form,setForm]=useState({content:existing?.content || '',kind:existing?.kind || 'free',visibility:existing?.visibility || (crewId?'crew':'public'),sport:existing?.sport || crew?.sport || ''});
