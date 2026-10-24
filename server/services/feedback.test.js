@@ -1,13 +1,25 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import express from 'express';
-import { buildFeedbackPrompt, createRateLimiter, feedbackHash, feedbackInput, feedbackRange, generateFeedback } from './feedback.js';
+import { feedbackReport, buildFeedbackPrompt, coachingDuration, coachingDistance, createRateLimiter, feedbackHash, feedbackInput, feedbackRange, generateFeedback } from './feedback.js';
 import { createFeedbackRouter } from '../routes/feedback.js';
 import { COACHING_INSTRUCTIONS } from './coachingInstructions.js';
 
 const range = { period: 'week', from: '2026-09-14', to: '2026-09-20', period_start: '2026-09-14' };
 const source = { range, profile: { main_sport: 'gym', goal_note: '근력' }, goals: [], activities: [{ id: 1, sport: 'gym', note: '좋았음' }], exercise_sets: [], meals: [] };
 const existing = { id: 7, period: 'week', period_start: '2026-09-14', content: '기존', model: 'model', regen_count: 1, llm_calls: 2, created_at: '2026-09-17T00:00:00Z' };
+
+test('coaching display uses readable units without dropping swimming distances or partial minutes', () => {
+  assert.equal(coachingDuration(3600), '1시간');
+  assert.equal(coachingDuration(1920), '32분');
+  assert.equal(coachingDuration(3661), '1시간 1분 1초');
+  assert.equal(coachingDistance(16000, 'cycling'), '16km');
+  assert.equal(coachingDistance(600, 'swimming'), '600m');
+  assert.equal(coachingDistance(null, 'gym'), null);
+  const prompt = buildFeedbackPrompt({...source, goals:[{type:'duration',period:'week',target:36000},{type:'distance',period:'week',sport:'running',target:15000}]});
+  assert.match(prompt, /"target_label":"10시간"/);
+  assert.match(prompt, /"target_label":"15km"/);
+});
 
 test('day/week/month ranges normalize in KST calendar and reject malformed input', () => {
   assert.deepEqual(feedbackRange('day', '2026-09-18'), { period: 'day', from: '2026-09-18', to: '2026-09-18', period_start: '2026-09-18' });
@@ -71,7 +83,7 @@ function dependencies(overrides = {}) {
 }
 
 test('same source returns cached content without requiring secrets, rate budget, LLM or save', async () => {
-  const prompt = buildFeedbackPrompt(source);
+  const prompt = buildFeedbackPrompt(source, new Date('2026-09-18T00:00:00Z'));
   const [deps, calls] = dependencies({ findExisting: async () => ({ ...existing, source_hash: feedbackHash(prompt, 'model') }),
     ensureConfig: () => { throw new Error('missing config'); } });
   const result = await generateFeedback(deps);
@@ -133,4 +145,27 @@ test('HTTP endpoint requires auth and maps known and unknown failures', async t 
   assert.equal((await request(true)).status, 200); assert.equal(calls[0].userId, 'owner'); assert.equal(calls[0].input.user_id, 'victim');
   mode = 'known'; const limited = await request(true); assert.equal(limited.status, 429); assert.match(await limited.text(), /RATE_LIMIT/);
   mode = 'unknown'; const failed = await request(true); assert.equal(failed.status, 500); assert.doesNotMatch(await failed.text(), /private/);
+});
+
+ test('report snapshot counts dates, preserves missing distance and separates sports',()=>{
+ const result=feedbackReport({...source,activities:[
+ {sport:'gym',performed_on:'2026-09-14',duration_sec:1800,distance_m:null},
+ {sport:'swimming',performed_on:'2026-09-14',duration_sec:600,distance_m:500},
+ {sport:'swimming',performed_on:'2026-09-15',duration_sec:1200,distance_m:1000}]});
+ assert.equal(result.activityCount,3);assert.equal(result.activeDays,2);assert.equal(result.totalTime,'1시간');
+ assert.equal(result.sports[0].distance,null);assert.equal(result.sports[1].distance,'1500m');
+ });
+ test('saved report returns the same snapshot on a cache hit',async()=>{
+ let row;
+ const [deps]=dependencies({save:async(_db,value)=>(row={id:99,...value})});
+ const fresh=await generateFeedback(deps);
+ const cached=await generateFeedback({...deps,findExisting:async()=>row});
+ assert.deepEqual(cached.report,fresh.report);assert.equal(cached.content,'새 피드백');assert.equal(cached.cached,true);
+ assert.equal(JSON.parse(row.content).format,'crewfit-report-v1');
+ });
+
+test('monthly feedback never receives weekly targets as comparison data',()=>{
+ const prompt=buildFeedbackPrompt({...source,range:{...range,period:'month'},goals:[{type:'distance',period:'week',target:15000},{type:'duration',period:'month',target:36000}]});
+ const data=JSON.parse(prompt.split('<user_data>\n')[1].split('\n</user_data>')[0]);
+ assert.equal(data.goals.length,1);assert.equal(data.goals[0].period,'month');assert.equal(data.display.goals.length,1);
 });

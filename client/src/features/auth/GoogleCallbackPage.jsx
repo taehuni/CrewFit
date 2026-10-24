@@ -24,7 +24,7 @@ export default function GoogleCallbackPage() {
     }
     if(calendar){
       if(!calendarRequest||calendarRequest.userId!==session.user.id||Date.now()-calendarRequest.at>900000||!session.provider_token){setError('캘린더 연결이 완료되지 않았어요. 기존 CrewFit 계정과 같은 구글 계정으로 다시 연결해 주세요.');return;}
-      sessionStorage.removeItem('crewfit-calendar-connect');navigate('/me?calendar=connected#profile-connections',{replace:true});return;
+      sessionStorage.removeItem('crewfit-calendar-connect');navigate('/me/settings?calendar=connected#profile-connections',{replace:true});return;
     }
     setError('');
     supabase.from('profiles').select('main_sport,user_settings(*)').eq('id', session.user.id).single().then(({ data, error: failure }) => {

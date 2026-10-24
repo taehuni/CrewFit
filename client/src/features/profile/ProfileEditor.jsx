@@ -10,7 +10,7 @@ import RealNameForm from './RealNameForm.jsx';
 import CrewPreferencesForm from './CrewPreferencesForm.jsx';
 import {MediaEditor,MemberOverview} from '../../shared/CommunityMedia.jsx';
 import {CommunitySettings} from '../social/index.js';
-import {Link, useSearchParams} from 'react-router';
+import {Link, useSearchParams, useLocation} from 'react-router';
 import './profile-polish.css';
 
 // "나" 탭. 프로필 카드·실명(D-28)·크루 추천(D-16)·공개 범위(D-19).
@@ -18,9 +18,17 @@ export default function ProfileEditor({settings=false}) {
   const { user, token, signOut } = useAuth();
   const photoInputRef=useRef(null);
   const [searchParams] = useSearchParams();
+  const {hash} = useLocation();
   const me = useQuery({ queryKey: queryKeys.me(user.id), queryFn: () => api('/me', { token }) });
 
-  useEffect(()=>{if(me.data&&searchParams.has('calendar'))document.getElementById('profile-connections')?.scrollIntoView({block:'start'});},[me.data,searchParams]);
+  useEffect(()=>{
+    if(!me.data)return;
+    const target=hash.slice(1)||(searchParams.has('calendar')?'profile-connections':'');
+    const allowed=settings?['profile-privacy','profile-connections']:['profile-introduction','profile-preferences'];
+    if(!allowed.includes(target))return;
+    const frame=requestAnimationFrame(()=>document.getElementById(target)?.scrollIntoView({block:'start'}));
+    return ()=>cancelAnimationFrame(frame);
+  },[me.data,searchParams,hash,settings]);
   return (
     <div className="profile-page">
       <div className="page-head">

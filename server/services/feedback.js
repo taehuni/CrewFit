@@ -40,8 +40,35 @@ export function feedbackInput(input, now) {
   return { range: feedbackRange(input.period, input.date, now), force: input.force === true };
 }
 
-export function buildFeedbackPrompt(source) {
+export function coachingDuration(seconds) {
+  const total = Math.max(0, Math.round(Number(seconds) || 0));
+  const hours = Math.floor(total / 3600), minutes = Math.floor(total % 3600 / 60), rest = total % 60;
+  return [hours && `${hours}시간`, minutes && `${minutes}분`, rest && `${rest}초`].filter(Boolean).join(' ') || '0분';
+}
+export function coachingDistance(meters, sport) {
+  if (meters == null) return null;
+  return sport === 'swimming' ? `${meters}m` : `${Number((meters / 1000).toFixed(3))}km`;
+}
+export function feedbackReport(source) {
+  const rows = source.activities || [];
+  return {
+    range: source.range,
+    activityCount: rows.length,
+    activeDays: new Set(rows.map(row => row.performed_on).filter(Boolean)).size,
+    totalTime: coachingDuration(rows.reduce((sum,row)=>sum+(row.duration_sec ?? 0),0)),
+    mealCount: source.meals?.length || 0,
+    sports: [...new Set(rows.map(row=>row.sport))].sort().map(sport=>{
+      const items=rows.filter(row=>row.sport===sport);
+      const seconds=items.reduce((sum,row)=>sum+(row.duration_sec ?? 0),0);
+      return {sport,count:items.length,seconds,time:coachingDuration(seconds),
+        distance:items.some(row=>row.distance_m!=null)?coachingDistance(items.reduce((sum,row)=>sum+(row.distance_m??0),0),sport):null};
+    }),
+  };
+}
+
+export function buildFeedbackPrompt(source, now = new Date()) {
   const activities = source.activities || [];
+  const goals = (source.goals || []).filter(goal => goal.period === source.range.period);
   const summary = {
     activity_count: activities.length,
     duration_sec: activities.reduce((sum, row) => sum + (row.duration_sec ?? 0), 0),
@@ -53,13 +80,20 @@ export function buildFeedbackPrompt(source) {
     exercise_set_count: source.exercise_sets?.length || 0,
     meal_record_count: source.meals?.length || 0,
   };
+  const display = {
+    total_time: coachingDuration(summary.duration_sec),
+    sports: summary.sports.map(row => ({sport: row.sport, count: row.count, time: coachingDuration(row.duration_sec), distance: coachingDistance(row.distance_m, row.sport)})),
+    goals: goals.map(goal => ({...goal, target_label: goal.type === 'duration' ? coachingDuration(goal.target) : goal.type === 'distance' ? coachingDistance(goal.target, goal.sport) : `${goal.target}회`})),
+  };
   const prompt = [
     `다음은 ${source.range.from}부터 ${source.range.to}까지의 CrewFit 사용자 기록입니다.`,
+    `분석 기준일(한국시간): ${new Date(now.getTime() + 9 * 3600000).toISOString().slice(0,10)}. 기간 종료일이 기준일보다 뒤라면 진행 중인 기간이므로 목표 미달로 평가하지 마세요.`,
     '이전 기간 비교 자료는 없습니다. 활성 목표는 현재 설정이며 과거 목표 이력은 아닙니다.',
     '단위: duration_sec는 초, distance_m는 미터, weight_kg는 kg, reps는 반복 횟수입니다.',
     'summary는 서버 집계입니다. 기록이 없는 부분을 0의 성과나 결핍으로 해석하지 마세요.',
+    'display는 사용자에게 보여줄 단위로 서버에서 변환한 값입니다. 답변의 시간·거리·목표에는 이 표기를 사용하세요. 총 운동 횟수는 summary.activity_count이며 종목별 count와 혼동하지 마세요.',
     '<user_data>',
-    JSON.stringify({ ...source, summary }).replaceAll('<', '\\u003c'),
+    JSON.stringify({ ...source, goals, summary, display }).replaceAll('<', '\\u003c'),
     '</user_data>',
   ].join('\n');
   if (prompt.length > 120000) throw failure(413, 'DATA_TOO_LARGE', '이 기간의 기록이 너무 많아 피드백을 만들 수 없어요. 더 짧은 기간을 선택해 주세요.');
@@ -148,7 +182,10 @@ async function saveFeedback(admin, row) {
 }
 
 function response(row, cached) {
-  return { id: row.id, period: row.period, period_start: row.period_start, content: row.content, model: row.model,
+  let content = row.content, report = null;
+  try { const saved = JSON.parse(content); if(saved?.format==='crewfit-report-v1' && typeof saved.analysis==='string') {content=saved.analysis;report=saved.summary;} } catch { /* Legacy text reports remain readable. */ }
+
+  return { id: row.id, period: row.period, period_start: row.period_start, content, report, model: row.model,
     regen_count: row.regen_count, remaining_regenerations: Math.max(0, 3 - row.regen_count), cached, created_at: row.created_at };
 }
 
@@ -182,7 +219,7 @@ export async function generateFeedback({
       if (error.status) throw error;
       throw failure(500, 'FEEDBACK_LOAD_FAILED', '피드백에 필요한 기록을 불러오지 못했어요.');
     }
-    const prompt = buildFeedbackPrompt(source), source_hash = feedbackHash(prompt, model);
+    const prompt = buildFeedbackPrompt(source, now), source_hash = feedbackHash(prompt, model);
     if (!force && existing?.source_hash === source_hash) return response(existing, true);
     try { ensureConfig(); }
     catch { throw failure(503, 'CONFIG_REQUIRED', 'AI 피드백 서버 설정이 아직 완료되지 않았어요.'); }
@@ -198,7 +235,7 @@ export async function generateFeedback({
       if (error.code === 'LLM_REFUSED') throw failure(422, 'LLM_REFUSED', error.message);
       throw failure(502, 'LLM_FAILED', 'AI 응답을 받지 못했어요. 잠시 후 다시 시도해 주세요.');
     }
-    const row = { user_id: userId, period: range.period, period_start: range.period_start, content: generated.content,
+    const row = { user_id: userId, period: range.period, period_start: range.period_start, content: JSON.stringify({format: 'crewfit-report-v1', summary: feedbackReport(source), analysis: generated.content}),
       model: generated.model || model, source_hash, regen_count: existing ? existing.regen_count + (force ? 1 : 0) : 0,
       llm_calls: (existing?.llm_calls || 0) + 1, created_at: now.toISOString() };
     let saved;

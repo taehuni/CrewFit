@@ -10,7 +10,7 @@ export default function ChatDock(){
  function selectPeer(profile){setPeer(profile);setView('direct');setOpen(true);requestAnimationFrame(()=>heading.current?.focus());}
  useEffect(()=>{const handler=()=>{setOpen(false);navigate('/coach');};window.addEventListener('crewfit:coach-chat',handler);return()=>window.removeEventListener('crewfit:coach-chat',handler);},[navigate]);
  useEffect(()=>{const handler=e=>{if(e.detail?.id)selectPeer(e.detail);};window.addEventListener('crewfit:direct-chat',handler);return()=>window.removeEventListener('crewfit:direct-chat',handler);},[]);
- useEffect(()=>{if(new URLSearchParams(search).has('calendar'))setOpen(false);if(new URLSearchParams(search).get('coach')==='plans'){setOpen(false);navigate('/coach');}},[search,navigate]);
+ useEffect(()=>{if(new URLSearchParams(search).has('calendar'))setOpen(false);if(new URLSearchParams(search).get('coach')==='plans'){setOpen(false);navigate('/coach?view=plans');}},[search,navigate]);
  useEffect(()=>{if(pathname.startsWith('/meals/')||pathname==='/store')setOpen(false);},[pathname]);
  function close(){setOpen(false);launcher.current?.focus();}
  function show(){setOpen(true);requestAnimationFrame(()=>heading.current?.focus());}

@@ -1,5 +1,6 @@
 import {createCalendarRouter} from './routes/calendar.js';
 import {createPartnersRouter} from './routes/partners.js';
+import {createStoreRouter} from './routes/store.js';
 import { createCoachRouter } from './routes/coach.js';
 import express from 'express';
 import cors from 'cors';
@@ -21,6 +22,7 @@ app.get('/health', (req, res) => res.json({ ok: true }));
 app.use('/api/me', meRouter);
 app.use('/api/calendar',createCalendarRouter(requireAuth));
 app.use('/api/partners',createPartnersRouter(requireAuth));
+app.use('/api/store',createStoreRouter(requireAuth));
 app.use('/api/coach', createCoachRouter(requireAuth));
 app.use('/api/dashboard', dashboardRouter);
 app.use('/api/exercises', createExercisesRouter(requireAuth));

@@ -63,7 +63,7 @@ export function WorkspaceFrame({ nickname, number,userId }) {
           <span className="ws-account-name">{nickname || '내 계정'}</span>
         </Link>
       </header>
-      <main id="main" className="ws-main" tabIndex={-1}>{(pathname.startsWith('/feed')||pathname.startsWith('/crews'))&&<nav className="community-tabs" aria-label="커뮤니티 메뉴"><Link to="/feed" aria-current={pathname.startsWith('/feed')?'page':undefined}>피드</Link><Link to="/crews" aria-current={pathname.startsWith('/crews')?'page':undefined}>크루</Link></nav>}<Outlet /></main>
+      <main id="main" className="ws-main" tabIndex={-1}>{((pathname==='/feed'||pathname.startsWith('/feed/'))||pathname.startsWith('/crews'))&&<nav className="community-tabs" aria-label="커뮤니티 메뉴"><Link to="/feed" aria-current={(pathname==='/feed'||pathname.startsWith('/feed/'))?'page':undefined}>피드</Link><Link to="/crews" aria-current={pathname.startsWith('/crews')?'page':undefined}>크루</Link></nav>}<Outlet /></main>
     </div>
   );
 }

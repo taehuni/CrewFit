@@ -15,13 +15,13 @@ export function matchCriteria(profile, settings) {
 
 export function matchedOn(crew, profile, settings) {
   return [...((settings?.interested_sports ?? (profile.main_sport ? [profile.main_sport] : [])).includes(crew.sport) ? ['sport'] : []),
-    ...(crew.region_sido === settings?.region_sido && crew.region_sigungu === settings?.region_sigungu ? ['region'] : []),
+    ...(settings?.region_sido && settings?.region_sigungu && crew.region_sido === settings.region_sido && crew.region_sigungu === settings?.region_sigungu ? ['region'] : []),
     ...(crew.activity_days?.some(day => settings?.preferred_days?.includes(day)) ? ['days'] : []),
     ...(profile.level && crew.level === profile.level ? ['level'] : []),
   ];
 }
 
-export async function matchCrews(db, userId) {
+export async function matchCrews(db, userId, random = Math.random) {
   if (!userId) throw failure(401, 'UNAUTHORIZED', '로그인이 필요해요.');
   const [p, s] = await Promise.all([
     db.from('profiles').select('main_sport,level').eq('id', userId).maybeSingle(),
@@ -41,20 +41,23 @@ export async function matchCrews(db, userId) {
   const active = matchCriteria(profile, settings), relaxed = [];
   for (;;) {
     const matches = [];
-    for (let offset = 0; matches.length < 20; offset += 100) {
+    for (let offset = 0; ; offset += 100) {
       let query = db.from('crews').select(fields).neq('owner_id', userId);
       if (interests.length) query = query.in('sport', interests);
       if (active.includes('region')) query = query.eq('region_sido', settings.region_sido).eq('region_sigungu', settings.region_sigungu);
       if (active.includes('days')) query = query.overlaps('activity_days', settings.preferred_days);
       if (active.includes('level')) query = query.eq('level', profile.level);
       const rows = checked(await query.order('id', { ascending: false }).range(offset, offset + 99)) || [];
-      matches.push(...rows.filter(row => !excluded.has(String(row.id))).slice(0, 20 - matches.length));
+      // Keep a bounded pool while giving every eligible crew a chance, not only the newest 20.
+      matches.push(...rows.filter(row => !excluded.has(String(row.id))).map(crew=>({crew,matched_on:matchedOn(crew,profile,settings),priority:random()})));
+      matches.sort((a,b)=>b.matched_on.length-a.matched_on.length||a.priority-b.priority);
+      matches.splice(20);
       if (rows.length < 100) break;
     }
     if (matches.length || !active.length) {
-      const crews = await Promise.all(matches.map(async crew => ({ ...crew,
+      const crews = await Promise.all(matches.map(async ({crew,matched_on}) => ({ ...crew,
         member_count: checked(await db.rpc('crew_member_count', { p_crew_id: crew.id })),
-        matched_on: matchedOn(crew, profile, settings),
+        matched_on,
       })));
       return { crews, relaxed };
     }

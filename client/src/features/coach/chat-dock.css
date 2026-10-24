@@ -7,3 +7,11 @@
 @media(max-width:959px){.chat-dock{width:auto;position:static}.chat-dock-panel{inset:0;width:100%;height:100dvh;max-height:none;border:0;border-radius:0;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);box-sizing:border-box}.workspace:has(.chat-dock[data-open=true]) .ws-nav{display:none}.ws-header{gap:10px}.ws-account-name{display:none}}
 @media(min-width:960px){.chat-dock-panel.chat-expanded{width:min(900px,calc(100vw - 48px));right:24px}}@media(max-width:959px){.chat-expand{display:none}body:has(.chat-dock[data-open=true]){overflow:hidden}}
 .ws-header .notification-link{margin-left:0}
+/* Desktop messenger returns to the lower-right corner; mobile stays in header. */
+@media(min-width:960px){
+ .chat-dock{position:fixed;right:24px;bottom:24px;margin:0;z-index:60}
+ .chat-dock-launcher{width:auto;min-height:52px;padding:12px 20px;border-radius:28px;background:#1e2229;color:white;box-shadow:0 6px 24px #1e222930;gap:10px}
+ .chat-dock-launcher>span{display:inline}.chat-dock-launcher .chat-unread{position:static}
+ .chat-dock-panel{top:auto;bottom:88px;right:24px;height:min(720px,calc(100dvh - 112px))}
+ .workspace .ws-header .notification-link{margin-left:auto}
+}

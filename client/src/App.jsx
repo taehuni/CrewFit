@@ -2,7 +2,8 @@ import { lazy } from 'react';
 const ProfileEditor = lazy(() => import('./features/profile/ProfileEditor.jsx'));
 
 const StorePage = lazy(() => import('./features/store/StorePage.jsx'));
-const CoachPage = lazy(() => import('./features/coach/CoachPage.jsx'));
+const StoreProductPage = lazy(() => import('./features/store/StoreProductPage.jsx'));
+const CoachPage = lazy(() => import('./features/coach/CoachEntry.jsx'));
 import { Suspense, useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -66,6 +67,7 @@ export default function App() {
                 <Route path="/goals" element={<GoalsPage />} />
                 <Route path="/feedback" element={<FeedbackPage />} />
                 <Route path="/coach" element={<CoachPage />} /><Route path="/store" element={<StorePage />} /><Route path="/partners" element={<Navigate to="/store?category=facilities" replace />} />
+                <Route path="/store/products/:productId" element={<StoreProductPage />} />
                 <Route path="/activities" element={<ActivitiesPage />} />
                 <Route path="/activities/new" element={<ActivityCreatePage />} />
                 <Route path="/activities/exercises" element={<ExerciseNamesPage />} />

@@ -1,36 +1,34 @@
 import {useEffect,useState} from 'react';
 import {Link,useSearchParams} from 'react-router';
+import {useQuery} from '@tanstack/react-query';
+import {useAuth} from '../auth/index.js';
+import {api} from '../../shared/api.js';
 import {PartnersPage} from '../partners/index.js';
 import './store.css';
-const categories=['전체','단백질 식품','간편한 한 끼','간식'];
-const foods=[
- {id:'chicken',name:'닭가슴살',category:'단백질 식품',caption:'한 끼에 곁들이기 편한',tag:'조리 방식 확인',shape:'pack',color:'peach',label:'CHICKEN',description:'소스 유무, 1팩의 양, 냉장·냉동 보관 조건을 비교해 보세요.'},
- {id:'tofu',name:'두부',category:'단백질 식품',caption:'다양하게 요리하는',tag:'식물성 식재료',shape:'box',color:'sage',label:'TOFU',description:'찌개용과 부침용 등 용도와 포장 단위, 원재료를 확인해 보세요.'},
- {id:'oats',name:'오트밀',category:'간편한 한 끼',caption:'내 방식대로 준비하는',tag:'아침 식사 아이디어',shape:'bag',color:'sand',label:'OATS',description:'압착 형태와 조리 시간, 첨가 재료를 확인하고 좋아하는 식재료와 구성해 보세요.'},
- {id:'rice',name:'잡곡밥',category:'간편한 한 끼',caption:'바쁜 날에도 간편하게',tag:'1회분 용량 확인',shape:'box',color:'lavender',label:'GRAINS',description:'곡물 구성과 1개 용량, 조리 방법을 비교해 보세요.'},
- {id:'yogurt',name:'플레인 요거트',category:'간식',caption:'취향에 맞춰 곁들이는',tag:'당류·원재료 확인',shape:'cup',color:'peach',label:'YOGURT',description:'무가당 여부와 영양정보, 우유 등 알레르기 유발 성분을 확인해 보세요.'},
- {id:'nuts',name:'견과류',category:'간식',caption:'작게 나눠 챙기는',tag:'소포장 비교',shape:'bag',color:'sage',label:'NUTS',description:'견과 구성과 1봉 용량, 소금·설탕 첨가 여부 및 알레르기 표시를 살펴보세요.'},
-];
-function FoodArt({food}){return <div className={'store-art '+food.color} aria-hidden="true"><span className="store-art-orbit"/><div className={'store-package '+food.shape}><small>DAILY FOOD</small><strong>{food.label}</strong><span className="store-package-mark">●</span><small>MAKE IT YOURS</small></div></div>}
+const money=n=>Number(n).toLocaleString('ko-KR')+'원';
+const themes={foods:['닭가슴살','오트밀','견과','두부','잡곡밥'],equipment:['요가매트','덤벨','러닝','폼롤러','밴드']};
+function ProductImage({product}){
+ const [failed,setFailed]=useState(false);
+ return <div className="store-product-photo">{failed?<span>사진을 불러오지 못했어요</span>:<img src={product.images[0]} alt={product.name} loading="lazy" onError={()=>setFailed(true)}/>}</div>;
+}
 export default function StorePage(){
- const [params,setParams]=useSearchParams();const facilities=params.get('category')==='facilities';
- const [filter,setFilter]=useState('전체'),[search,setSearch]=useState(params.get('q')||'');
- const queryText=params.get('q')||'';
- const fromMeal=params.get('source')==='meal';
- function updateSearch(value){setSearch(value);setParams(previous=>{const next=new URLSearchParams(previous);if(value)next.set('q',value);else next.delete('q');return next;},{replace:true});}
- useEffect(()=>{setSearch(queryText);setFilter('전체');},[queryText]);
- const visible=foods.filter(f=>(filter==='전체'||f.category===filter)&&`${f.name} ${f.category}`.toLowerCase().includes(search.trim().toLowerCase()));
- return <div className="store-page"><header className="page-head"><div><span className="section-eyebrow">FOR YOUR EVERYDAY</span><h1>스토어</h1><p>먹는 것부터 움직이는 공간까지, 나의 일상에 맞게.</p></div><Link to="/meals">내 식단 기록 ↗</Link></header>
- <nav className="store-tabs" aria-label="스토어 카테고리">{[['foods','식품'],['facilities','운동시설']].map(([id,name])=><button key={id} aria-pressed={facilities===(id==='facilities')} onClick={()=>setParams(id==='facilities'?{category:id}:{})}>{name}<span>{id==='foods'?'DAILY FOOD':'MOVE SPACE'}</span></button>)}</nav>
+ const {token}=useAuth();const [params,setParams]=useSearchParams();
+ const category=['equipment','facilities'].includes(params.get('category'))?params.get('category'):'foods';
+ const q=params.get('q')||'',facilities=category==='facilities',fromMeal=params.get('source')==='meal';
+ const [draft,setDraft]=useState(q),[limit,setLimit]=useState(12);
+ useEffect(()=>{setDraft(q);setLimit(12);},[category,q]);
+ const catalog=useQuery({queryKey:['store-products-v2',category,q],queryFn:()=>api('/store/products?'+new URLSearchParams({category,q}),{token}),enabled:!!token&&!facilities,staleTime:300000,retry:false});
+ function search(value){setParams(previous=>{const next=new URLSearchParams(previous);value?next.set('q',value):next.delete('q');return next;});}
+ const products=catalog.data?.products||[];
+ return <div className="store-page"><header className="page-head"><div><span className="section-eyebrow">FOR YOUR EVERYDAY</span><h1>스토어</h1><p>잘 먹고, 즐겁게 움직이는 일상을 위한 선택.</p></div><Link to="/meals">내 식단 기록 ↗</Link></header>
+ <nav className="store-tabs" aria-label="스토어 카테고리">{[['foods','식품'],['equipment','운동용품'],['facilities','운동시설']].map(([id,name])=><button key={id} aria-pressed={category===id} onClick={()=>setParams({category:id})}>{name}</button>)}</nav>
  {facilities?<PartnersPage embedded/>:<>
- {fromMeal&&<section className="store-meal-context"><div><span className="section-eyebrow">FROM YOUR MEAL PLAN</span><h2>식단에서 골라 온 식품</h2><p>{queryText?<><strong>{queryText}</strong>의 판매처를 찾아보세요.</>:<>필요한 식품을 골라 한 끼를 준비해 보세요.</>}</p></div><Link to="/meals?view=plans">저장한 식단으로 돌아가기 ↗</Link></section>}
- {!fromMeal&&<section className="store-hero"><div><span className="section-eyebrow">EAT WELL. MOVE WELL.</span><h2>잘 먹는 일도,<br/>나를 위한 운동.</h2><p>거창한 준비 대신, 일상에 더할 식품을 만나보세요.</p><a href="#store-foods">식품 둘러보기 ↓</a></div><div className="store-hero-word" aria-hidden="true">GOOD<br/><span>FOOD.</span></div></section>}
- <div className="store-context"><div><strong>추천부터 한 끼 준비까지</strong><p>코치에게 상담 → 마음에 드는 식단 저장 → 필요한 식품 찾기</p></div><Link to="/coach">AI 코치 열기 ↗</Link></div>
- <section id="store-foods" className="store-foods"><div className="store-catalog-head"><div><h2>일상에 더할 식품</h2><p>상품 종류 예시 · 판매처 검색으로 연결돼요.</p></div><label className="store-search"><span>식품 검색</span><input type="search" placeholder="어떤 식품을 찾으세요?" value={search} onChange={e=>updateSearch(e.target.value)}/></label></div>
- <div className="store-filters" aria-label="식품 종류">{categories.map(c=><button key={c} aria-pressed={filter===c} onClick={()=>setFilter(c)}>{c}</button>)}</div><p className="store-count" role="status">{visible.length}가지 식품</p>
- <div className="store-grid">{visible.map(food=><article className="store-card" key={food.id}><FoodArt food={food}/><div className="store-card-body"><span className="store-tag">{food.tag}</span><p className="store-caption">{food.caption}</p><h3>{food.name}</h3><p className="store-description">{food.description}</p><div className="store-sellers"><a href={'https://search.shopping.naver.com/search/all?query='+encodeURIComponent(food.name)} target="_blank" rel="noopener noreferrer" aria-label={food.name+' 네이버쇼핑 검색 (새 탭)'}>네이버쇼핑 ↗</a><a href={'https://www.coupang.com/np/search?q='+encodeURIComponent(food.name)} target="_blank" rel="noopener noreferrer" aria-label={food.name+' 쿠팡 검색 (새 탭)'}>쿠팡 ↗</a></div></div></article>)}</div>
- {!visible.length&&<div className="store-empty"><h3>찾는 식품이 아직 없어요.</h3><p>{search.trim()?<>CrewFit에 등록된 종류가 없어도 판매처에서 검색할 수 있어요.</>:<>다른 종류를 선택해 보세요.</>}</p>{search.trim()&&<div className="store-empty-search"><a href={'https://search.shopping.naver.com/search/all?query='+encodeURIComponent(search.trim())} target="_blank" rel="noopener noreferrer">네이버쇼핑에서 검색 ↗<span className="sr-only"> (새 탭)</span></a><a href={'https://www.coupang.com/np/search?q='+encodeURIComponent(search.trim())} target="_blank" rel="noopener noreferrer">쿠팡에서 검색 ↗<span className="sr-only"> (새 탭)</span></a></div>}<button className="btn btn-ghost" onClick={()=>{setFilter('전체');updateSearch('');}}>전체 식품 보기</button></div>}
- <p className="store-footnote">현재는 식품 종류를 둘러보는 화면이에요. 이미지는 종류를 표현한 일러스트이며 실제 판매 상품이 아닙니다. 가격·영양정보·배송과 구매는 이동한 판매처에서 확인해 주세요. CrewFit 내 식품 결제는 아직 지원하지 않아요.</p></section>
- </>}
+ {fromMeal&&<section className="store-meal-context"><div><h2>식단에서 골라 온 식품</h2><p>{q?`${q} 관련 상품을 살펴보세요.`:'한 끼에 필요한 식품을 찾아보세요.'}</p></div><Link to="/meals?view=plans">저장한 식단으로 돌아가기 ↗</Link></section>}
+ <section className={'store-live-intro '+(category==='equipment'?'equipment':'')}><div><span className="section-eyebrow">{category==='foods'?'EAT WELL':'MOVE WELL'}</span><h2>{category==='foods'?'한 끼를 채우는 작은 선택':'내 운동에 맞는 준비'}</h2><p>{category==='foods'?'닭가슴살부터 곡물과 견과까지, 일상에 더할 식품을 둘러보세요.':'홈트레이닝부터 러닝까지, 꾸준한 움직임을 돕는 용품을 만나보세요.'}</p></div><span className="store-live-badge">오너클랜 상품</span></section>
+ <section className="store-foods"><div className="store-catalog-head"><div><h2>{q?`‘${q}’ 검색 결과`:category==='foods'?'일상에 더할 식품':'운동을 위한 아이템'}</h2><p>{q?'상품명·분류가 맞는 상품만 표시해요.':'CrewFit이 골라 둔 상품이에요. 가격과 재고는 공급처에서 갱신해요.'}</p></div><form className="store-search-form" onSubmit={e=>{e.preventDefault();search(draft.trim());}}><label className="store-search"><span>{category==='foods'?'식품 검색':'운동용품 검색'}</span><input type="search" maxLength={80} placeholder="찾고 싶은 상품을 입력하세요" value={draft} onChange={e=>setDraft(e.target.value)}/></label><button className="btn btn-primary">검색</button></form></div>
+ <div className="store-filters" aria-label="상품 빠른 검색"><button aria-pressed={!q} onClick={()=>search('')}>추천 상품</button>{themes[category].map(name=><button key={name} aria-pressed={q===name} onClick={()=>search(name)}>{name}</button>)}</div>
+ {catalog.isPending?<div className="store-empty" role="status">상품 사진과 가격을 불러오고 있어요…</div>:catalog.isError?<div className="store-empty" role="alert"><h3>상품을 불러오지 못했어요.</h3><p>{catalog.error.message}</p><button className="btn btn-primary" onClick={()=>catalog.refetch()}>다시 시도</button></div>:<><p className="store-count" role="status">{products.length}개 상품 · {catalog.data?.updatedAt&&new Date(catalog.data.updatedAt).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})} 확인</p><div className="store-grid store-live-grid">{products.slice(0,limit).map(product=><article className="store-card store-live-card" key={product.id}><Link className="store-product-open" to={`/store/products/${product.id}?${params.toString()}`} aria-label={product.name+' 상세 보기'}><ProductImage product={product}/><div className="store-card-body"><span className="store-tag">{product.category.split('>').slice(-1)}</span><h3>{product.name}</h3><p className="store-product-price">{money(product.price)}</p><small>공급처 조회 가격 · 배송비 별도</small><span className="store-product-more">상품 살펴보기 ↗</span></div></Link></article>)}</div>{!products.length&&<div className="store-empty"><h3>조건에 맞는 상품이 없어요.</h3><p>다른 검색어나 추천 상품을 확인해 보세요.</p><button className="btn btn-ghost" onClick={()=>search('')}>추천 상품 보기</button></div>}{products.length>limit&&<button className="btn btn-ghost store-load-more" onClick={()=>setLimit(n=>n+12)}>상품 더 보기</button>}</>}
+ <p className="store-footnote">오너클랜에서 제공하는 실제 상품 정보예요. 표시 가격은 최종 결제 금액이 아니며, 옵션·수량·배송 조건에 따라 달라질 수 있어요. 상품 정보는 최대 5분간 저장 후 다시 조회합니다.</p></section></>}
+
  </div>;
 }

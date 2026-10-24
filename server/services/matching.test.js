@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import express from 'express';
-import { matchCrews } from './matching.js';
+import { matchCrews, matchedOn } from './matching.js';
 import { createCrewsRouter } from '../routes/crews.js';
 const profile = {main_sport:'running',level:'beginner'};
 const settings = {region_sido:'서울',region_sigungu:'중구',preferred_days:[1,3]};
@@ -44,7 +44,7 @@ test('does not fill strict results with weaker matches or relax sport; unset opt
 test('paginates memberships and candidates before relaxing and caps recommendation response at 20',async()=>{
   const members=Array.from({length:105},(_,i)=>({crew_id:i+1,user_id:'me'}));
   const result=await matchCrews(fixture({members,crews:Array.from({length:140},(_,i)=>crew(i+1))}).db,'me');
-  assert.equal(result.crews.length,20);assert.equal(result.crews[0].id,106);assert.deepEqual(result.relaxed,[]);
+  assert.equal(result.crews.length,20);assert.ok(result.crews.every(c=>c.id>105));assert.equal(new Set(result.crews.map(c=>c.id)).size,20);assert.deepEqual(result.relaxed,[]);
 });
 test('auth, missing sport and partial database errors never become empty success',async()=>{
   await assert.rejects(matchCrews({},null),{status:401});
@@ -66,8 +66,23 @@ test('match route requires auth and takes caller from verified session rather th
 test('multiple interests include either sport; an explicit empty choice explores all sports without false match reasons',async()=>{
  const crews=[crew(1),crew(2,{sport:'gym'}),crew(3,{sport:'swimming'})];
  const multi=await matchCrews(fixture({s:{...settings,interested_sports:['running','gym']},crews}).db,'me');
- assert.deepEqual(multi.crews.map(c=>c.id),[1,2]);
+ assert.deepEqual(multi.crews.map(c=>c.id).sort((a,b)=>a-b),[1,2]);
  const any=await matchCrews(fixture({p:{},s:{interested_sports:[]},crews}).db,'me');
  assert.equal(any.crews.length,3);
  assert.ok(any.crews.every(c=>!c.matched_on.includes('sport')));
+});
+
+test('missing region on both sides does not become a matching reason',()=>{assert.deepEqual(matchedOn({sport:'running'}, {}, {}),[]);assert.deepEqual(matchedOn({region_sido:null,region_sigungu:null}, {}, {region_sido:null,region_sigungu:null}),[]);});
+
+test('equal matches rotate across all pages, including candidates beyond the newest twenty',async()=>{
+ const crews=Array.from({length:125},(_,i)=>crew(i+1));let n=0;
+ const first=await matchCrews(fixture({crews}).db,'me',()=>0.5);
+ const rotated=await matchCrews(fixture({crews}).db,'me',()=>1/(++n+1));
+ assert.equal(n,125);assert.equal(first.crews[0].id,1);assert.equal(rotated.crews[0].id,125);
+ assert.equal(new Set(rotated.crews.map(c=>c.id)).size,20);
+});
+test('more matching conditions outrank randomness after criteria are relaxed',async()=>{
+ const crews=[crew(1,{region_sido:'부산',activity_days:[],level:null}),crew(2,{region_sido:'부산'})];let n=0;
+ const result=await matchCrews(fixture({crews}).db,'me',()=>n++?0.99:0);
+ assert.equal(result.crews[0].id,2);assert.deepEqual(result.crews[0].matched_on,['sport','days','level']);
 });

@@ -27,10 +27,19 @@ Render 환경변수에는 로컬 파일의 값을 옮긴다. `.env` 자체를 Gi
 | `SUPABASE_SERVICE_ROLE_KEY` | server/.env | 서버 전용 크루 통계·AI 저장 |
 | `OPENAI_API_KEY` | server/.env | 서버 전용 AI 요청 |
 | `OPENAI_MODEL` | server/.env | 기본 gpt-4.1-mini |
+| `OWNERCLAN_USERNAME` | server/.env | 서버 전용 오너클랜 판매사 아이디 |
+| `OWNERCLAN_PASSWORD` | server/.env | 서버 전용 오너클랜 판매사 비밀번호 |
 
 프론트 빌드의 `VITE_API_URL`은 빈 값으로 강제해 휴대폰이 localhost를 호출하지 않도록 한다. 비밀키에는 `VITE_` 접두사를 붙이지 않는다. 프론트 환경변수 변경 후에는 다시 빌드·배포한다.
 
 ## 주소 발급 후
+
+### 2026-10-24 코칭·리포트·스토어 배포
+
+1. 전체 기간 입문 계획을 저장하려면 `server/config/20261021_full_starter_plans.sql`을 먼저 적용한다. 기존 데이터를 유지하며 제안·저장 위치의 상한을 28개로 확장한다.
+2. Render 서버 환경변수에 `OWNERCLAN_USERNAME`, `OWNERCLAN_PASSWORD`를 등록한다. 파일이나 값을 Git·프론트 빌드에 넣지 않는다. 상품 조회 토큰은 서버 메모리에서만 관리한다.
+3. 검증한 `render_test` 커밋을 수동 배포한다. `/health`, 코칭의 달력·지난 대화, 크루 추천, 식품·운동용품 검색 및 `/store/products/:productId` 새로고침을 확인한다.
+4. 스토어는 실제 공급처 정보 조회 단계이며 상품 주문·결제를 실행하지 않는다. 실제 GPS 이동과 외부 캘린더 동의 흐름은 기기·계정에서 별도로 확인한다.
 
 ### 2026-10-03 GPS 보관 기능 배포 순서
 

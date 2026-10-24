@@ -452,3 +452,10 @@ AI 코치 진입을 홈 CTA에서 로그인 셸 공통 우하단 채팅 패널�
 - `/me` shows the owner's posts, activity summaries and approved crews; `/me/edit` groups personal information and exercise preferences; `/me/settings` holds privacy, community controls, connected services and sign-out. Calendar callbacks to the old `/me?calendar=` redirect to settings.
 - `20261014_member_follows.sql` adds directed follower/following edges with RLS, no self-follow, unique pairs, owner-only mutation and block-aware visibility/insertion. Blocking hides existing edges; unblocking makes them visible again. Following is not a requirement for direct messages; existing nickname search and conversations remain.
 - Authenticated demo checks verified follow insert/read/delete, impersonation/self-follow rejection and duplicate protection. Temporary demo edges were removed; no messages were sent. UI checks cover 320/390/1440px, profile tabs, editor/settings separation, mobile messages and community navigation memory.
+
+
+### 2026-10-21 운동 리포트 구조화
+- 새 분석은 실제 활동 횟수·운동 날짜 수·총 시간·식사 기록 수·종목별 시간/거리를 서버에서 집계하여 생성 당시 스냅샷으로 보관한다. 임의 체력 점수와 체성분 지표는 표시하지 않는다.
+- 기존 content TEXT에 format=crewfit-report-v1, summary, analysis의 버전 지정 JSON을 저장한다. API는 content(기존 분석 문자열)와 report(집계)를 분리해서 반환하고 클라이언트 직접 조회와 이력도 같은 버전을 해석한다. 기존 일반 텍스트는 계속 지원한다. 외부 소비자는 이 포맷을 고려해야 한다.
+- 추천은 1회 운동 예시의 준비·본운동·마무리·강도·조절을 구분하며 휴식 요청과 통증 제약을 우선한다. 사용자가 확인한 뒤 계획 상담/저장 흐름으로 연결한다.
+- 인바디 연동은 미구현이다. 추후 실제 제공 API·이용 조건 확인 및 사용자 동의 후 측정 시각과 출처가 있는 체성분 자료를 별도로 설계한다. 기존 운동 기록으로 체성분을 추정하지 않는다.
