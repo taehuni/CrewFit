@@ -1,3 +1,5 @@
+import GpsPhoneDialog from '../tracking/GpsPhoneDialog.jsx';
+import { isMobileTrackingDevice } from '../tracking/device.js';
 import ActivityTimeline from './ActivityTimeline.jsx';
 import { Suspense, useRef, useState } from 'react';
 import { Link } from 'react-router';
@@ -33,6 +35,7 @@ function Filters({ filters, onFilter }) {
 }
 
 export default function ActivityListView({ filters, filterMessage, records, onFilter }) {
+  const [phoneGuide, setPhoneGuide] = useState(false);
   const returnTo = listURL(filters);
   const items = records.data?.pages.flatMap(page => page.items) || [];
   const filtered = Boolean(filters.sport || filters.from || filters.to);
@@ -44,10 +47,11 @@ export default function ActivityListView({ filters, filterMessage, records, onFi
   }
   return <div className="activity-library">
     <RecordTabs active="activities" />
+    {phoneGuide && <GpsPhoneDialog onClose={() => setPhoneGuide(false)}/>}
     <header className="activity-library-heading"><div><span className="section-eyebrow">나의 운동 일지</span><h1>움직인 만큼, 쌓이는 기록</h1><p>가벼운 산책부터 마지막 한 세트까지.</p></div>
     </header>
     <div className="record-entry-grid">
-      <Link className="record-entry record-entry-gps" to="/activities/track"><span className="record-entry-tag">지금 밖에서 운동한다면</span><strong>GPS 측정 시작</strong><p>러닝 · 걷기 · 자전거<br/>움직인 경로와 시간을 함께 남겨요.</p><span className="record-entry-bottom">종목 선택하기 <span aria-hidden="true">↗</span></span><svg className="record-route-art" viewBox="0 0 200 170" fill="none" aria-hidden="true"><path d="M180 0C70 0 195 70 90 80S10 145 165 150" stroke="currentColor" strokeWidth="24" opacity=".08"/><path d="M180 0C70 0 195 70 90 80S10 145 165 150" stroke="currentColor" strokeWidth="2" strokeDasharray="5 7"/><circle cx="165" cy="150" r="7" fill="currentColor"/></svg></Link>
+      <Link className="record-entry record-entry-gps" to="/activities/track" onClick={e => { if (!isMobileTrackingDevice(navigator)) { e.preventDefault(); setPhoneGuide(true); } }}><span className="record-entry-tag">지금 밖에서 운동한다면</span><strong>GPS 측정 시작</strong><p>러닝 · 걷기 · 자전거<br/>움직인 경로와 시간을 함께 남겨요.</p><span className="record-entry-bottom">종목 선택하기 <span aria-hidden="true">↗</span></span><svg className="record-route-art" viewBox="0 0 200 170" fill="none" aria-hidden="true"><path d="M180 0C70 0 195 70 90 80S10 145 165 150" stroke="currentColor" strokeWidth="24" opacity=".08"/><path d="M180 0C70 0 195 70 90 80S10 145 165 150" stroke="currentColor" strokeWidth="2" strokeDasharray="5 7"/><circle cx="165" cy="150" r="7" fill="currentColor"/></svg></Link>
       <Link className="record-entry record-entry-manual" to="/activities/new" state={{activitiesReturnTo:returnTo}}><span className="record-entry-tag">운동을 마쳤다면</span><strong>직접 기록하기</strong><p>모든 종목의 시간과 거리,<br/>헬스 세트와 오늘의 메모까지.</p><span className="record-entry-bottom">운동 남기기 <span aria-hidden="true">＋</span></span></Link>
     </div>
     <Suspense fallback={<p>보관한 측정 확인 중…</p>}><GpsDraftList /></Suspense>

@@ -1,3 +1,5 @@
+import GpsPhoneDialog from './GpsPhoneDialog.jsx';
+import { isMobileTrackingDevice } from './device.js';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams, useBeforeUnload } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
@@ -10,6 +12,11 @@ import { saveGpsDraft, finalizeGpsDraft } from './drafts.js';
 import RouteMap from './RouteMap.jsx';
 import './tracking.css';
 export default function TrackingPage() {
+  const navigate = useNavigate(), [params] = useSearchParams();
+  if (!isMobileTrackingDevice(navigator)) return <GpsPhoneDialog sport={params.get('sport')} onClose={() => navigate('/activities', { replace: true })}/>;
+  return <MobileTrackingPage/>;
+}
+function MobileTrackingPage() {
   const { user } = useAuth(), cache = useQueryClient(), navigate = useNavigate(), [params] = useSearchParams();
   const [sport, setSport] = useState(TRACKING_SPORTS.includes(params.get('sport')) ? params.get('sport') : '');
   const [track, setTrack] = useState({ status: 'idle', points: [], elapsed: 0, distance: 0, message: '', awake: false });

@@ -1,3 +1,4 @@
+import { safeAuthNext } from './googleAuth.js';
 import { Navigate, Outlet, useLocation } from 'react-router';
 import { useAuth } from './AuthContext.jsx';
 import {useQuery} from '@tanstack/react-query';
@@ -11,7 +12,7 @@ export default function RequireAuth() {
   const { loading, session } = useAuth();
   const location = useLocation();
   if (loading) return <div className="center">불러오는 중…</div>;
-  if (!session) return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  if (!session) return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
   return <ProfileGate/>;
 }
 
@@ -28,7 +29,8 @@ function ProfileGate(){
 // 로그인 상태에서 /login 등에 오면 홈으로.
 export function GuestOnly() {
   const { loading, session } = useAuth();
+  const location = useLocation();
   if (loading) return <div className="center">불러오는 중…</div>;
-  if (session) return <Navigate to="/home" replace />;
+  if (session) return <Navigate to={safeAuthNext(location.state?.from)} replace />;
   return <Outlet />;
 }
