@@ -8,6 +8,8 @@ import { queryKeys } from './queryKeys.js';
 import { bibNumber } from './ui.jsx';
 import './workspace.css';
 import './quality.css';
+import './device-navigation.css';
+import { isMobileTrackingDevice } from '../features/tracking/device.js';
 import {NotificationLink} from '../features/social/index.js';
 import {MemberAvatar} from './CommunityMedia.jsx';
 
@@ -42,7 +44,7 @@ export function WorkspaceFrame({ nickname, number,userId }) {
   const [community,setCommunity]=useState(()=>{try{return localStorage.getItem('crewfit-community')==='/crews'?'/crews':'/feed';}catch{return '/feed';}});
   useEffect(()=>{if(pathname==='/crews'||pathname==='/feed'){setCommunity(pathname);try{localStorage.setItem('crewfit-community',pathname);}catch{}}},[pathname]);
   return (
-    <div className="workspace">
+    <div className="workspace" data-device={isMobileTrackingDevice(navigator) ? 'mobile' : 'desktop'}>
       <a href="#main" className="skip-link">본문으로 건너뛰기</a>
       <header className="ws-header">
         <Link to="/home" className="ws-brand" aria-label="CrewFit 홈"><Wordmark /></Link>

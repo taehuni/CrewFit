@@ -52,3 +52,8 @@
 @media(max-width:600px){.coach-history-toolbar small{display:none}.coach-history-toolbar button{font-size:11px;padding:7px}.coach-archive-search{grid-template-columns:minmax(0,1fr) auto auto;padding:12px;gap:8px}.archive-keyword{grid-column:1/-1}.coach-archive-search input[type=date]{appearance:none;min-inline-size:0}.coach-archive-results{padding:12px}.archive-result{padding:14px}.archive-result-meta{flex-wrap:wrap}}
 
 .coach-archive-host{display:flex;flex:1;min-height:0;overflow:hidden}.coach-archive-host[hidden]{display:none}
+.conversation-plan-request{padding:16px;border:1px solid var(--line);border-radius:16px;background:#f7faf5;margin-top:18px}
+.conversation-plan-request fieldset{min-width:0;border:0;padding:0}
+.conversation-plan-request label{display:grid;gap:6px;font-size:12px;min-width:0}
+.conversation-plan-request input,.conversation-plan-request select{box-sizing:border-box;width:100%;min-width:0;max-width:100%;min-height:44px;border:1px solid var(--line);border-radius:10px;background:white;padding:8px;font:inherit}
+.conversation-plan-request .btn{width:100%;margin-top:14px;white-space:normal;line-height:1.5}

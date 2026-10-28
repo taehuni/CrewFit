@@ -1,0 +1,47 @@
+/* Navigation follows the device; content grids still follow available width. */
+.workspace[data-device=desktop] .ws-header{gap:24px}
+.workspace[data-device=desktop] .ws-header .notification-link{margin-left:auto}
+.workspace[data-device=desktop] .ws-nav{position:static;inset:auto;display:flex;border-top:0;padding-bottom:0;background:transparent}
+.workspace[data-device=desktop] .ws-nav-links{gap:24px}
+.workspace[data-device=desktop] .ws-nav-item{flex:none;min-height:48px;flex-direction:row;font-size:14px;white-space:nowrap}
+.workspace[data-device=desktop] .ws-nav-item svg{display:none}
+.workspace[data-device=desktop] .ws-nav-item[aria-current=page]::after{inset:auto 0 -1px;height:3px}
+.workspace[data-device=desktop] .ws-main{padding-bottom:96px}
+.workspace[data-device=desktop] .chat-dock{position:fixed;right:20px;bottom:20px;width:auto;margin:0;z-index:60}
+.workspace[data-device=desktop] .chat-dock-launcher{width:auto;min-height:48px;padding:12px 18px;border-radius:28px;background:#1e2229;color:white;box-shadow:0 6px 24px #1e222930;gap:10px}
+.workspace[data-device=desktop] .chat-dock-launcher>span{display:inline}
+.workspace[data-device=desktop] .chat-dock-launcher .chat-unread{position:static}
+.workspace[data-device=desktop] .chat-dock-panel{inset:auto 20px 80px auto;width:min(430px,calc(100vw - 40px));height:min(720px,calc(100dvh - 100px));margin:0;padding:0;border:1px solid #dfe3e6;border-radius:22px;box-sizing:border-box}
+.workspace[data-device=desktop] .chat-dock-panel.chat-expanded{width:min(900px,calc(100vw - 40px))}
+.workspace[data-device=desktop]:has(.chat-dock[data-open=true]) .ws-nav{display:flex}
+body:has(.workspace[data-device=desktop] .chat-dock[data-open=true]){overflow:auto}
+@media(max-width:1099px){
+ .workspace[data-device=desktop] .ws-header{gap:16px;padding-inline:24px}
+ .workspace[data-device=desktop] .ws-nav-links{gap:18px}
+ .workspace[data-device=desktop] .ws-account-name{display:none}
+}
+@media(max-width:799px){
+ .workspace[data-device=desktop] .ws-header{height:auto;min-height:72px;flex-wrap:wrap;gap:0 12px;padding:12px 20px 0}
+ .workspace[data-device=desktop] .ws-brand{min-height:44px;display:flex;align-items:center}
+ .workspace[data-device=desktop] .ws-nav{order:10;flex:0 0 100%;margin-top:10px;border-top:1px solid var(--line)}
+ .workspace[data-device=desktop] .ws-nav-links{width:100%;gap:0;justify-content:space-between}
+ .workspace[data-device=desktop] .ws-nav-item{flex:1;min-width:0;min-height:48px;font-size:13px}
+ .workspace[data-device=desktop] .ws-nav-item[aria-current=page]::after{left:15%;right:15%}
+ .workspace[data-device=desktop] .ws-main{padding-top:24px}
+}
+/* Tablets and phones keep touch navigation even in landscape. */
+.workspace[data-device=mobile] .ws-nav{position:fixed;z-index:20;inset:auto 0 0;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.workspace[data-device=mobile] .ws-nav-links{width:100%;gap:0}
+.workspace[data-device=mobile] .ws-nav-item{flex:1;min-height:64px;flex-direction:column;gap:3px;font-size:12px}
+.workspace[data-device=mobile] .ws-nav-item svg{display:block}
+.workspace[data-device=mobile] .ws-nav-item[aria-current=page]::after{inset:0 25% auto;height:3px}
+.workspace[data-device=mobile] .ws-main{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+.workspace[data-device=mobile] .chat-dock{position:static;margin-left:auto;width:auto}
+.workspace[data-device=mobile] .chat-dock-launcher{position:relative;width:44px;min-height:44px;padding:10px;border-radius:50%;background:transparent;color:var(--ink);box-shadow:none}
+.workspace[data-device=mobile] .chat-dock-launcher>span{display:none}
+.workspace[data-device=mobile] .chat-dock-launcher .chat-unread{position:absolute;right:-4px;top:0}
+.workspace[data-device=mobile] .ws-header .notification-link{margin-left:0}
+.workspace[data-device=mobile] .chat-dock-panel{inset:0;width:100%;height:100dvh;max-height:none;margin:0;border:0;border-radius:0;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);box-sizing:border-box}
+.workspace[data-device=mobile] .chat-expand{display:none}
+.workspace[data-device=mobile]:has(.chat-dock[data-open=true]) .ws-nav{display:none}
+body:has(.workspace[data-device=mobile] .chat-dock[data-open=true]){overflow:hidden}

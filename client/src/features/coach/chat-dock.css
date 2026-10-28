@@ -15,3 +15,11 @@
  .chat-dock-panel{top:auto;bottom:88px;right:24px;height:min(720px,calc(100dvh - 112px))}
  .workspace .ws-header .notification-link{margin-left:auto}
 }
+.chat-dock-body .coach-page[data-coach-view] .saved-plan-layout{display:flex;flex-direction:column;gap:18px}
+.chat-dock-body .coach-page[data-coach-view] .saved-plan-calendar{position:static;width:100%}
+.chat-dock-body .coach-page[data-coach-view] .saved-plan-day{width:100%;min-width:0}
+.chat-dock-body .saved-plan-day>article{padding:16px}
+.chat-dock-body .plan-delete-footer{margin-top:12px;padding-top:12px}
+.chat-dock-body .plan-delete-confirm{padding:12px}
+.chat-dock-body .plan-delete-confirm>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.chat-dock-body .plan-delete-confirm button{min-width:0;white-space:normal;padding:10px}
