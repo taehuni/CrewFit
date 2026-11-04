@@ -1,7 +1,7 @@
 export function safeAuthNext(value) {
   if (typeof value !== 'string' || !value.startsWith('/') || value.startsWith('//') || /[\\\s]/.test(value)) return '/home';
   const url = new URL(value, 'https://crewfit.invalid');
-  if (url.origin !== 'https://crewfit.invalid' || !/^\/(home|activities|crews|feed|me|goals|meals|feedback|notifications)(\/|$)/.test(url.pathname)) return '/home';
+  if (url.origin !== 'https://crewfit.invalid' || !/^\/(home|activities|crews|feed|me|goals|meals|feedback|notifications|coach|pose|store|users|partners)(\/|$)/.test(url.pathname)) return '/home';
   return url.pathname + url.search + url.hash;
 }
 

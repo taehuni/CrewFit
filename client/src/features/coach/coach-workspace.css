@@ -1,0 +1,83 @@
+/* Conversation and saved schedules are separate workspaces at every width. */
+.coach-page > .coach-layout { grid-template-columns:minmax(0,1fr); gap:0; }
+.coach-page > .coach-mobile-views { display:flex; max-width:460px; gap:6px; margin-bottom:18px; }
+.coach-page[data-coach-view=conversation] > .coach-layout > .coach-saved { display:none; }
+.coach-page[data-coach-view=plans] > .coach-layout > .coach-conversation { display:none; }
+.coach-page > .page-head { margin-bottom:18px; }
+.coach-page > .coach-entry-back { margin-bottom:8px; }
+.coach-page .coach-conversation { height:clamp(620px,calc(100dvh - 190px),1000px); min-height:0; background:#f6f8f5; }
+.coach-page .coach-history { padding:24px max(24px,calc((100% - 850px)/2)); }
+.coach-page .coach-history-toolbar { padding:16px 24px; }
+.coach-page .coach-history .coach-intro { border:0; background:#edf2ed; box-shadow:none; }
+.coach-page .coach-intro h2 { font-size:20px; }
+.coach-page .coach-history .coach-user { margin-left:20%; background:#203e34; }
+.coach-page .coach-answer { border-color:#dfe6df; padding:24px; }
+.coach-page .coach-answer > strong { color:#203e34; }
+.coach-page .coach-answer > p { font-size:15px; line-height:1.85; }
+.workspace .coach-page .coach-conversation .coach-composer { padding:16px max(24px,calc((100% - 850px)/2)); }
+.coach-page .coach-composer > label { font-size:13px; }
+.coach-page .coach-composer-heading { gap:8px; align-items:baseline; }
+.coach-page .coach-composer-heading label { font-size:13px; font-weight:700; }
+.coach-page .coach-composer-heading span { font-size:11px; color:#526959; }
+.coach-page .coach-context-note { font-size:11px; color:#586b5e; line-height:1.6; margin:5px 0 0; }
+.coach-page .coach-composer textarea { margin:8px 0; border-radius:14px; }
+.coach-page .coach-composer .btn-primary { background:var(--accent-ink); }
+.coach-page[data-coach-view=plans] .coach-saved { border-radius:24px; padding:28px; }
+.coach-page[data-coach-view=plans] .saved-plan-layout { display:grid; grid-template-columns:minmax(0,1fr) minmax(290px,340px); align-items:start; gap:28px; }
+.coach-page[data-coach-view=plans] .saved-plan-calendar { grid-column:2; grid-row:1; position:static; }
+.coach-page[data-coach-view=plans] .saved-plan-day { grid-column:1; grid-row:1; }
+.coach-page .saved-plan-day > article { background:#fff; border-color:#dfe6df; border-left:4px solid #89a393; border-radius:16px; padding:20px; }
+.coach-page .saved-plan-day > article > small { color:#496357; font-weight:650; }
+.coach-page .saved-plan-day > article h3 { font-size:18px; line-height:1.5; }
+.coach-page .saved-plan-day > article p { line-height:1.8; }
+.coach-page .coach-saved-plan-top { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+.coach-page .coach-saved-plan-top time { display:flex; align-items:baseline; gap:6px; font-size:21px; font-weight:750; color:#254a38; font-variant-numeric:tabular-nums; }
+.coach-page .coach-saved-plan-top time span { font-size:11px; font-weight:500; }
+.coach-page .coach-saved-plan-meta { display:flex; flex-wrap:wrap; gap:6px; font-size:12px; color:#466150; }
+.coach-page .coach-saved-plan-meta span { padding:4px 9px; background:#edf3ec; border-radius:8px; }
+.coach-page .coach-plan-notes { margin:16px 0; padding:14px 16px; background:#f7f9f5; border-radius:12px; min-width:0; }
+.coach-page .coach-plan-notes > strong { display:block; font-size:11px; color:#58705e; margin-bottom:8px; }
+.coach-page .coach-plan-notes p { font-size:13px; margin:0; overflow-wrap:anywhere; white-space:pre-wrap; }
+.coach-page .coach-plan-notes p + p { border-top:1px solid #e4ebe0; padding-top:8px; margin-top:8px; }
+.coach-page .saved-plan-day .saved-plan-actions { justify-content:flex-end; gap:10px; }
+.coach-page .coach-saved article .saved-plan-actions > .saved-plan-record { flex:0 1 auto; }
+.coach-page .plan-day-heading { padding:8px 0 12px; border-bottom:1px solid #e1e6df; }
+.coach-page .plan-calendar { border-color:#dfe6df; background:#f8faf7; }
+.coach-page .calendar-plan-tools { margin:16px 0 24px; }
+.coach-page[data-coach-view=proposal] > .coach-layout > :is(.coach-conversation,.coach-saved) { display:none; }
+.coach-review-panel { min-width:0; padding:28px; border:1px solid #dfe6df; border-radius:24px; background:white; scroll-margin-top:90px; }
+.coach-review-panel[hidden],.coach-review-panel > div[hidden] { display:none; }
+.coach-review-panel > header { display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.coach-review-panel > header h2 { font-size:24px; margin:8px 0; }
+.coach-review-panel > header p { font-size:13px; line-height:1.7; color:var(--ink-2); }
+.coach-proposal-summary { display:flex; align-items:center; justify-content:space-between; gap:16px; background:#eef4ee; border:1px solid #dbe5da; border-radius:16px; padding:18px; margin-top:20px; }
+.coach-proposal-summary strong { font-size:14px; }
+.coach-proposal-summary .coach-proposal-kind { display:block; color:#536d59; font-size:10px; font-weight:700; margin-bottom:6px; }
+.coach-proposal-summary small { display:block; font-size:11px; color:#526959; margin-top:5px; line-height:1.5; }
+.coach-proposal-summary p { font-size:12px; margin:6px 0 0; color:#496357; }
+.coach-proposal-summary .btn { flex-shrink:0; background:white; font-size:13px; min-height:44px; }
+@media(max-width:760px) {
+ .coach-page > .coach-mobile-views { max-width:none; }
+ .coach-page .coach-conversation { height:clamp(380px,calc(100dvh - 250px),760px); min-height:0; max-height:none; }
+ .coach-page .coach-history { padding:14px; }
+ .coach-page .coach-history-toolbar { padding:12px; flex-wrap:wrap; gap:8px; }
+ .coach-page .coach-history-toolbar > div { flex:1 1 110px; min-width:0; }
+ .coach-page .coach-history-toolbar > div small { display:none; }
+ .coach-page .coach-history-toolbar button { min-height:44px; padding:8px 10px; font-size:11px; }
+ .workspace .coach-page .coach-conversation .coach-composer { padding:12px 14px; }
+ .coach-page .coach-history .coach-user { margin-left:8%; }
+ .coach-page .coach-answer { padding:16px; }
+ .coach-page .coach-answer > p { font-size:14px; }
+ .coach-page[data-coach-view=plans] .coach-saved { padding:18px; }
+ .coach-page[data-coach-view=plans] .saved-plan-layout { display:flex; flex-direction:column; gap:16px; }
+ .coach-page[data-coach-view=plans] .saved-plan-calendar { position:static; width:100%; }
+ .coach-page[data-coach-view=plans] .saved-plan-day { width:100%; }
+ .coach-page[data-coach-view=plans] .plan-calendar { max-width:none; }
+ .coach-page .saved-plan-day > article { padding:16px; }
+ .coach-page .coach-plan-notes { padding:12px; }
+ .coach-page .coach-composer-heading span { font-size:10px; }
+ .coach-page .coach-page-actions { display:flex; }
+ .coach-review-panel { padding:16px; }
+ .coach-review-panel > header { align-items:flex-start; flex-direction:column; }
+ .coach-proposal-summary { flex-direction:column; align-items:stretch; padding:14px; }
+}

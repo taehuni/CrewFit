@@ -15,7 +15,7 @@ export default function ActivityDetailView({ detail, onDelete }) {
   const groups = groupExerciseSets(data?.sets || []);
   return <article className="activity-detail">
     <header className="activity-detail-heading">
-      <Link to={returnTo || '/home'} state={activity ? { performedOn: activity.performed_on } : undefined} className="activity-back">운동 목록으로</Link>
+      <Link to={returnTo || '/home'} state={activity ? { performedOn: activity.performed_on } : undefined} className="activity-back">{returnTo === "/me?view=records" ? "내 프로필 기록으로" : returnTo ? "운동 목록으로" : "홈으로"}</Link>
       <h1>{activity ? (SPORT_LABEL[activity.sport] || '운동') + ' 기록' : '운동 기록 상세'}</h1>
       {activity && <time dateTime={activity.performed_on}>{activity.performed_on.replaceAll('-', '.')}</time>}
       {activity && <p className="muted">{recordSource(activity)}</p>}

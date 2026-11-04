@@ -39,7 +39,7 @@ export default function CrewChat({roomId,active,direct=false}){
   markCrewRead(supabase,roomId,user.id,latest,direct).then(()=>{if(!cancelled){seen.current=latest;qc.invalidateQueries({queryKey:[root+'-rooms',user.id]});}}).catch(()=>{});
   return()=>{cancelled=true;};
  },[latest,active,denied,query.dataUpdatedAt,query.isError,roomId,user.id,qc]);
- async function send(e){e.preventDefault();if(lock.current||!text.trim()||denied)return;lock.current=true;setBusy(true);setError('');const body=text.trim();if(pending.current?.body!==body)pending.current={id:crypto.randomUUID(),body};
+ async function send(e){e.preventDefault();if(lock.current||!active||!query.isSuccess||!query.data?.allowed||!text.trim()||denied)return;lock.current=true;setBusy(true);setError('');const body=text.trim();if(pending.current?.body!==body)pending.current={id:crypto.randomUUID(),body};
   try{const response=await supabase.from(table).insert({...pending.current,...(direct?{recipient_id:roomId}:{crew_id:roomId}),author_id:user.id});if(response.error){if(response.error.code!=='23505')throw response.error;const existing=await result(supabase.from(table).select('id').eq('id',pending.current.id).single());if(!existing)throw response.error;}setText('');pending.current=null;nearBottom.current=true;await query.refetch();qc.invalidateQueries({queryKey:[root+'-rooms',user.id]});}
   catch{setError(direct?'보내지 못했어요. 연결이나 차단 상태를 확인해 주세요.':'보내지 못했어요. 연결과 크루 가입 상태를 확인한 뒤 다시 보내 주세요.');}finally{lock.current=false;setBusy(false);}
  }

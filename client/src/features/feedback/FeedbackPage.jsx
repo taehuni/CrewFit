@@ -1,5 +1,6 @@
 import '../coach/coach-entry.css';
 import FeedbackContent from './FeedbackContent.jsx';
+import {feedbackCoachPrompt} from './feedbackCoachContext.js';
 import { useRef, useState } from 'react';
 import { Link } from 'react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -61,7 +62,7 @@ export default function FeedbackPage() {
         <Link to="/coach" className="feedback-back">코칭 선택으로 →</Link>
       </header>
 
-      <nav className="feedback-view-tabs" aria-label="기간별 코칭 화면"><button type="button" aria-pressed={view==='result'} onClick={()=>setView('result')}>기간별 코칭</button><button type="button" aria-pressed={view==='history'} onClick={()=>setView('history')}>지난 코칭</button></nav>
+      <nav className="feedback-view-tabs" aria-label="운동 리포트 화면"><button type="button" aria-pressed={view==='result'} onClick={()=>setView('result')}>기간별 리포트</button><button type="button" aria-pressed={view==='history'} onClick={()=>setView('history')}>지난 리포트</button></nav>
       <div hidden={view!=='result'}>
       <section className="feedback-control" aria-labelledby="feedback-period-title">
         <div>
@@ -81,9 +82,9 @@ export default function FeedbackPage() {
       </section>
 
       <div className="feedback-actions">
-        <p>기간 선택은 조회만 해요. 버튼을 눌러야 AI가 분석해요.</p>
+        <p>기간을 선택하면 저장된 리포트를 보여줘요. 기록이 달라졌다면 아래 버튼으로 갱신해 주세요.</p>
         <button type="button" className="btn btn-primary" disabled={busy || feedback.isFetching || !!feedback.error}
-          onClick={() => request()}>{busy ? '분석 중…' : result ? '현재 기록으로 리포트 만들기' : '리포트 만들기'}</button>
+          onClick={() => request()}>{busy ? '분석 중…' : result ? '최신 기록 반영하기' : '리포트 만들기'}</button>
       </div>
       {result && feedback.error && <div className="feedback-state-error" role="alert">
         <p>저장된 결과를 다시 확인하지 못했어요. 화면에는 이전 조회 결과를 유지했어요.</p>
@@ -105,11 +106,11 @@ export default function FeedbackPage() {
           : <div className="feedback-state"><strong>이 기간의 피드백을 받아보세요.</strong><span>운동·식단·목표 기록을 바탕으로 다음 운동에서 할 행동을 제안해요.</span></div>}
       </section>
 
-      {result && <section className="feedback-plan-bridge"><div><h3>추천을 내 일정으로 이어가볼까요?</h3><p>가능한 날짜와 시간을 확인해 운동 계획으로 제안해요. 제안을 확인한 뒤 내 계획에 저장할 수 있어요.</p></div><Link className="btn btn-primary" to="/coach?view=chat" state={{coachPrompt:`이 피드백을 참고해서 다음 운동 계획을 함께 만들고 싶어요. 가능한 날짜·요일과 시간을 먼저 물어봐 주세요. 피드백 안의 제약과 특이사항을 고려하고 제가 확인하기 전에는 저장했다고 말하지 마세요.\n참고 피드백:\n${result.content.slice(0,1400)}`}}>추천으로 계획 상담하기 →</Link></section>}
+      {result && <section className="feedback-plan-bridge"><div><h3>추천을 내 일정으로 이어가볼까요?</h3><p>가능한 날짜와 시간을 확인해 운동 계획으로 제안해요. 제안을 확인한 뒤 내 계획에 저장할 수 있어요.</p></div><Link className="btn btn-primary" to="/coach?view=chat" state={{coachPrompt:feedbackCoachPrompt(result)}}>추천으로 계획 상담하기 →</Link></section>}
       {result && <footer className="feedback-actions">
-        <div><p>작성 시점의 분석이에요. 현재 기록으로 요청해도 내용이 같으면 기존 결과를 사용해요.</p>{generate.error && <p className="feedback-regenerate-error" role="alert">{feedbackError(generate.error)} 기존 코칭은 그대로 유지했어요.</p>}</div>
+        <div><p>기록이 같아도 새로 분석해요. 현재 기록을 사용하며, 재생성 횟수를 사용해요.</p>{generate.error && <p className="feedback-regenerate-error" role="alert">{feedbackError(generate.error)} 기존 리포트는 그대로 유지했어요.</p>}</div>
         <button type="button" className="btn btn-ghost" disabled={busy || feedback.isFetching || !!feedback.error || result.remaining_regenerations === 0}
-          onClick={() => request(true)}>{`다시 받기 · ${result.remaining_regenerations}회 남음`}</button>
+          onClick={() => request(true)}>{`리포트 다시 생성 · ${result.remaining_regenerations}회 남음`}</button>
       </footer>}
       </div><div hidden={view!=='history'}><FeedbackHistory /></div>
       <p className="feedback-caution">AI 코칭은 의료 진단이 아닙니다. 통증이나 건강 문제는 전문가와 상담하세요.</p>

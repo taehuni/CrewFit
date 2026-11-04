@@ -99,7 +99,10 @@ export async function deleteMeal(db, userId, id) {
   if (!data) throw notFound();
 }
 export async function invalidateMeals(cache, userId) {
-  await cache.invalidateQueries({ queryKey: queryKeys.mealsRoot(userId) });
+  await Promise.all([
+    cache.invalidateQueries({ queryKey: queryKeys.mealsRoot(userId) }),
+    cache.resetQueries({ queryKey: ['meal-plan-record', userId] }),
+  ]);
 }
 
 export function visibleMealItems(items) {

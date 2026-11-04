@@ -1,10 +1,11 @@
 import './plan-delete.css';
-import {useRef,useState} from 'react';
+import {useRef,useState,useId} from 'react';
 import {Link} from 'react-router';
 import {useQuery,useQueryClient} from '@tanstack/react-query';
 import {useAuth} from '../auth/index.js';
 import {api} from '../../shared/api.js';
 import './nutrition.css';
+import './nutrition-proposals.css';
 const labels={breakfast:'아침',lunch:'점심',dinner:'저녁',snack:'간식'};
 export function useNutrition(){const {user,token}=useAuth();return useQuery({queryKey:['nutrition',user.id],queryFn:()=>api('/coach/nutrition',{token}),retry:false});}
 function PreferencesForm({initial}){
@@ -16,16 +17,34 @@ export function NutritionPreferences(){const query=useNutrition();if(query.isPen
 function Foods({plan}){return <><ul className="nutrition-foods">{plan.items.map((item,i)=><li key={i}><strong>{item.name}</strong><span>{item.amount}</span>{item.alternative&&<small>대체 아이디어 · {item.alternative}</small>}</li>)}</ul>{plan.note&&<p className="nutrition-note">{plan.note}</p>}<p className="nutrition-caution">AI가 제안한 구성으로, 영양성분을 검증한 식단은 아니에요. 알레르기가 있다면 제품의 원재료 표시도 확인해 주세요.</p></>;}
 function IngredientLinks({plan}) {
  const names=[...new Set(plan.items.map(item=>item.name).filter(Boolean))];
- return <div className="nutrition-shopping"><strong>필요한 식품 찾아보기</strong><p>준비할 음식만 골라 판매처를 비교해 보세요.</p><div>{names.map(name=><Link key={name} to={'/store?source=meal&q='+encodeURIComponent(name)}>{name} <span aria-hidden="true">↗</span></Link>)}</div></div>;
+ return <div className="nutrition-shopping"><strong>필요한 식품 찾아보기</strong><p>준비할 음식의 상품 정보와 가격을 살펴보세요.</p><div>{names.map(name=><Link key={name} to={'/store?source=meal&q='+encodeURIComponent(name)}>{name} <span aria-hidden="true">↗</span></Link>)}</div></div>;
 }
 function PlanHeading({plan}) {
  return <div className="nutrition-plan-heading"><span className="nutrition-meal-badge">{labels[plan.meal_type]}</span><time dateTime={plan.scheduled_on}>{plan.scheduled_on}</time></div>;
 }
 export function MealProposals({turn}){
- const query=useNutrition(),{user,token}=useAuth(),cache=useQueryClient(),lock=useRef(false);const [busy,setBusy]=useState(null),[error,setError]=useState('');
- async function save(position){if(lock.current)return;lock.current=true;setBusy(position);setError('');try{await api('/coach/meal-plans',{token,body:{turn_id:turn.id,position}});await cache.invalidateQueries({queryKey:['nutrition',user.id]});}catch(e){setError(e.message);}finally{lock.current=false;setBusy(null);}}
+ const query=useNutrition(),{user,token}=useAuth(),cache=useQueryClient(),lock=useRef(false);
+ const [busy,setBusy]=useState(null),[error,setError]=useState(''),[activePosition,setActivePosition]=useState(0);
+ const detailId=useId();
+ async function save(position){if(lock.current)return;lock.current=true;setBusy(position);setError('');try{await api('/coach/meal-plans',{token,body:{turn_id:turn.id,position}});await cache.invalidateQueries({queryKey:['nutrition',user.id]});}catch(e){setError('끼니 '+(position+1)+' 저장: '+e.message);}finally{lock.current=false;setBusy(null);}}
  if(!turn.meal_proposals?.length)return null;
- return <section className="nutrition-proposals"><h3>제안받은 식단</h3><p>마음에 드는 끼니를 계획으로 저장해 보세요.</p>{turn.meal_proposals.map((plan,position)=>{const saved=query.data?.plans.find(p=>p.turn_id===turn.id&&p.position===position);return <article className="nutrition-plan" key={position}><PlanHeading plan={plan}/><h4>{plan.title}</h4><Foods plan={plan}/>{saved?<p role="status">식단 계획에 저장했어요. <Link to="/meals?view=plans">저장한 계획 보기 ↗</Link> · <Link to={'/meals/new?plan='+saved.id}>먹은 식단으로 기록 ↗</Link></p>:<button className="btn btn-primary" disabled={busy!==null||!query.isSuccess} onClick={()=>save(position)}>{busy===position?'저장 중…':'식단 계획에 저장'}</button>}<IngredientLinks plan={plan}/></article>;})}{error&&<p role="alert">{error}</p>}</section>;
+ const position=activePosition<turn.meal_proposals.length?activePosition:0;
+ const plan=turn.meal_proposals[position];
+ const savedAt=index=>query.data?.plans.find(p=>p.turn_id===turn.id&&p.position===index);
+ const saved=savedAt(position);
+ return <section className="nutrition-proposals nutrition-proposal-review">
+  <div className="nutrition-proposal-heading"><h3>제안받은 식단</h3><span>{turn.meal_proposals.length}개 끼니</span></div>
+  <p>끼니를 선택해 구성을 확인하고, 마음에 드는 계획을 저장하세요.</p>
+  <div className="nutrition-proposal-options" role="group" aria-label="제안된 끼니 선택">{turn.meal_proposals.map((item,index)=><button type="button" key={index} disabled={busy!==null} aria-pressed={position===index} aria-controls={detailId} onClick={()=>setActivePosition(index)}><span>{item.scheduled_on} · {labels[item.meal_type]}{savedAt(index)&&<em>저장됨</em>}</span><strong>{item.title}</strong></button>)}</div>
+  {query.isPending&&<p role="status">식단 저장 내역을 확인하고 있어요.</p>}
+  {query.isError&&<p role="alert">저장 내역을 불러오지 못했어요. <button type="button" onClick={()=>query.refetch()}>다시 확인</button></p>}
+  <article className="nutrition-plan nutrition-proposal-detail" id={detailId}>
+   <PlanHeading plan={plan}/><h4>{plan.title}</h4><Foods plan={plan}/>
+   {error&&<p role="alert">{error}</p>}
+   {saved?<p role="status">식단 계획에 저장했어요. <Link to="/meals?view=plans">저장한 계획 보기 ↗</Link> · <Link to={'/meals/new?plan='+saved.id}>먹은 식단으로 기록 ↗</Link></p>:<button type="button" className="btn btn-primary" disabled={busy!==null||!query.isSuccess} onClick={()=>save(position)}>{busy===position?'저장 중…':'이 끼니를 식단 계획에 저장'}</button>}
+   <IngredientLinks plan={plan}/>
+  </article>
+ </section>;
 }
 export function SavedMealPlans(){const query=useNutrition(),{user,token}=useAuth(),cache=useQueryClient(),lock=useRef(false);const [confirm,setConfirm]=useState(null),[busy,setBusy]=useState(false),[error,setError]=useState('');async function remove(id){if(lock.current)return;lock.current=true;setBusy(true);setError('');try{await api('/coach/meal-plans/'+id,{token,method:'DELETE'});await cache.invalidateQueries({queryKey:['nutrition',user.id]});setConfirm(null);}catch(e){setError(e.message);}finally{lock.current=false;setBusy(false);}}
  return <section className="nutrition-saved"><span className="section-eyebrow">MY MEAL PLAN</span><h2>저장한 식단 계획</h2><p className="muted small">최근 100개 · 계획을 지워도 먹은 기록은 유지돼요.</p>{query.isPending?<p role="status">식단 계획을 불러오는 중…</p>:query.isError?<p role="alert">계획을 불러오지 못했어요. <button onClick={()=>query.refetch()}>다시 시도</button></p>:!query.data.plans.length?<p className="coach-empty">코치가 제안한 끼니를 저장하면 여기에 모여요.</p>:<div className="nutrition-plan-grid">{query.data.plans.map(plan=><article className="nutrition-saved-card" key={plan.id}><PlanHeading plan={plan}/><h3>{plan.title}</h3><Foods plan={plan}/><Link to={'/meals/new?plan='+plan.id}>먹은 식단으로 기록 ↗</Link><IngredientLinks plan={plan}/><div className="plan-delete-footer">{confirm===plan.id?<div className="plan-delete-confirm"><p>이 식단 계획을 삭제할까요?<small>이미 기록한 식사는 유지돼요.</small></p><div><button disabled={busy} onClick={()=>remove(plan.id)}>삭제 확인</button><button disabled={busy} onClick={()=>setConfirm(null)}>취소</button></div></div>:<button className="coach-delete" onClick={()=>setConfirm(plan.id)}>계획 삭제</button>}</div></article>)}</div>}{error&&<p role="alert">{error}</p>}</section>;

@@ -11,6 +11,7 @@ import RecordTabs from '../../shared/RecordTabs.jsx';
 import { GpsDraftList } from '../tracking/index.js';
 import SportIcon from '../../shared/SportIcon.jsx';
 import './record-polish.css';
+import './record-library-polish.css';
 
 function Filters({ filters, onFilter }) {
   const [draft, setDraft] = useState(filters);
@@ -21,13 +22,7 @@ function Filters({ filters, onFilter }) {
     setError(message);
     if (!message) onFilter(draft);
   }
-  return <form className="activity-filters" onSubmit={submit} noValidate aria-label="운동 기록 필터">
-    <div className="field"><div className="field-label-row"><label htmlFor="filter-sport">종목</label></div>
-      <select id="filter-sport" value={draft.sport} onChange={e => setDraft({ ...draft, sport: e.target.value })}>
-        <option value="">전체 종목</option>
-        {LIST_SPORTS.map(sport => <option key={sport} value={sport}>{SPORT_LABEL[sport]}</option>)}
-      </select>
-    </div>
+  return <form className="activity-filters record-period-fields" onSubmit={submit} noValidate aria-label="운동 기록 필터">
     <Field id="filter-from" label="시작일" type="date" min="1900-01-01" max="9999-12-24" value={draft.from} onChange={e => setDraft({ ...draft, from: e.target.value })} />
     <Field id="filter-to" label="종료일" type="date" min="1900-01-01" max="9999-12-24" value={draft.to} onChange={e => setDraft({ ...draft, to: e.target.value })} error={error} />
     <div className="activity-filter-actions"><Button type="submit" variant="ghost">적용</Button><Button variant="ghost" onClick={() => { const empty = { sport: '', from: '', to: '' }; setDraft(empty); setError(''); onFilter(empty); }}>초기화</Button></div>
@@ -48,16 +43,16 @@ export default function ActivityListView({ filters, filterMessage, records, onFi
   return <div className="activity-library">
     <RecordTabs active="activities" />
     {phoneGuide && <GpsPhoneDialog onClose={() => setPhoneGuide(false)}/>}
-    <header className="activity-library-heading"><div><span className="section-eyebrow">나의 운동 일지</span><h1>움직인 만큼, 쌓이는 기록</h1><p>가벼운 산책부터 마지막 한 세트까지.</p></div>
+    <header className="activity-library-heading"><div><span className="section-eyebrow">나의 운동 일지</span><h1>운동 기록</h1><p>운동을 남기고, 쌓인 변화를 돌아보세요.</p></div>
     </header>
     <div className="record-entry-grid">
-      <Link className="record-entry record-entry-gps" to="/activities/track" onClick={e => { if (!isMobileTrackingDevice(navigator)) { e.preventDefault(); setPhoneGuide(true); } }}><span className="record-entry-tag">지금 밖에서 운동한다면</span><strong>GPS 측정 시작</strong><p>러닝 · 걷기 · 자전거<br/>움직인 경로와 시간을 함께 남겨요.</p><span className="record-entry-bottom">종목 선택하기 <span aria-hidden="true">↗</span></span><svg className="record-route-art" viewBox="0 0 200 170" fill="none" aria-hidden="true"><path d="M180 0C70 0 195 70 90 80S10 145 165 150" stroke="currentColor" strokeWidth="24" opacity=".08"/><path d="M180 0C70 0 195 70 90 80S10 145 165 150" stroke="currentColor" strokeWidth="2" strokeDasharray="5 7"/><circle cx="165" cy="150" r="7" fill="currentColor"/></svg></Link>
-      <Link className="record-entry record-entry-manual" to="/activities/new" state={{activitiesReturnTo:returnTo}}><span className="record-entry-tag">운동을 마쳤다면</span><strong>직접 기록하기</strong><p>모든 종목의 시간과 거리,<br/>헬스 세트와 오늘의 메모까지.</p><span className="record-entry-bottom">운동 남기기 <span aria-hidden="true">＋</span></span></Link>
+      <Link className="record-entry record-entry-gps" to="/activities/track" onClick={e => { if (!isMobileTrackingDevice(navigator)) { e.preventDefault(); setPhoneGuide(true); } }}><span className="record-entry-tag">지금 밖에서 운동한다면</span><strong>GPS 측정 시작</strong><p>러닝 · 걷기 · 자전거의 경로와 시간</p><span className="record-entry-bottom">종목 선택하기 <span aria-hidden="true">↗</span></span><svg className="record-route-art" viewBox="0 0 200 170" fill="none" aria-hidden="true"><path d="M180 0C70 0 195 70 90 80S10 145 165 150" stroke="currentColor" strokeWidth="24" opacity=".08"/><path d="M180 0C70 0 195 70 90 80S10 145 165 150" stroke="currentColor" strokeWidth="2" strokeDasharray="5 7"/><circle cx="165" cy="150" r="7" fill="currentColor"/></svg></Link>
+      <Link className="record-entry record-entry-manual" to="/activities/new" state={{activitiesReturnTo:returnTo}}><span className="record-entry-tag">운동을 마쳤다면</span><strong>직접 기록하기</strong><p>운동 시간·거리부터 헬스 세트까지</p><span className="record-entry-bottom">운동 남기기 <span aria-hidden="true">＋</span></span></Link>
     </div>
     <Suspense fallback={<p>보관한 측정 확인 중…</p>}><GpsDraftList /></Suspense>
     <div className="record-history-heading"><h2>내 운동 모아보기</h2><Link to="/activities/exercises" state={{activitiesReturnTo:returnTo}}>운동명 관리 ↗</Link></div>
     <div className="record-sport-filters" role="group" aria-label="종목 빠른 선택">{['',...LIST_SPORTS].map(sport=><button type="button" key={sport} aria-pressed={filters.sport===sport} onClick={()=>onFilter({...filters,sport})}>{sport&&<SportIcon sport={sport}/>}<span>{SPORT_LABEL[sport]||'전체'}</span></button>)}</div>
-    <section className="record-date-filter"><h3>날짜 · 상세 필터{filtered?' · 적용 중':''}</h3><Filters key={returnTo} filters={filters} onFilter={onFilter} /></section>
+    <section className="record-date-filter"><h3>기간으로 찾기{filters.from||filters.to?' · 적용 중':''}</h3><Filters key={returnTo} filters={filters} onFilter={onFilter} /></section>
     <section className="activity-library-results" aria-label="운동 기록 목록" aria-busy={records.isFetching}>
       <div className="activity-library-caption"><span>최신 날짜순</span><span role="status">{!filterMessage && records.data ? items.length + '건 표시' + (records.hasNextPage ? ' · 더 있음' : '') : ''}</span></div>
       {filterMessage ? <p className="activity-list-message" role="alert">{filterMessage}</p>

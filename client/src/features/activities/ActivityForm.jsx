@@ -10,7 +10,7 @@ import SportIcon from '../../shared/SportIcon.jsx';
 
 const emptySet = () => ({ name: '', reps: '', weight: '' });
 
-export default function ActivityForm({ today, onSave, initialSport = 'running', initialValues, editing = false, cancelTo = '/home', gpsDraft, onSelectDraft, onClearDraft,
+export default function ActivityForm({ today, onSave, initialSport = 'running', initialValues, editing = false, cancelTo = '/home', gpsDraft, onSelectDraft, onClearDraft, planTitle, planNote,
   exerciseNames = [], exerciseNamesPending = false, exerciseNamesError = false, onExerciseNameFocus, onExerciseNamesRetry }) {
   const location = useLocation();
   const [form, setForm] = useState(() => initialValues || { sport: initialActivitySport(initialSport), date: today, minutes: '', seconds: '0', distance: '', lapCount: '', note: '', sets: [emptySet()] });
@@ -32,6 +32,7 @@ export default function ActivityForm({ today, onSave, initialSport = 'running', 
     event.preventDefault();
     if (lock.current) return;
     const payload = activityPayload(form, { editing });
+    if (planTitle && !gpsDraft && form.date > today) payload.errors.date = '아직 오지 않은 계획 날짜예요. 실제 운동한 날짜로 바꿔 주세요.';
     setErrors(payload.errors);
     setMessage('');
     if (Object.keys(payload.errors).length) {
@@ -54,10 +55,11 @@ export default function ActivityForm({ today, onSave, initialSport = 'running', 
     }
   }
   return <div className="activity-page">
-    <header className="activity-heading"><Link to={cancelTo} state={location.state}>{editing ? '기록 상세로' : cancelTo === '/home' ? '홈으로' : '기록 목록으로'}</Link><h1>{editing ? '운동 기록 수정' : '운동 기록하기'}</h1><p className="activity-form-intro">오늘의 움직임을 남겨 주세요. 작은 기록도 차곡차곡 쌓여요.</p></header>
+    <header className="activity-heading"><Link to={cancelTo} state={location.state}>{editing ? '기록 상세로' : cancelTo.startsWith('/coach?') ? '내 계획으로' : cancelTo === '/home' ? '홈으로' : '기록 목록으로'}</Link><h1>{editing ? '운동 기록 수정' : '운동 기록하기'}</h1><p className="activity-form-intro">오늘의 움직임을 남겨 주세요. 작은 기록도 차곡차곡 쌓여요.</p></header>
     <form ref={formRef} onSubmit={submit} noValidate>
       <fieldset disabled={busy} className="activity-fields">
         <legend className="sr-only">운동 기록</legend>
+        {planTitle && !gpsDraft && <section className="gps-drafts"><strong>계획을 참고해 기록해요 · {planTitle}</strong><p>계획의 날짜·운동 시간을 미리 넣었어요. 실제 운동한 날짜와 시간으로 수정하고, 거리나 세트도 직접 입력해 주세요. 저장 전에는 운동 기록으로 남지 않아요.</p>{planNote && <p>계획 메모 · {planNote}</p>}</section>}
         {gpsDraft && <section className="gps-drafts"><strong>보관한 GPS 측정을 불러왔어요.</strong><p>종목·날짜·시간·거리는 측정값을 사용합니다. 메모를 남기고 저장해 주세요.</p><Button variant="ghost" onClick={onClearDraft}>불러오기 취소</Button></section>}
         {gpsDraft && <Suspense fallback={<p>경로를 불러오는 중…</p>}><GpsRouteMap points={gpsDraft.points} /></Suspense>}
         <fieldset className="activity-sports" disabled={editing || Boolean(gpsDraft)}><legend>{editing || gpsDraft ? '종목 · 변경할 수 없어요' : '종목'}</legend>

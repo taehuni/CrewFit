@@ -24,6 +24,7 @@ export function listURL(filters) {
 }
 export function activitiesReturnTo(state) {
   const path = state?.activitiesReturnTo;
+  if (path === '/me?view=records') return path;
   if (typeof path !== 'string' || !(path === '/activities' || path.startsWith('/activities?'))) return null;
   const filters = listFilters(new URLSearchParams(path.split('?')[1]));
   return filterError(filters) ? '/activities' : listURL(filters);

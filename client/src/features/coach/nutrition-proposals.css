@@ -1,0 +1,15 @@
+.nutrition-proposal-review{min-width:0;container-type:inline-size}
+.nutrition-proposal-heading{display:flex;gap:12px;justify-content:space-between;align-items:center}
+.nutrition-proposal-heading h3{font-size:18px;margin:0}
+.nutrition-proposal-heading>span{font-size:12px;padding:6px 10px;border-radius:20px;background:#eef3ef;color:#36584b;flex-shrink:0}
+.nutrition-proposal-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;max-height:240px;overflow:auto;padding:3px;margin:14px 0;scrollbar-width:thin;overscroll-behavior:contain}
+.nutrition-proposal-options button{display:grid;gap:6px;text-align:left;padding:12px;border:1px solid #dce4de;background:#fff;color:#243e32;border-radius:12px;min-width:0}
+.nutrition-proposal-options button[aria-pressed=true]{background:#f0f5f1;border-color:#638675;box-shadow:inset 3px 0 #294e40}
+.nutrition-proposal-options button>span{font-size:11px;color:#62746a;display:flex;flex-wrap:wrap;gap:5px}
+.nutrition-proposal-options strong{font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+.nutrition-proposal-options em{font-style:normal;font-weight:700}
+.nutrition-proposal-review .nutrition-proposal-detail{margin-top:0;min-width:0;padding:16px}
+.nutrition-proposal-detail h4{overflow-wrap:anywhere}
+.nutrition-proposal-detail>.btn{white-space:normal;min-height:44px}
+.nutrition-proposal-review button:focus-visible{outline:3px solid #ef9d70;outline-offset:2px}
+@container(max-width:360px){.nutrition-proposal-options{grid-template-columns:minmax(0,1fr);max-height:200px}.nutrition-proposal-review .nutrition-proposal-detail{padding:12px}.nutrition-proposal-detail>.btn{width:100%}}

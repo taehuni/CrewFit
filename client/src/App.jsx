@@ -1,4 +1,5 @@
 import { lazy } from 'react';
+const PosePage = lazy(() => import('./features/pose/PosePage.jsx'));
 const ProfileEditor = lazy(() => import('./features/profile/ProfileEditor.jsx'));
 
 const StorePage = lazy(() => import('./features/store/StorePage.jsx'));
@@ -66,7 +67,7 @@ export default function App() {
                 <Route path="/notifications" element={<NotificationsPage />} />
                 <Route path="/goals" element={<GoalsPage />} />
                 <Route path="/feedback" element={<FeedbackPage />} />
-                <Route path="/coach" element={<CoachPage />} /><Route path="/store" element={<StorePage />} /><Route path="/partners" element={<Navigate to="/store?category=facilities" replace />} />
+                <Route path="/pose" element={<PosePage />} /><Route path="/coach" element={<CoachPage />} /><Route path="/store" element={<StorePage />} /><Route path="/partners" element={<Navigate to="/store?category=facilities" replace />} />
                 <Route path="/store/products/:productId" element={<StoreProductPage />} />
                 <Route path="/activities" element={<ActivitiesPage />} />
                 <Route path="/activities/new" element={<ActivityCreatePage />} />

@@ -1,6 +1,6 @@
 import { Link, useSearchParams } from 'react-router';
 import { useInfiniteQuery,useQuery } from '@tanstack/react-query';
-import {useState} from 'react';
+import {useEffect,useState} from 'react';
 import { useAuth } from '../auth/index.js';
 import { supabase } from '../../shared/supabaseClient.js';
 import { queryKeys } from '../../shared/queryKeys.js';
@@ -16,6 +16,7 @@ export default function CrewsPage() {
   const sport = params.get('sport') || '';
   const filters={search:params.get('q')||'',region:params.get('region')||''};
   const [search,setSearch]=useState(filters.search);
+  useEffect(()=>setSearch(filters.search),[filters.search]);
   const mine=useInfiniteQuery({queryKey:queryKeys.myCrews(user.id),initialPageParam:null,queryFn:({pageParam})=>loadMyCrews(supabase,user.id,pageParam),getNextPageParam:p=>p.next,retry:false});
   const regions=useQuery({queryKey:queryKeys.regions(user.id),queryFn:()=>loadRegions(supabase),staleTime:3600000});
   const crews = useInfiniteQuery({ queryKey: queryKeys.crewList(user.id, sport,filters), initialPageParam: null,

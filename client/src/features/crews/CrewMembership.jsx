@@ -3,20 +3,16 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../auth/index.js';
 import { api } from '../../shared/api.js';
 import { supabase } from '../../shared/supabaseClient.js';
-import { queryKeys } from '../../shared/queryKeys.js';
 import { leaveCrew } from './crews.js';
+import { refreshCrewMembership } from './crewMembershipCache.js';
 
 export default function CrewMembership({crew}) {
   const {user,token}=useAuth(), cache=useQueryClient();
   const [busy,setBusy]=useState(false), [confirm,setConfirm]=useState(false), [error,setError]=useState(''), [message,setMessage]=useState('');
   const running=useRef(false);
   const pending=crew.membership==='pending', joined=crew.membership==='approved';
-  async function refresh() {
-    await Promise.all([
-      cache.invalidateQueries({queryKey:queryKeys.crewStatsRoot(user.id,String(crew.id))}),
-      cache.invalidateQueries({queryKey:queryKeys.crewDetail(user.id,String(crew.id))}),
-      cache.invalidateQueries({queryKey:queryKeys.crewListRoot(user.id)}),
-    ]);
+  async function refresh(leaving=false) {
+    await refreshCrewMembership(cache,user.id,crew.id,leaving);
   }
   async function act(leaving=false) {
     if(running.current)return;
@@ -25,7 +21,7 @@ export default function CrewMembership({crew}) {
       if(leaving){await leaveCrew(supabase,crew,user.id);setMessage(pending?'가입 요청을 취소했어요.':'크루에서 탈퇴했어요.');}
       else { const result=await api(`/crews/${crew.id}/join`,{token,body:{}});setMessage(result.status==='pending'?'가입을 요청했어요. 크루장의 승인을 기다려 주세요.':'크루에 가입했어요.'); }
       setConfirm(false);
-      await refresh();
+      await refresh(leaving);
     }catch(error){setError(error.message);}
     finally{running.current=false;setBusy(false);}
   }

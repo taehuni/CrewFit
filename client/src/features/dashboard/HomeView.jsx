@@ -23,11 +23,10 @@ export default function HomeView({ log, days, today, offset, onWeekChange }) {
         <div><span className="section-eyebrow">하루하루, 나의 페이스로</span><h1>내 운동</h1></div>
         <Link to="/activities/new" className="btn btn-primary home-record-link"><span aria-hidden="true">＋</span> 운동 기록하기</Link>
       </header>
-      <Link to="/store?category=facilities" className="home-partners-link"><span><strong>운동할 곳 찾기</strong><small>헬스·PT·체험 수업 · 제휴 서비스 미리보기</small></span><span aria-hidden="true">↗</span></Link><HomeTodayPlan today={today}/>
 
       <section className="home-week-section" aria-labelledby="week-title">
         <div className="home-section-head">
-          <div><h2 id="week-title">{offset === 0 ? '이번 주' : '주간 기록'}</h2><p>{weekLabel(days)}</p></div>
+          <div><h2 id="week-title">{offset === 0 ? '이번 주 기록' : '주간 기록'}</h2><p>{weekLabel(days)}</p></div>
           <div className="week-controls">
             <button type="button" aria-label="이전 주" onClick={() => onWeekChange(offset - 1)}>‹</button>
             <button type="button" onClick={() => onWeekChange(0)} disabled={offset === 0}>이번 주</button>
@@ -50,6 +49,8 @@ export default function HomeView({ log, days, today, offset, onWeekChange }) {
           })}
         </ol>
       </section>
+
+      <HomeTodayPlan today={today}/>
 
       <section className="home-streak" aria-labelledby="streak-title">
         <header><h2 id="streak-title">연속 운동</h2><span>하루에 운동 기록 1개 이상</span></header>
@@ -83,6 +84,7 @@ export default function HomeView({ log, days, today, offset, onWeekChange }) {
             </div>
           </div>}
       </section>
+      <Link to="/store?category=facilities" className="home-partners-link"><span><strong>운동할 곳 찾기</strong><small>헬스·PT·체험 수업 · 제휴 서비스 미리보기</small></span><span aria-hidden="true">↗</span></Link>
     </div>
   );
 }

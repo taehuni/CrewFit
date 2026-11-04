@@ -17,3 +17,12 @@ test('Google login only requests sign-in, keeps app return path and propagates f
   assert.deepEqual(request.options.queryParams, { prompt: 'select_account' });
   await assert.rejects(startGoogleLogin({ signInWithOAuth: async () => ({ error: { message: 'secret-provider-details' } }) }, { origin: 'http://localhost:5173' }), /구글 로그인을 시작하지 못했어요/);
 });
+
+test('new protected destinations survive OAuth redirects without allowing prefix or URL tricks',async()=>{
+ for(const path of ['/coach?view=plans&date=2026-11-03','/pose','/store/products/sample?category=foods','/users/123','/partners']){
+  assert.equal(safeAuthNext(path),path);
+  let input;await startGoogleLogin({signInWithOAuth:async request=>{input=request;return {error:null};}},{origin:'https://crewfit.invalid',next:path});
+  assert.equal(new URL(input.options.redirectTo).searchParams.get('next'),path);
+ }
+ for(const path of ['/coach-evil','/storefront','/users/../../login','//evil.test/coach','/coach\\evil.test','/pose\n','/auth/google','https://evil.test/store'])assert.equal(safeAuthNext(path),'/home');
+});

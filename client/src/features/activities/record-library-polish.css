@@ -1,0 +1,31 @@
+.activity-library .activity-library-heading { margin:24px 0 20px; }
+.activity-library .activity-library-heading h1 { font-size:clamp(28px,3vw,36px); }
+.activity-library .record-entry { min-height:160px; padding:20px 24px; }
+.activity-library .record-entry strong { margin:8px 0 6px; font-size:22px; }
+.activity-library .record-entry-bottom { padding-top:12px; }
+.activity-library .record-entry-bottom > span { width:28px; height:28px; }
+.activity-library .record-route-art { width:150px; right:10px; top:-15px; opacity:.65; }
+.activity-library .record-history-heading { margin-top:24px; }
+.activity-library .record-date-filter { border-color:#dfe5df; margin-bottom:20px; }
+.activity-library .record-date-filter > h3 { padding:12px 18px 0; font-size:12px; }
+.activity-library .record-period-fields { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto; gap:14px; align-items:start; padding:14px 18px 18px; border:0; background:none; }
+.activity-library .record-period-fields > .field:first-child { grid-column:auto; }
+.activity-library .record-period-fields input { border-radius:10px; border-color:#dfe5df; font-size:16px; }
+.activity-library .record-period-fields .activity-filter-actions { grid-column:auto; align-self:start; margin-top:28px; }
+.activity-library .activity-filter-actions .btn { min-height:48px; min-width:70px; padding:10px 16px; border-radius:10px; }
+.activity-library .activity-filter-actions .btn:first-child { background:#203e34; color:white; border-color:#203e34; }
+.activity-library .activity-library-results { margin-top:20px; }
+.activity-library .activity-library-caption { font-size:12px; }
+.activity-library :is(.record-sport-filters button,.activity-filter-actions button):focus-visible { outline:3px solid #a34225; outline-offset:3px; }
+@media(max-width:639px) {
+ .activity-library .record-entry { min-height:165px; padding:16px; }
+ .activity-library .record-entry strong { font-size:18px; }
+ .activity-library .record-entry p { font-size:12px; line-height:1.65; }
+ .activity-library .record-entry-bottom { font-size:11px; gap:4px; }
+ .activity-library .record-route-art { width:115px; right:-55px; }
+ .activity-library .record-period-fields { grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px; padding:14px; }
+ .activity-library .record-period-fields > .field { grid-column:auto; }
+ .activity-library .record-period-fields .activity-filter-actions { grid-column:1/-1; margin-top:0; justify-self:stretch; }
+ .activity-library .record-history-heading { align-items:center; }
+}
+@media(max-width:359px) { .activity-library .record-period-fields { grid-template-columns:minmax(0,1fr); } }

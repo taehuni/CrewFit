@@ -7,6 +7,9 @@ import {koreaToday} from '../../shared/calendar.js';
 import CoachPage from './CoachPage.jsx';
 import {starterPrompt,firstWeekLabel} from './starterPlan.js';
 import './coach-entry.css';
+import './coach-hub.css';
+import '../pose/pose.css';
+import './coach-workspace.css';
 
 function StarterPlan(){
  const {user,token}=useAuth(),cache=useQueryClient(),navigate=useNavigate(),pending=useRef(null),lock=useRef(false);
@@ -19,7 +22,54 @@ function StarterPlan(){
 export default function CoachEntry(){
  const location=useLocation();const mode=new URLSearchParams(location.search).get('view');
  if(mode==='start')return <StarterPlan/>;
- if(mode==='chat'||mode==='plans'||location.state?.coachPrompt)return <CoachPage key={mode||'prompt'} initialView={mode==='plans'?'plans':'conversation'}/>;
- const cards=[{id:'01',title:'처음 시작하기',tag:'기록이 없어도 괜찮아요',text:'해보고 싶은 운동과 가능한 시간을 고르면, 나에게 맞는 1·2·4주 계획을 함께 설계해요.',to:'/coach?view=start',action:'첫 계획 만들기',theme:'start'}, {id:'02',title:'기록 돌아보기',tag:'운동을 이어가고 있다면',text:'지금까지의 운동과 식단을 돌아보고, 다음에 해볼 행동을 찾아봐요.',to:'/feedback',action:'리포트와 피드백 보기',theme:'review'}, {id:'03',title:'맞춤 계획 · 상담',tag:'운동을 시작했어도, 계속하고 있어도',text:'목표와 가능한 시간을 알려주세요. 운동·식단 계획을 새로 제안받거나 기존 계획을 조정할 수 있어요.',to:'/coach?view=chat',action:'코칭 대화 시작하기',theme:'chat'}, {id:'04',title:'내 계획',tag:'오늘 할 일부터 다음 일정까지',text:'확정한 운동 계획은 달력에서, 저장한 식단은 끼니별로 확인해요.',to:'/coach?view=plans',action:'저장한 계획 확인하기',theme:'plans'}];
- return <div className="coach-entry"><header><span className="section-eyebrow">YOUR NEXT STEP</span><h1>지금, 어떤 도움이 필요하세요?</h1><p>처음 시작하는 날도, 다음 목표를 고민하는 날도.<br/>나에게 필요한 코칭을 골라보세요.</p></header><div className="coach-entry-grid">{cards.map(card=><Link key={card.id} to={card.to} className={'coach-entry-card '+card.theme}><div className="coach-entry-card-top"><span>{card.id}</span><small>{card.tag}</small></div><h2>{card.title}</h2><p>{card.text}</p><strong>{card.action}<span aria-hidden="true">↗</span></strong></Link>)}</div></div>;
+ if(mode==='chat'||mode==='plans'||location.state?.coachPrompt)return <CoachPage initialView={mode==='plans'?'plans':'conversation'}/>;
+ return <CoachHub/>;
+}
+
+function HubIcon({kind}) {
+ const paths={
+  start:<><path d="M12 3v4m0 10v4M3 12h4m10 0h4"/><circle cx="12" cy="12" r="5"/></>,
+  report:<><path d="M4 4v16h16M8 15l4-5 4 3 4-7"/><path d="M16 6h4v4"/></>,
+  chat:<><path d="M20 11a8 8 0 0 1-8 8H5l-3 3v-9a10 10 0 0 1 18-6"/><path d="M8 9h8M8 13h5"/></>,
+  plans:<><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 11h18m-13 5 2 2 5-4"/></>,
+ };
+ return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[kind]}</svg>;
+}
+
+function CoachHub() {
+ return <div className="coach-hub">
+  <header className="coach-hub-heading">
+   <div><span className="coach-hub-eyebrow">MY COACHING</span><h1>코칭</h1><p>계획부터 실천까지, 내 페이스로 이어가요.</p></div>
+   <Link className="coach-hub-plan-shortcut" to="/coach?view=plans"><HubIcon kind="plans"/>내 계획 보기<span aria-hidden="true">↗</span></Link>
+  </header>
+  <div className="coach-hub-grid">
+   <Link className="coach-hub-start" to="/coach?view=start">
+    <div className="coach-hub-start-content">
+     <span className="coach-hub-tag"><span aria-hidden="true"/>처음 시작하거나 새 루틴이 필요할 때</span>
+     <h2>운동 계획,<br/>지금의 나에게 맞게.</h2>
+     <p>하고 싶은 운동과 가능한 시간을 알려주세요.<br className="coach-hub-desktop-break"/> 무리 없이 시작할 1·2·4주 계획을 제안해요.</p>
+     <span className="coach-hub-primary-action">맞춤 계획 만들기 <span aria-hidden="true">↗</span></span>
+    </div>
+    <div className="coach-hub-plan-visual" aria-hidden="true">
+     <div className="coach-hub-visual-title"><HubIcon kind="start"/><span>나에게 맞는 계획을 설계하는 순서</span></div>
+     <div className="coach-hub-visual-steps"><span><i/>운동 선택</span><span><i/>시간 맞추기</span><span><i/>계획 확인</span></div>
+    </div>
+   </Link>
+   <Link className="coach-hub-route coach-hub-report" to="/feedback">
+    <span className="coach-hub-icon"><HubIcon kind="report"/></span>
+    <div className="coach-hub-route-body"><span className="coach-hub-label">기록에서 찾는 다음 한 걸음</span><h2>운동 리포트</h2><p>운동과 식단 기록을 돌아보고,<br/>잘한 점과 다음 행동을 확인해요.</p><strong>내 기록 분석하기 <span aria-hidden="true">↗</span></strong></div>
+   </Link>
+   <Link className="coach-hub-route coach-hub-chat" to="/coach?view=chat">
+    <span className="coach-hub-icon"><HubIcon kind="chat"/></span>
+    <div className="coach-hub-route-body"><span className="coach-hub-label">목표가 바뀌어도 괜찮아요</span><h2>코칭 대화</h2><p>운동·식단을 물어보고,<br/>지금 나에게 맞는 계획으로 조정해요.</p><strong>상담 시작하기 <span aria-hidden="true">↗</span></strong></div>
+   </Link>
+  </div>
+  <Link className="coach-hub-schedule" to="/coach?view=plans">
+   <span className="coach-hub-icon"><HubIcon kind="plans"/></span>
+   <div><h2>계획을 세웠다면, 이제 한 걸음</h2><p>저장한 운동 일정을 달력에서 확인해요.</p></div>
+   <span className="coach-hub-schedule-action">내 일정 확인 <span aria-hidden="true">→</span></span>
+  </Link>
+  <Link className="coach-hub-pose" to="/pose"><span aria-hidden="true">↗</span><div><small>카메라로 확인하는 움직임</small><h2>운동 자세 확인</h2><p>스쿼트·런지·푸시업, 촬영 방향에 맞는 피드백을 확인해요.</p></div><strong>시작하기 →</strong></Link>
+  <p className="coach-hub-footnote">제안받은 계획은 직접 확인하고 선택해요. 나에게 필요한 일정만 골라 저장하세요.</p>
+ </div>;
 }

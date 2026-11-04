@@ -1,0 +1,48 @@
+.proposal-review{container-type:inline-size;border-top:1px solid var(--line);padding-top:20px;min-width:0}
+.proposal-review .proposal-review-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.proposal-review-heading span{font-size:10px;font-weight:800;letter-spacing:.12em;color:#667a70}
+.proposal-review .proposal-review-heading h3{margin:5px 0;font-size:18px;line-height:1.4}
+.proposal-review-heading>strong{flex-shrink:0;font-size:12px;color:#36584b;background:#edf3ef;padding:6px 10px;border-radius:20px}
+.proposal-review-weeks{display:flex;flex-wrap:wrap;gap:6px;margin:16px 0 10px}
+.proposal-review-weeks button,.proposal-review-selection button{border:1px solid #d8e1dc;border-radius:9px;background:#fff;color:#294e40;padding:8px 11px;font-size:12px;min-height:38px}
+.proposal-review-weeks button[aria-pressed=true]{background:#203e34;border-color:#203e34;color:white}
+.proposal-review-selection{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin:12px 0}
+.proposal-review .proposal-review-selection p{font-size:12px;margin:0;color:#63716b;line-height:1.6}
+.proposal-review-selection>div{display:flex;flex-wrap:wrap;gap:6px}
+.proposal-review-workspace{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:12px;align-items:start}
+.proposal-review-list{min-width:0;max-height:460px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;display:grid;gap:7px;padding:2px}
+.proposal-review-row{display:flex;align-items:center;min-width:0;border:1px solid #e1e7e3;border-radius:12px;background:#fff}
+.proposal-review-row.is-active{border-color:#648676;background:#f0f5f1;box-shadow:inset 3px 0 #294e40}
+.proposal-review-check{padding:12px 8px 12px 12px;display:flex;align-items:center;justify-content:center;min-height:48px;cursor:pointer;flex-shrink:0}
+.proposal-review .proposal-review-check input{margin:0;padding:0;width:17px;height:17px;min-height:17px;accent-color:#294e40}
+.proposal-review-row>button{min-width:0;flex:1;border:0;background:none;text-align:left;padding:12px 12px 12px 2px;color:inherit;display:grid;gap:5px;border-radius:9px}
+.proposal-review-date{font-size:11px;color:#62746a;display:flex;flex-wrap:wrap;gap:4px;line-height:1.5}
+.proposal-review-date em{font-style:normal;color:#365e4c;font-weight:700}
+.proposal-review-row strong{font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+.proposal-review-row small{font-size:11px;color:#66766e;display:flex;justify-content:space-between}
+.proposal-review-editor{background:#f7f9f7;border:1px solid #e0e6e1;border-radius:14px;padding:14px;min-width:0;scroll-margin-block:16px}
+.proposal-review-editor-heading{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:13px;margin-bottom:12px}
+.proposal-review-editor-heading span{font-size:11px;color:#60786b}
+.proposal-review-editor label{display:grid;gap:6px;margin:0 0 12px;font-size:12px;min-width:0;font-weight:600}
+.proposal-review-fields{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 10px}
+.proposal-review-editor input,.proposal-review-editor select,.proposal-review-editor textarea{box-sizing:border-box;width:100%;min-width:0;max-width:100%;border:1px solid #d9e0db;border-radius:8px;padding:9px;background:#fff;font:inherit;min-height:42px;color:inherit}
+.proposal-review-editor input[type=date],.proposal-review-editor input[type=time]{appearance:none;-webkit-appearance:none}
+.proposal-review-editor textarea{resize:vertical;line-height:1.7;font-weight:400;min-height:120px}
+.proposal-review-editor>small{font-size:11px;color:#68786f}
+.proposal-review-footer{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:16px}
+.proposal-review .proposal-review-footer p{flex:1;min-width:160px;margin:0;font-size:11px;color:#65736b;line-height:1.6}
+.proposal-review-footer .btn{font-size:13px;white-space:normal;min-height:44px}
+.proposal-review-footer .btn-primary{background:var(--accent-ink)}
+.proposal-review .proposal-review-error{color:#a32b1b;background:#fff0e9;border-radius:9px;padding:10px 12px;font-size:13px}
+.proposal-review :is(button,input,select,textarea):focus-visible{outline:3px solid #ef9d70;outline-offset:3px}
+.proposal-review button:disabled{cursor:default;opacity:.55}
+@container(max-width:580px){
+ .proposal-review-workspace{grid-template-columns:minmax(0,1fr)}
+ .proposal-review-list{max-height:220px}
+ .proposal-review-editor{padding:12px}
+ .proposal-review-editor input,.proposal-review-editor select,.proposal-review-editor textarea{font-size:16px}
+ .proposal-review-footer{align-items:stretch;gap:8px}
+ .proposal-review-footer .btn{width:100%}
+ .proposal-review-footer p{flex-basis:100%}
+}
+@container(max-width:300px){.proposal-review-fields{grid-template-columns:minmax(0,1fr)}}

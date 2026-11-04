@@ -1,0 +1,76 @@
+.coach-hub { --hub-green:#203e34; --hub-muted:#66746d; padding:12px 0 20px; }
+.coach-hub-heading { display:flex; align-items:center; justify-content:space-between; gap:24px; margin:0 0 28px; }
+.coach-hub-eyebrow { color:var(--hub-muted); font-size:11px; font-weight:750; letter-spacing:.14em; }
+.coach-hub-heading h1 { margin:7px 0 9px; font-size:clamp(28px,3vw,36px); letter-spacing:-.045em; }
+.coach-hub-heading p { color:var(--ink-2); font-size:14px; line-height:1.7; }
+.coach-hub-plan-shortcut { display:inline-flex; align-items:center; gap:10px; min-height:46px; padding:10px 17px; background:#fff; border:1px solid #dce4de; border-radius:14px; font-size:13px; font-weight:700; flex-shrink:0; }
+.coach-hub-plan-shortcut svg { width:19px; height:19px; color:var(--hub-green); }
+.coach-hub-grid { display:grid; grid-template-columns:minmax(0,1.12fr) minmax(0,1fr); grid-template-rows:repeat(2,1fr); gap:16px; }
+.coach-hub-start { grid-row:1 / 3; display:flex; flex-direction:column; justify-content:space-between; min-width:0; overflow:hidden; border-radius:26px; background:var(--hub-green); color:#fff; padding:32px; }
+.coach-hub-start-content { position:relative; }
+.coach-hub-tag { display:inline-flex; align-items:center; gap:7px; color:#d6e3d9; font-size:11px; font-weight:600; line-height:1.6; }
+.coach-hub-tag>span { width:6px; height:6px; border-radius:50%; background:#e3b29a; flex-shrink:0; }
+.coach-hub-start h2 { font-size:clamp(28px,3.1vw,42px); line-height:1.23; letter-spacing:-.045em; margin:25px 0 18px; color:#fff; }
+.coach-hub-start-content>p { color:#d6e3d9; font-size:14px; line-height:1.85; margin:0; }
+.coach-hub-primary-action { display:inline-flex; align-items:center; justify-content:space-between; gap:30px; min-height:48px; margin-top:24px; padding:12px 18px; background:var(--accent-ink,#c73a05); color:#fff; border-radius:13px; font-size:14px; font-weight:750; }
+.coach-hub-primary-action>span { font-size:21px; line-height:1; }
+.coach-hub-plan-visual { margin-top:32px; padding:18px 0 0; border-top:1px solid #ffffff26; }
+.coach-hub-visual-title { display:flex; align-items:center; gap:8px; color:#d4e0d7; font-size:11px; }
+.coach-hub-visual-title svg { width:18px; height:18px; }
+.coach-hub-visual-steps { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:17px; }
+.coach-hub-visual-steps>span { display:flex; flex-direction:column; gap:9px; font-size:11px; color:#e8eee9; }
+.coach-hub-visual-steps i { display:block; height:4px; border-radius:6px; background:#ffffff38; }
+.coach-hub-visual-steps>span:first-child i { background:#f29971; }
+.coach-hub-route { display:flex; align-items:flex-start; gap:20px; border:1px solid #dfe6df; border-radius:24px; background:#fff; padding:27px; min-width:0; }
+.coach-hub-icon { display:grid; place-items:center; width:46px; height:46px; flex-shrink:0; border-radius:15px; color:var(--hub-green); background:#edf2ed; }
+.coach-hub-icon svg { width:25px; height:25px; }
+.coach-hub-chat .coach-hub-icon { background:#faf0e8; color:#9c4b28; }
+.coach-hub-route-body { flex:1; min-width:0; }
+.coach-hub-label { display:block; color:var(--hub-muted); font-size:11px; line-height:1.7; }
+.coach-hub-route h2 { margin:6px 0 10px; font-size:22px; letter-spacing:-.035em; }
+.coach-hub-route p { font-size:13px; line-height:1.8; color:var(--ink-2); margin:0; }
+.coach-hub-route strong { display:flex; justify-content:space-between; align-items:center; gap:15px; margin-top:20px; font-size:12px; font-weight:750; color:var(--hub-green); }
+.coach-hub-route strong>span { font-size:21px; line-height:1; }
+.coach-hub-schedule { display:flex; gap:18px; align-items:center; padding:23px 27px; background:#f0f3ee; border:1px solid #e0e7df; border-radius:21px; margin-top:18px; }
+.coach-hub-schedule>.coach-hub-icon { background:#fff; }
+.coach-hub-schedule>div { flex:1; min-width:0; }
+.coach-hub-schedule h2 { font-size:16px; letter-spacing:-.025em; line-height:1.5; margin:0 0 4px; }
+.coach-hub-schedule p { color:var(--ink-2); font-size:12px; line-height:1.7; margin:0; }
+.coach-hub-schedule-action { display:inline-flex; align-items:center; gap:24px; font-size:13px; font-weight:700; color:var(--hub-green); flex-shrink:0; }
+.coach-hub-schedule-action>span { font-size:20px; }
+.coach-hub-footnote { color:var(--hub-muted); font-size:11px; line-height:1.8; margin:17px 4px 0; }
+.coach-hub a { transition:box-shadow .18s,transform .18s,border-color .18s; }
+.coach-hub a:focus-visible { outline:3px solid var(--accent); outline-offset:4px; }
+@media(hover:hover) { .coach-hub a:hover { transform:translateY(-2px); box-shadow:0 8px 24px #203e340c; } .coach-hub-route:hover,.coach-hub-plan-shortcut:hover { border-color:#8eaa99; } }
+@media(max-width:800px) {
+ .coach-hub-grid { grid-template-columns:minmax(0,1fr); grid-template-rows:auto; gap:12px; }
+ .coach-hub-start { grid-row:auto; padding:26px; }
+ .coach-hub-start h2 { font-size:32px; margin:17px 0 13px; }
+ .coach-hub-plan-visual { margin-top:24px; }
+ .coach-hub-visual-steps { margin-top:12px; }
+ .coach-hub-route { padding:22px; gap:17px; }
+ .coach-hub-route strong { margin-top:15px; }
+ .coach-hub-route p br { display:none; }
+ .coach-hub-schedule { padding:22px; gap:14px; flex-wrap:wrap; }
+ .coach-hub-schedule-action { margin-left:60px; min-height:28px; }
+}
+@media(max-width:440px) {
+ .coach-hub { padding-top:4px; }
+ .coach-hub-heading { align-items:flex-start; gap:12px; margin-bottom:22px; }
+ .coach-hub-heading p { max-width:190px; font-size:12px; }
+ .coach-hub-heading h1 { font-size:28px; }
+ .coach-hub-plan-shortcut { padding:10px 12px; gap:6px; font-size:12px; margin-top:20px; }
+ .coach-hub-plan-shortcut svg { display:none; }
+ .coach-hub-start { padding:24px; border-radius:22px; }
+ .coach-hub-start-content>p { font-size:13px; }
+ .coach-hub-plan-visual { display:none; }
+ .coach-hub-desktop-break { display:none; }
+ .coach-hub-route { padding:20px; gap:14px; border-radius:20px; }
+ .coach-hub-icon { width:40px; height:40px; border-radius:13px; }
+ .coach-hub-route h2 { font-size:20px; }
+ .coach-hub-route p { font-size:12px; }
+ .coach-hub-schedule { padding:20px; }
+ .coach-hub-schedule h2 { font-size:14px; }
+ .coach-hub-schedule-action { margin-left:54px; }
+}
+@media(prefers-reduced-motion:reduce) { .coach-hub a { transition:none; } .coach-hub a:hover { transform:none; } }

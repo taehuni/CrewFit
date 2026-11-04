@@ -82,6 +82,6 @@ test('detail treats invalid/missing/other records alike and filters owner', asyn
 });
 test('visible items tolerate malformed legacy JSON and cache invalidation is account scoped', async () => {
   assert.deepEqual(visibleMealItems([null, {}, { name: ' 사과 ', amount: ' 1개 ', kcal: 50 }, { name: '물', kcal: -1 }]), [{ name: '사과', amount: '1개', kcal: 50 }, { name: '물', amount: null, kcal: null }]);
-  const keys = []; await invalidateMeals({ invalidateQueries: async ({ queryKey }) => keys.push(queryKey) }, 'me');
-  assert.deepEqual(keys, [queryKeys.mealsRoot('me')]);
+  const keys = []; await invalidateMeals({ invalidateQueries: async ({ queryKey }) => keys.push(queryKey), resetQueries: async ({ queryKey }) => keys.push(queryKey) }, 'me');
+  assert.deepEqual(keys, [queryKeys.mealsRoot('me'), ['meal-plan-record','me']]);
 });
