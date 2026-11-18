@@ -1,0 +1,11 @@
+{
+  "appId": "com.crewfit.app",
+  "appName": "CrewFit",
+  "webDir": "dist",
+  "plugins": {
+    "SystemBars": { "insetsHandling": "native", "initialViewportFitValueHint": "auto" }
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}

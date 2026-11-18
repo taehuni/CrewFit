@@ -6,6 +6,8 @@ import { Button, Field, FormMessage } from '../../shared/ui.jsx';
 import AuthLayout, { authMessage } from './AuthLayout.jsx';
 import { normalizeMemberName } from '../../shared/memberName.js';
 import { signupWithEmail } from './authLinks.js';
+import { Capacitor } from '@capacitor/core';
+import { sendNativeAuthEmail } from './nativeAuthRuntime.js';
 
 // 가입 트리거가 닉네임은 profiles, 실명은 본인 전용 user_settings에 저장한다 (D-28).
 export default function SignupPage() {
@@ -30,9 +32,10 @@ export default function SignupPage() {
     setBusy(true); setError('');
     const email = f.get('email').trim();
     try {
-      const status = await signupWithEmail(supabase.auth, {
+      const send = redirect => signupWithEmail(supabase.auth, {
         email, password: f.get('password'), nickname, real_name,
-      }, window.location.origin);
+      }, window.location.origin, redirect);
+      const status = await (Capacitor.isNativePlatform() ? sendNativeAuthEmail('email', send) : send());
       navigate(status === 'signed-in' ? '/home' : '/verify-email', {
         replace: true, state: { email, sent: true },
       });

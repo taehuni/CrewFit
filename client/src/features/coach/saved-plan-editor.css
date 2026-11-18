@@ -1,0 +1,18 @@
+.saved-plan-calendar-controls,.saved-plan-editor fieldset{border:0;padding:0;margin:0;min-width:0}
+.saved-plan-editor{padding:20px;border:1px solid var(--line,#ddd);border-radius:18px;background:var(--surface,#fff);margin-bottom:20px;min-width:0}
+.saved-plan-editor label{display:grid;gap:6px;min-width:0;margin-bottom:14px;font-weight:600}
+.saved-plan-editor input,.saved-plan-editor select,.saved-plan-editor textarea{box-sizing:border-box;width:100%;max-width:100%;min-width:0}
+.saved-plan-editor-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 14px}
+.saved-plan-editor-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.saved-plan-actions{flex-wrap:wrap}
+.plan-day-heading{flex-wrap:wrap}.plan-day-heading>.btn{margin-left:auto;min-height:44px;white-space:normal}
+.saved-plan-complete,.saved-plan-success{color:#244b3c;background:#edf3e8;border-radius:12px;padding:10px 14px;font-size:14px;font-weight:650}
+.saved-plan-success a{margin-left:8px;text-decoration:underline}
+.nutrition-saved .saved-plan-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,340px);gap:24px;align-items:start;margin-top:20px}
+.nutrition-saved .saved-plan-calendar{grid-column:2;grid-row:1;min-width:0}
+.nutrition-saved .saved-plan-day{grid-column:1;grid-row:1;min-width:0}
+.meal-journal .nutrition-day-plans{grid-template-columns:minmax(0,1fr)}
+.nutrition-saved .plan-calendar{margin-top:0}
+.saved-plan-editor input,.saved-plan-editor select,.saved-plan-editor textarea,.nutrition-preferences input,.nutrition-preferences select{font-size:16px}
+@media(max-width:959px){.nutrition-saved .saved-plan-layout{display:flex;flex-direction:column;gap:16px}.nutrition-saved .saved-plan-calendar,.nutrition-saved .saved-plan-day{width:100%}}
+@media(max-width:420px){.saved-plan-editor{padding:14px}.saved-plan-editor-fields{grid-template-columns:minmax(0,1fr)}}

@@ -1,3 +1,4 @@
+import {useProfileForm} from './ProfileChanges.jsx';
 import { useRef, useState } from 'react';
 import { Link } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
@@ -11,6 +12,7 @@ export default function PublicProfileForm({ userId, profile, mode="all" }) {
   const cache = useQueryClient(), lock = useRef(false);
   const [form, setForm] = useState(() => ({ nickname: profile.nickname, activity_visibility: profile.activity_visibility || 'crew', show_crews: profile.show_crews ?? true }));
   const [busy, setBusy] = useState(false), [error, setError] = useState(''), [message, setMessage] = useState('');
+  const changes=useProfileForm(mode==='nickname'?{nickname:form.nickname}:mode==='privacy'?{activity_visibility:form.activity_visibility,show_crews:form.show_crews}:form);
   function change(key, value) { setForm(previous => ({ ...previous, [key]: value })); setError(''); setMessage(''); }
   async function submit(event) {
     event.preventDefault(); if (lock.current) return;
@@ -23,6 +25,7 @@ export default function PublicProfileForm({ userId, profile, mode="all" }) {
         cache.invalidateQueries({ queryKey: queryKeys.postsRoot(userId) }),
         cache.invalidateQueries({ queryKey: ['crewStats', userId] }),
       ]);
+      changes.markSaved(mode==='nickname'?{nickname:saved.nickname}:mode==='privacy'?{activity_visibility:saved.activity_visibility,show_crews:saved.show_crews}:{nickname:saved.nickname,activity_visibility:saved.activity_visibility,show_crews:saved.show_crews});
       setForm({ nickname: saved.nickname, activity_visibility: saved.activity_visibility, show_crews: saved.show_crews });
       setMessage(mode==='nickname'?'닉네임을 저장했어요.':'공개 설정을 저장했어요.');
     } catch (cause) { setError(cause.message); }
@@ -37,7 +40,7 @@ export default function PublicProfileForm({ userId, profile, mode="all" }) {
       <label className="profile-checkbox"><input type="checkbox" checked={form.show_crews} disabled={busy} onChange={event => change('show_crews', event.target.checked)} />가입 크루를 다른 회원에게 공개</label>
       <p className="muted">끄더라도 같은 크루원은 함께 가입한 크루를 볼 수 있어요. 실명·지역·선호 요일은 공개 카드에 표시하지 않아요.</p></>}
       <FormMessage>{error}</FormMessage><FormMessage tone="ok">{message}</FormMessage>
-      <Button type="submit" disabled={busy}>{busy ? '저장 중…' : '프로필 설정 저장'}</Button>
+      <Button type="submit" disabled={busy}>{busy ? '저장 중…' : mode==='nickname'?'닉네임 저장':mode==='privacy'?'공개 설정 저장':'프로필 설정 저장'}</Button>
     </form>
     <Link to={`/users/${userId}`}>내 회원 페이지 보기</Link>
   </section>;

@@ -1,0 +1,4 @@
+.leave-guard-overlay{position:fixed;inset:0;z-index:1000;background:#14251c80;display:grid;place-items:center;padding:20px}
+.leave-guard{background:var(--surface,#fff);color:var(--ink,#1d2923);border-radius:24px;padding:24px;width:min(100%,400px);box-shadow:0 12px 48px #0003}
+.leave-guard h2{font-size:21px;margin:0 0 12px}.leave-guard p{line-height:1.7;margin:0 0 24px;overflow-wrap:anywhere}
+.leave-guard>div{display:flex;gap:12px}.leave-guard button{flex:1;min-height:48px}

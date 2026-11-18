@@ -25,3 +25,48 @@
 .gps-drafts-toggle span { font-size: .875rem; font-weight: 400; }
 .gps-draft-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .gps-draft-confirm { flex-basis: 100%; padding-top: 8px; }
+
+.tracking-page p{line-height:1.7}
+.tracking-page textarea{border-radius:12px;resize:vertical;box-sizing:border-box}
+.tracking-page:not(.tracking-active)>.btn{min-height:48px;white-space:normal}
+.tracking-notice{padding:14px 16px;background:var(--surface,#f2f5ef);border:1px solid var(--line,#dce3dc);border-radius:16px}
+.tracking-page [role="alert"]{padding:16px;border-radius:16px;background:#fff0eb;color:#a33320}
+.tracking-page [role="alert"] a{display:inline-block;margin-top:8px;color:inherit}
+
+/* Measurement states share the same spacing and visual hierarchy on web and Android. */
+.tracking-page{box-sizing:border-box;max-width:720px;padding:32px 24px 40px;gap:24px;color:#20362d;background:#f5f7f4}
+.measurement-heading{display:grid;gap:10px;padding:8px 0 4px}
+.tracking-page .measurement-eyebrow{font-size:12px;font-weight:750;letter-spacing:.08em;color:#627668}
+.measurement-heading h1{font-size:clamp(23px,5.8vw,32px);line-height:1.3;letter-spacing:-.04em}
+.measurement-subtitle{font-size:14px;color:#68766d}
+.tracking-page .tracking-sports{margin:0;gap:12px}
+.tracking-page .tracking-sports legend{font-size:14px;margin-bottom:14px}
+.tracking-page .tracking-sports label{position:relative;flex-direction:column;min-height:124px;background:#fff;border:1px solid #dce4dc;border-radius:22px;gap:12px;font-size:15px;transition:background .15s,border-color .15s}
+.tracking-page .tracking-sports label[data-selected="true"]{background:#eaf1e7;border:2px solid #345842;box-shadow:0 4px 14px #2647320a}
+.tracking-page .tracking-sports input{position:absolute;opacity:0;width:1px;height:1px}
+.tracking-page .tracking-sports label:focus-within{outline:3px solid #ed9772;outline-offset:3px}
+.measurement-prep{padding:24px;background:#fff;border:1px solid #e0e7de;border-radius:24px;display:grid;gap:12px}
+.measurement-prep h2{font-size:19px;margin:0;line-height:1.45;letter-spacing:-.03em}
+.measurement-prep p{font-size:14px;color:#657269}
+.measurement-capabilities{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.measurement-capabilities span{padding:7px 11px;border-radius:20px;background:#f1f4ef;font-size:12px;color:#4f6656}
+.tracking-page>.btn{border-radius:16px;min-height:54px;font-size:15px}
+.tracking-page .tracking-metrics{padding:28px;border-radius:24px;background:#fff;border:1px solid #dce4dc;gap:24px}
+.tracking-metrics dt{font-size:13px;color:#64776a}
+.tracking-metrics dd{font-family:inherit;font-weight:750;letter-spacing:-.045em;font-size:clamp(32px,8.5vw,54px);font-variant-numeric:tabular-nums}
+.tracking-metrics small{font-family:inherit;font-size:18px;letter-spacing:0}
+.tracking-page .measurement-section-title{font-size:18px;margin:0}
+.tracking-page .route-map,.tracking-page .route-outline{border-radius:20px;overflow:hidden}
+.tracking-page>label{font-weight:650;font-size:14px}
+.tracking-page>label small{font-weight:400;color:#758176}
+.tracking-page>label textarea{font-weight:400;border-color:#dce4dc;border-radius:16px;min-height:110px}
+.tracking-page>.tracking-secondary{font-size:14px;color:#617367;text-decoration:none}
+.tracking-page.tracking-active{max-width:720px;min-height:100dvh;background:#182e25;color:#fff;align-items:stretch;justify-content:flex-start;text-align:left;padding-top:40px}
+.tracking-active .measurement-eyebrow,.tracking-active .measurement-subtitle{color:#b6cbbb}
+.tracking-active .tracking-metrics{background:#213d30;border-color:#3b5546;padding:32px 24px;gap:32px;margin:12px 0}
+.tracking-active .tracking-metrics dt{color:#b6cbbb}
+.tracking-active .tracking-metrics dd{font-size:clamp(38px,10vw,64px)}
+.tracking-active>.btn{width:100%;min-width:0;min-height:60px}
+.tracking-active>.tracking-secondary{color:#d1dfd3}
+.tracking-page [role="status"]{font-size:14px}
+@media(max-width:380px){.tracking-page{padding:24px 16px 32px;gap:20px}.tracking-page .tracking-sports{gap:8px}.tracking-page .tracking-sports label{min-height:112px;border-radius:18px}.measurement-prep{padding:20px}.tracking-page .tracking-metrics{padding:24px 20px}.tracking-page .tracking-actions{flex-direction:column}.tracking-page .tracking-actions>*{min-width:0}}

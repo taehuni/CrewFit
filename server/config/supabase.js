@@ -15,7 +15,8 @@ export function createUserClient(token) {
   });
 }
 
-// RLS 우회. 사용처는 services/crewStats.js · services/feedback.js · services/partners.js만 (routes/ import 금지).
+// RLS 우회. services/crewStats.js · feedback.js · partners.js · poseVideos.js.
+// poseVideos는 먼저 사용자 RLS로 본인 세션을 검증. routes/ 직접 import 금지.
 export const supabaseAdmin = createClient(
   url,
   process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder',

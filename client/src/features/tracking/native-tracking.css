@@ -1,0 +1,9 @@
+.native-gps-banner{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px;padding:16px 20px;background:#eaf1e8;border:1px solid #ccdcca;border-radius:18px;color:#203d31;text-decoration:none}
+.native-gps-banner span{display:grid;gap:6px}.native-gps-banner small{line-height:1.5}.native-gps-banner b{font-size:13px;white-space:nowrap}
+.native-tracking .tracking-actions{display:flex;flex-wrap:wrap;gap:12px;width:100%}.native-tracking .tracking-actions>*{flex:1;min-width:140px}
+.native-tracking .tracking-status{padding:14px 18px;background:#ffffff12;border-radius:16px;max-width:480px}
+.native-tracking .tracking-secondary{color:inherit;min-height:44px;display:inline-flex;align-items:center;justify-content:center}
+@media(max-width:400px){.native-gps-banner{padding:14px;gap:10px}.native-gps-banner small{font-size:12px}}
+.native-tracking .measurement-save-actions{padding:16px;box-sizing:border-box;background:#fff;border:1px solid #dce4dc;border-radius:22px}
+.native-tracking .measurement-save-actions .btn{min-height:52px;border-radius:14px;white-space:normal}
+.native-tracking .measurement-discard{align-self:flex-end;background:transparent;color:#936052;border:1px solid #e3d8d1;border-radius:14px;min-height:44px;padding:10px 16px;font-size:13px}

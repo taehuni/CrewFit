@@ -1,11 +1,13 @@
 import { useRef, useState } from 'react';
 import { supabase } from '../../shared/supabaseClient.js';
 import { startGoogleLogin } from './googleAuth.js';
+import { Capacitor } from '@capacitor/core';
+import { startNativeGoogleLogin } from './nativeAuthRuntime.js';
 
 export default function GoogleLoginButton({ disabled = false, next = '/home' }) {
   const lock = useRef(false);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(() => new URLSearchParams(window.location.search).get('nativeAuth') === 'failed' ? '구글 로그인을 완료하지 못했어요. 다시 시도해 주세요.' : '');
   async function signIn() {
     if (lock.current) return;
     lock.current = true; setBusy(true); setError('');
@@ -19,7 +21,8 @@ export default function GoogleLoginButton({ disabled = false, next = '/home' }) 
         setError('구글 로그인 연결을 준비 중이에요. 지금은 이메일로 이용해 주세요.');
         return;
       }
-      await startGoogleLogin(supabase.auth, { origin: window.location.origin, next });
+      if (Capacitor.isNativePlatform()) await startNativeGoogleLogin(next);
+      else await startGoogleLogin(supabase.auth, { origin: window.location.origin, next });
     } catch { setError('구글 로그인에 연결하지 못했어요. 연결 상태를 확인하고 다시 시도해 주세요.'); }
     finally { lock.current = false; setBusy(false); }
   }

@@ -20,7 +20,7 @@ export default function GpsPhoneDialog({ onClose, sport = '' }) {
   return <dialog ref={dialog} className="gps-phone-dialog" aria-labelledby="gps-phone-title" onCancel={onClose} onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
     <div className="gps-phone-content">
       <button type="button" className="gps-phone-close" aria-label="안내 닫기" autoFocus onClick={onClose}>×</button>
-      <span className="gps-phone-eyebrow">CONTINUE ON MOBILE</span>
+      <span className="gps-phone-eyebrow">휴대폰에서 GPS 측정</span>
       <h2 id="gps-phone-title">휴대폰으로 이어서<br/>측정하세요</h2>
       <p>GPS 운동 측정은 휴대폰에서 이용해 주세요.<br/>PC에서는 기록 입력과 경로 확인이 가능해요.</p>
       <div className="gps-phone-qr"><QRCodeSVG value={url} size={188} marginSize={4} level="M" title="휴대폰 GPS 측정 페이지 접속 QR코드"/></div>

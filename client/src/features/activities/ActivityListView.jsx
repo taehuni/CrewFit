@@ -50,7 +50,7 @@ export default function ActivityListView({ filters, filterMessage, records, onFi
       <Link className="record-entry record-entry-manual" to="/activities/new" state={{activitiesReturnTo:returnTo}}><span className="record-entry-tag">운동을 마쳤다면</span><strong>직접 기록하기</strong><p>운동 시간·거리부터 헬스 세트까지</p><span className="record-entry-bottom">운동 남기기 <span aria-hidden="true">＋</span></span></Link>
     </div>
     <Suspense fallback={<p>보관한 측정 확인 중…</p>}><GpsDraftList /></Suspense>
-    <div className="record-history-heading"><h2>내 운동 모아보기</h2><Link to="/activities/exercises" state={{activitiesReturnTo:returnTo}}>운동명 관리 ↗</Link></div>
+    <p><Link className="btn" to="/pose#pose-history-title">자세 측정 결과 보기 →</Link></p><div className="record-history-heading"><h2>내 운동 모아보기</h2><Link to="/activities/exercises" state={{activitiesReturnTo:returnTo}}>운동명 관리 ↗</Link></div>
     <div className="record-sport-filters" role="group" aria-label="종목 빠른 선택">{['',...LIST_SPORTS].map(sport=><button type="button" key={sport} aria-pressed={filters.sport===sport} onClick={()=>onFilter({...filters,sport})}>{sport&&<SportIcon sport={sport}/>}<span>{SPORT_LABEL[sport]||'전체'}</span></button>)}</div>
     <section className="record-date-filter"><h3>기간으로 찾기{filters.from||filters.to?' · 적용 중':''}</h3><Filters key={returnTo} filters={filters} onFilter={onFilter} /></section>
     <section className="activity-library-results" aria-label="운동 기록 목록" aria-busy={records.isFetching}>

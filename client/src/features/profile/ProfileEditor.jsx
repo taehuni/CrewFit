@@ -1,3 +1,4 @@
+import {ProfileChangesProvider, useConfirmProfileExit} from './ProfileChanges.jsx';
 import ConnectedServices from './ConnectedServices.jsx';
 import { useRef,useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -14,7 +15,12 @@ import {Link, useSearchParams, useLocation} from 'react-router';
 import './profile-polish.css';
 
 // "나" 탭. 프로필 카드·실명(D-28)·크루 추천(D-16)·공개 범위(D-19).
-export default function ProfileEditor({settings=false}) {
+export default function ProfileEditor(props) {
+  const {user}=useAuth();
+  return <ProfileChangesProvider key={user.id}><ProfileEditorContent {...props}/></ProfileChangesProvider>;
+}
+function ProfileEditorContent({settings=false}) {
+  const confirmExit=useConfirmProfileExit();
   const { user, token, signOut } = useAuth();
   const photoInputRef=useRef(null);
   const [searchParams] = useSearchParams();
@@ -42,7 +48,7 @@ export default function ProfileEditor({settings=false}) {
           <section hidden={settings} id="profile-introduction" className="profile-section"><header><span>01</span><div><h2>개인 정보</h2><p>계정 정보와 나를 소개하는 내용을 모았어요.</p></div></header><p className="profile-account-email">로그인 이메일 <strong>{user.email}</strong></p><PublicProfileForm mode="nickname" key={user.id} userId={user.id} profile={me.data.profile}/><RealNameForm key={user.id} userId={user.id} initialName={me.data.settings?.real_name}/><MediaEditor mode="bio"/></section>
           <section hidden={settings} id="profile-preferences" className="profile-section"><header><span>02</span><div><h2>운동 관심·목표</h2><p>좋아하는 운동과 활동 여건을 설정해요.</p></div></header><CrewPreferencesForm key={user.id} userId={user.id} profile={me.data.profile} settings={me.data.settings}/><Link className="btn btn-ghost" to="/goals">나의 운동 목표 관리 ↗</Link></section>
           <section hidden={!settings} id="profile-privacy" className="profile-section"><header><span>03</span><div><h2>공개 범위·커뮤니티</h2><p>기록 공개 범위와 차단·신고 내역을 관리해요.</p></div></header><PublicProfileForm mode="privacy" userId={user.id} profile={me.data.profile}/><CommunitySettings/></section>
-          <section hidden={!settings} id="profile-connections" className="profile-section"><header><span>04</span><div><h2>연결 서비스</h2><p>운동 계획을 일상에서 이어가세요.</p></div></header><ConnectedServices/><Button variant="ghost" onClick={signOut}>로그아웃</Button></section>
+          <section hidden={!settings} id="profile-connections" className="profile-section"><header><span>04</span><div><h2>연결 서비스</h2><p>운동 계획을 일상에서 이어가세요.</p></div></header><ConnectedServices/><Button variant="ghost" onClick={()=>{if(confirmExit())void signOut();}}>로그아웃</Button></section>
         </div></div>}
       </div>
     </div>

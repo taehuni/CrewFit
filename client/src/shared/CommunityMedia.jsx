@@ -1,3 +1,4 @@
+import {useProfileChanges} from '../features/profile/ProfileChanges.jsx';
 import {useState,useRef,useEffect} from 'react';
 import {useQuery,useQueryClient} from '@tanstack/react-query';
 import {useAuth} from '../features/auth/index.js';
@@ -32,6 +33,7 @@ export function MediaEditor({crew=null,photoInputRef=null,mode="all"}){
   const key=crew?queryKeys.crewCover(user.id,String(crew.id)):queryKeys.memberCard(user.id,user.id);
   const query=useQuery({queryKey:key,queryFn:()=>crew?loadCover(supabase,crew.id):loadMemberCard(supabase,user.id),retry:false});
   const [photo,setPhoto]=useState(null),[preview,setPreview]=useState(''),[bio,setBio]=useState(null),[remove,setRemove]=useState(false),[busy,setBusy]=useState(false),[message,setMessage]=useState(''),[error,setError]=useState('');
+  useProfileChanges(Boolean(photo||remove||(mode!=='photo'&&bio!==null&&bio!==(query.data?.bio??''))));
   useEffect(()=>{if(!photo){setPreview('');return;}const url=URL.createObjectURL(photo);setPreview(url);return()=>URL.revokeObjectURL(url);},[photo]);
   async function submit(e){e.preventDefault();if(lock.current)return;lock.current=true;setBusy(true);setError('');setMessage('');let uploaded;
     try{
@@ -44,18 +46,18 @@ export function MediaEditor({crew=null,photoInputRef=null,mode="all"}){
         const [cards,covers]=await Promise.all([supabase.from('member_cards').select('user_id').eq('avatar_path',previous).limit(1),supabase.from('crew_covers').select('crew_id').eq('image_path',previous).limit(1)]);
         if(!cards.error&&!covers.error&&!cards.data.length&&!covers.data.length)await supabase.storage.from('community-media').remove([previous]);
       }
-      setPhoto(null);setRemove(false);await cache.invalidateQueries({queryKey:['community',user.id]});setMessage('저장했어요.');
+      setPhoto(null);setRemove(false);setBio(null);await cache.invalidateQueries({queryKey:['community',user.id]});setMessage('저장했어요.');
     }catch(e){if(uploaded)await supabase.storage.from('community-media').remove([uploaded]);setError(e.message);}finally{lock.current=false;setBusy(false);}
   }
   return <section className={mode==="photo"?"media-editor profile-photo-controls":"card media-editor"}>{mode!=="photo"&&<><h2>{crew?'크루 대표 사진':mode==='bio'?'자기소개':'사진과 자기소개'}</h2><p className="muted">{crew?'크루의 분위기를 보여주는 사진을 골라 주세요.':'다른 회원에게 나를 소개해 보세요.'}</p></>}
     <form onSubmit={submit}><fieldset disabled={busy||query.isPending||query.isError}>
       {crew&&(preview || (!remove&&query.data?.url))&&<img className={crew?'media-preview':'media-preview avatar-preview'} src={preview||query.data.url} alt="선택한 사진 미리보기"/>}
       {!crew&&mode==="all"&&<button type="button" className="profile-photo-picker" aria-label="프로필 사진 선택" onClick={()=>inputRef.current?.click()}>{(preview||(!remove&&query.data?.url))?<img src={preview||query.data.url} alt="프로필 사진 미리보기"/>:<span className="profile-photo-placeholder" aria-hidden="true">＋</span>}<span className="profile-photo-caption">{preview?"선택한 사진 · 저장 전":"눌러서 사진 변경"}</span></button>}
-      {mode!=="bio"&&<label className={crew?"photo-picker":"profile-file-input"}>사진 선택<input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={e=>{const f=e.target.files?.[0];if(f)try{validatePhoto(f);setPhoto(f);setRemove(false);setError('');}catch(err){setError(err.message);}e.target.value='';}}/></label>}
-      {mode!=="bio"&&(photo||query.data?.url)&&<button type="button" className="btn btn-ghost" onClick={()=>{setPhoto(null);setRemove(true);}}>사진 없애기</button>}
-      {!crew&&mode!=="photo"&&<label>짧은 자기소개<textarea rows={3} maxLength={160} value={bio??query.data?.bio??''} placeholder="천천히, 꾸준히 달리는 것을 좋아해요." onChange={e=>setBio(e.target.value)}/></label>}
+      {mode!=="bio"&&<label className={crew?"photo-picker":"profile-file-input"}>사진 선택<input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={e=>{const f=e.target.files?.[0];if(f)try{validatePhoto(f);setPhoto(f);setRemove(false);setError('');setMessage('');}catch(err){setError(err.message);}e.target.value='';}}/></label>}
+      {mode!=="bio"&&(photo||query.data?.url)&&<button type="button" className="btn btn-ghost" onClick={()=>{setPhoto(null);setRemove(true);setMessage('');setError('');}}>사진 없애기</button>}
+      {!crew&&mode!=="photo"&&<label>짧은 자기소개<textarea rows={3} maxLength={160} value={bio??query.data?.bio??''} placeholder="천천히, 꾸준히 달리는 것을 좋아해요." onChange={e=>{setBio(e.target.value);setMessage('');setError('');}}/></label>}
       {mode!=="bio"&&<small className="muted">JPG·PNG·WebP · 최대 20MB · 사진은 자동으로 크기를 줄여 저장해요.</small>}
-      {mode==="photo"&&preview&&<img className="media-preview avatar-preview" src={preview} alt="저장할 프로필 사진 미리보기"/>}{(mode!=="photo"||photo||remove)&&<button className="btn btn-primary" disabled={busy}>{busy?'저장 중…':'저장하기'}</button>}
+      {mode==="photo"&&preview&&<img className="media-preview avatar-preview" src={preview} alt="저장할 프로필 사진 미리보기"/>}{(mode!=="photo"||photo||remove)&&<button className="btn btn-primary" disabled={busy}>{busy?'저장 중…':crew?'대표 사진 저장':mode==='bio'?'자기소개 저장':mode==='photo'?'프로필 사진 저장':'사진·자기소개 저장'}</button>}
     </fieldset></form>{error&&<p role="alert">{error}</p>}{message&&<p role="status">{message}</p>}{query.isError&&<button className="btn btn-ghost" onClick={()=>query.refetch()}>다시 불러오기</button>}
   </section>;
 }

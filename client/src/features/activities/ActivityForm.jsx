@@ -1,3 +1,4 @@
+import useUnsavedForm from '../../shared/useUnsavedForm.js';
 import { Suspense, useRef, useState } from 'react';
 import { GpsDraftList, GpsRouteMap } from '../tracking/index.js';
 import { Link, useLocation } from 'react-router';
@@ -15,6 +16,12 @@ export default function ActivityForm({ today, onSave, initialSport = 'running', 
   const location = useLocation();
   const [form, setForm] = useState(() => initialValues || { sport: initialActivitySport(initialSport), date: today, minutes: '', seconds: '0', distance: '', lapCount: '', note: '', sets: [emptySet()] });
   const [sportDistances, setSportDistances] = useState({});
+  const { leaveGuard, markSaved } = useUnsavedForm({
+    form,
+    otherSportDistances: Object.fromEntries(Object.entries(sportDistances)
+      .filter(([sport, distance]) => sport !== form.sport && distance !== '')
+      .sort(([a], [b]) => a.localeCompare(b))),
+  });
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
@@ -42,10 +49,10 @@ export default function ActivityForm({ today, onSave, initialSport = 'running', 
     lock.current = true;
     setBusy(true);
     try {
-      await onSave(payload);
+      await onSave(payload, markSaved);
     } catch (error) {
       setMessage(gpsDraft ? error.message : editing
-        ? error.code === 'PGRST202' ? '헬스 수정용 DB 함수가 아직 적용되지 않았어요. 20260914_update_gym_activity.sql 적용이 필요합니다. 입력 내용은 유지됩니다.'
+        ? error.code === 'PGRST202' ? '헬스 기록 수정 기능을 준비 중이에요. 입력 내용은 유지됩니다. 잠시 후 다시 시도해 주세요.'
           : error.code === 'not_found' || error.code === 'P0002' ? '기록이 삭제되었거나 수정할 수 없어요. 입력 내용은 유지됩니다.'
           : '수정 결과를 확인하지 못했어요. 입력 내용은 유지됩니다. 연결 상태를 확인하고 다시 시도해 주세요.'
         : '저장을 확인하지 못했어요. 입력 내용은 유지됩니다. 연결을 확인하고, 재시도 전 홈에 같은 기록이 있는지 확인해 주세요.');
@@ -54,7 +61,7 @@ export default function ActivityForm({ today, onSave, initialSport = 'running', 
       setBusy(false);
     }
   }
-  return <div className="activity-page">
+  return <div className="activity-page">{leaveGuard}
     <header className="activity-heading"><Link to={cancelTo} state={location.state}>{editing ? '기록 상세로' : cancelTo.startsWith('/coach?') ? '내 계획으로' : cancelTo === '/home' ? '홈으로' : '기록 목록으로'}</Link><h1>{editing ? '운동 기록 수정' : '운동 기록하기'}</h1><p className="activity-form-intro">오늘의 움직임을 남겨 주세요. 작은 기록도 차곡차곡 쌓여요.</p></header>
     <form ref={formRef} onSubmit={submit} noValidate>
       <fieldset disabled={busy} className="activity-fields">

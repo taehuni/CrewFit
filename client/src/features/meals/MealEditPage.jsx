@@ -11,6 +11,6 @@ export default function MealEditPage() {
   const { mealId } = useParams(); const { user } = useAuth(); const cache = useQueryClient(); const navigate = useNavigate();
   const detail = useQuery({ queryKey: queryKeys.meal(user.id, mealId), queryFn: () => loadMealDetail(supabase, user.id, mealId) });
   if (!detail.data) return <MealDetailView detail={detail} />;
-  async function save(meal) { await updateMeal(supabase, user.id, mealId, meal); await invalidateMeals(cache, user.id); navigate('/meals/' + mealId, { replace: true }); }
+  async function save(meal, markSaved) { await updateMeal(supabase, user.id, mealId, meal); await invalidateMeals(cache, user.id); markSaved(); navigate('/meals/' + mealId, { replace: true }); }
   return <MealForm editing initialValues={mealFormValues(detail.data)} cancelTo={'/meals/' + mealId} onSave={save} />;
 }

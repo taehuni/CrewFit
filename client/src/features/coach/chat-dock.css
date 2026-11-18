@@ -23,3 +23,7 @@
 .chat-dock-body .plan-delete-confirm{padding:12px}
 .chat-dock-body .plan-delete-confirm>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .chat-dock-body .plan-delete-confirm button{min-width:0;white-space:normal;padding:10px}
+.chat-dock-header>div{min-width:0}
+.chat-dock-header button{width:44px;height:44px;flex-shrink:0}
+.chat-dock button:focus-visible,.chat-dock textarea:focus-visible,.chat-dock input:focus-visible{outline:3px solid var(--orange,#ff5a15);outline-offset:2px}
+@media(max-width:380px){.chat-dock-header{padding:12px;gap:8px}.crew-chat-compose>div{flex-wrap:wrap}.crew-chat-compose button{min-height:44px;margin-left:auto}}

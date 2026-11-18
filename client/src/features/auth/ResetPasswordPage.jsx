@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { supabase } from '../../shared/supabaseClient.js';
 import { Button, Field, FormMessage } from '../../shared/ui.jsx';
@@ -11,17 +11,21 @@ export default function ResetPasswordPage() {
   const { loading, session, initializationError } = useAuth();
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const lock = useRef(false);
   const navigate = useNavigate();
 
   async function onSubmit(e) {
     e.preventDefault();
+    if (lock.current) return;
     const f = new FormData(e.currentTarget);
     if (f.get('password') !== f.get('confirm')) return setError('두 비밀번호가 서로 달라요.');
-    setBusy(true); setError('');
-    const { error } = await supabase.auth.updateUser({ password: f.get('password') });
-    setBusy(false);
-    if (error) return setError(authMessage(error));
-    navigate('/home', { replace: true });
+    lock.current = true;setBusy(true); setError('');
+    try {
+      const { error } = await supabase.auth.updateUser({ password: f.get('password') });
+      if (error) throw error;
+      navigate('/home', { replace: true });
+    } catch (error) { setError(authMessage(error)); }
+    finally { lock.current = false;setBusy(false); }
   }
 
   if (loading) return <div className="center">링크 확인 중…</div>;

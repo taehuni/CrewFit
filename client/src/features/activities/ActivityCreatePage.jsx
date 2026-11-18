@@ -11,6 +11,7 @@ import { activitiesReturnTo } from './activityList.js';
 import { initialActivitySport } from './sports.js';
 import { useExerciseNames } from './useExerciseNames.js';
 import { planActivityDraft } from './planActivity.js';
+import {sourceWorkoutPlanId,recordWorkoutPlan} from './planCompletion.js';
 
 export default function ActivityCreatePage() {
   const { user } = useAuth();
@@ -19,23 +20,26 @@ export default function ActivityCreatePage() {
   const navigate = useNavigate();
   const location = useLocation();
   const planDraft = planActivityDraft(location.state, user.id);
+  const planId=planDraft?sourceWorkoutPlanId(location.state,user.id):null;
   const returnTo = planDraft?.returnTo || activitiesReturnTo(location.state);
   const [search, setSearch] = useSearchParams();
   const draftId = search.get('gpsDraft');
   const draft = useQuery({queryKey:queryKeys.gpsDraft(user.id,draftId),queryFn:({signal})=>loadGpsDraft(supabase,user.id,draftId,signal),enabled:Boolean(draftId),gcTime:0});
   const sport = planDraft?.values.sport || initialActivitySport(search.get('sport'));
   const today = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
-  async function save(payload) {
-    const activityId = draftId ? await finalizeGpsDraft(supabase,draftId,payload.activity.note || '') : null;
-    if (!draftId) await saveActivity(supabase, user.id, payload);
+  async function save(payload, markSaved) {
+    const activityId = planId?await recordWorkoutPlan(supabase,planId,payload,draftId):draftId ? await finalizeGpsDraft(supabase,draftId,payload.activity.note || '') : null;
+    if (!draftId&&!planId) await saveActivity(supabase, user.id, payload);
     await Promise.all([
       cache.invalidateQueries({ queryKey: queryKeys.activitiesRoot(user.id) }),
       cache.invalidateQueries({ queryKey: queryKeys.dashboardRoot(user.id) }),
       cache.invalidateQueries({ queryKey: queryKeys.gpsDraftsRoot(user.id) }),
       cache.invalidateQueries({ queryKey: queryKeys.attachmentChoices(user.id) }),
       cache.invalidateQueries({ queryKey: queryKeys.memberRoot(user.id) }),
+      cache.invalidateQueries({queryKey:['workout-plans',user.id]}),
     ]);
-    navigate(activityId ? `/activities/${activityId}` : '/home', { state: { performedOn: payload.activity.performed_on } });
+    markSaved();
+    navigate(planId?planDraft.returnTo:activityId ? `/activities/${activityId}` : planDraft?.returnTo || '/home', { state: { performedOn: payload.activity.performed_on,recordedPlanId:planId,recordedActivityId:activityId } });
   }
   if (draftId && draft.isPending) return <p role="status">보관한 GPS 측정을 불러오는 중…</p>;
   if (draftId && (draft.isError || !draft.data)) return <div role="alert"><p>보관한 측정을 불러오지 못했어요.</p><button onClick={()=>draft.refetch()}>다시 시도</button> <Link to="/activities">기록 목록으로</Link></div>;

@@ -27,7 +27,7 @@ export default function MealListView({ meals }) {
       {meals.isPending ? <p className="meal-state" role="status">식단 기록을 불러오고 있어요.</p>
         : !meals.data && meals.isError ? <div className="meal-state" role="alert"><p>식단 기록을 불러오지 못했어요.</p><Button variant="ghost" onClick={() => meals.refetch()}>다시 불러오기</Button></div>
         : <>{items.length ? <MealTimeline items={items} /> : <div className="meal-state"><h2>아직 식단 기록이 없어요.</h2><p>먹은 음식을 간단히 남기면 AI 피드백에 함께 반영할 수 있어요.</p><Link className="btn btn-ghost" to="/meals/new">첫 식단 기록하기</Link></div>}
-          {meals.isError && meals.data && <div className="meal-state" role="alert"><p>다음 기록을 불러오지 못했어요. 현재 목록은 유지됩니다.</p><Button variant="ghost" disabled={meals.isFetching} onClick={more}>다시 불러오기</Button></div>}
+          {meals.isError && meals.data && <div className="meal-state" role="alert"><p>{meals.isFetchNextPageError ? '다음 기록을 불러오지 못했어요. 현재 목록은 유지됩니다.' : '최신 기록을 확인하지 못했어요. 이전 조회 결과입니다.'}</p><Button variant="ghost" disabled={meals.isFetching} onClick={meals.isFetchNextPageError ? more : () => meals.refetch()}>다시 불러오기</Button></div>}
           {meals.hasNextPage && !meals.isFetchNextPageError && <Button className="meal-more" variant="ghost" disabled={meals.isFetching} onClick={more}>{meals.isFetchingNextPage ? '불러오는 중…' : '더 보기'}</Button>}
         </>}
     </section></>}

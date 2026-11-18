@@ -25,9 +25,10 @@ export default function ActivityEditPage() {
   });
   if (!detail.data) return <ActivityDetailView detail={detail} />;
   if (!ACTIVITY_SPORTS.includes(detail.data.activity.sport)) return <ActivityDetailView detail={detail} />;
-  async function save(payload) {
+  async function save(payload, markSaved) {
     await updateActivity(supabase, user.id, activityId, payload);
     await invalidateActivityData(cache, user.id);
+    markSaved();
     navigate(returnTo || '/home', { replace: true, state: { performedOn: payload.activity.performed_on } });
   }
   return <ActivityForm {...exerciseNames} key={activityId} editing initialValues={activityFormValues(detail.data)}

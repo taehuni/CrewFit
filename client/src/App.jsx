@@ -6,10 +6,12 @@ const StorePage = lazy(() => import('./features/store/StorePage.jsx'));
 const StoreProductPage = lazy(() => import('./features/store/StoreProductPage.jsx'));
 const CoachPage = lazy(() => import('./features/coach/CoachEntry.jsx'));
 import { Suspense, useEffect, useRef } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router';
+import { createBrowserRouter, RouterProvider, Routes, Route, Navigate, useLocation } from 'react-router';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './shared/queryClient.js';
 import AppShell from './shared/AppShell.jsx';
+import NavigationExperience from './shared/NavigationExperience.jsx';
+import {LeaveGuardProvider} from './shared/useLeaveGuard.jsx';
 import NotFoundPage from './shared/NotFoundPage.jsx';
 import {
   AuthProvider, RequireAuth, GuestOnly,
@@ -38,13 +40,24 @@ function AuthLinkEntry({ children }) {
   return children;
 }
 
+const router = createBrowserRouter([{ path: '*', element: <AppRoutes /> }]);
+
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <BrowserRouter>
+        <RouterProvider router={router} />
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+}
+
+function AppRoutes() {
+  return (
           <AuthLinkEntry>
+          <LeaveGuardProvider>
           <Suspense fallback={<p role="status">화면을 불러오고 있어요.</p>}>
+          <NavigationExperience />
           <Routes>
             {/* 공개: 소개 화면(회원은 /home으로) */}
             <Route path="/" element={<LandingPage />} />
@@ -92,10 +105,8 @@ export default function App() {
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
           </Suspense>
+          </LeaveGuardProvider>
           </AuthLinkEntry>
-        </BrowserRouter>
-      </AuthProvider>
-    </QueryClientProvider>
   );
 }
 

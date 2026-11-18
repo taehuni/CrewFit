@@ -3,6 +3,8 @@ import { supabase } from '../../shared/supabaseClient.js';
 import { Button, Field, FormMessage } from '../../shared/ui.jsx';
 import { authMessage } from './AuthLayout.jsx';
 import { resendConfirmation } from './authLinks.js';
+import { Capacitor } from '@capacitor/core';
+import { sendNativeAuthEmail } from './nativeAuthRuntime.js';
 
 export default function ConfirmationForm({ initialEmail = '', initiallySent = false }) {
   const [email, setEmail] = useState(initialEmail);
@@ -22,7 +24,8 @@ export default function ConfirmationForm({ initialEmail = '', initiallySent = fa
     if (inFlight.current || seconds > 0) return;
     inFlight.current = true; setBusy(true); setError(''); setSent(false);
     try {
-      await resendConfirmation(supabase.auth, email, window.location.origin);
+      const send = redirect => resendConfirmation(supabase.auth, email, window.location.origin, redirect);
+      await (Capacitor.isNativePlatform() ? sendNativeAuthEmail('email', send) : send());
       setSent(true); setSeconds(60);
     } catch (err) {
       setError(authMessage(err));

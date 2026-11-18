@@ -1,3 +1,4 @@
+import {useProfileForm} from './ProfileChanges.jsx';
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../shared/supabaseClient.js';
@@ -11,6 +12,7 @@ export default function RealNameForm({ userId, initialName }) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [tone, setTone] = useState('error');
+  const changes=useProfileForm(name);
 
   async function onSubmit(event) {
     event.preventDefault();
@@ -24,6 +26,7 @@ export default function RealNameForm({ userId, initialName }) {
       queryClient.setQueryData(queryKeys.me(userId), (me) => me && ({
         ...me, settings: { ...me.settings, real_name: data.real_name },
       }));
+      changes.markSaved(data.real_name);
       setName(data.real_name);
       setTone('ok');
       setMessage('이름을 저장했어요.');

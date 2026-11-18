@@ -1,3 +1,4 @@
+import useUnsavedForm from '../../shared/useUnsavedForm.js';
 import { useRef, useState } from 'react';
 import { Link } from 'react-router';
 import { Button, Field, FormMessage } from '../../shared/ui.jsx';
@@ -6,6 +7,7 @@ import './meals.css';
 
 export default function MealForm({ today, initialValues, editing = false, onSave, cancelTo = '/meals' }) {
   const [form, setForm] = useState(() => initialValues || { date: today, type: 'breakfast', items: [emptyMealItem()], note: '' });
+  const { leaveGuard, markSaved } = useUnsavedForm(form);
   const [errors, setErrors] = useState({}), [message, setMessage] = useState(''), [busy, setBusy] = useState(false);
   const lock = useRef(false), formRef = useRef(null);
   const change = (key, value) => setForm(previous => ({ ...previous, [key]: value }));
@@ -20,11 +22,11 @@ export default function MealForm({ today, initialValues, editing = false, onSave
       return;
     }
     lock.current = true; setBusy(true);
-    try { await onSave(result.meal); }
+    try { await onSave(result.meal, markSaved); }
     catch (failure) { setMessage(failure?.code === 'not_found' ? '기록이 삭제되었거나 수정할 수 없어요. 입력 내용은 유지됩니다.' : '저장 결과를 확인하지 못했어요. 입력 내용은 유지됩니다. 연결 상태를 확인하고 다시 시도해 주세요.'); }
     finally { lock.current = false; setBusy(false); }
   }
-  return <div className="meal-form-page">
+  return <div className="meal-form-page">{leaveGuard}
     <header className="meal-form-heading"><Link to={cancelTo}>{editing ? '식단 상세로' : '식단 목록으로'}</Link><h1>{editing ? '식단 기록 수정' : '식단 기록하기'}</h1></header>
     <form ref={formRef} onSubmit={submit} noValidate><fieldset disabled={busy} className="meal-fields"><legend className="sr-only">식단 기록</legend>
       <div className="meal-basics"><Field id="meal-date" label="식사 날짜" type="date" required min="1900-01-01" max="9999-12-24" value={form.date} onChange={e => change('date', e.target.value)} error={errors.date} />

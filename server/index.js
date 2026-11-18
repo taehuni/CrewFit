@@ -9,12 +9,14 @@ import dashboardRouter from './routes/dashboard.js';
 import { createExercisesRouter } from './routes/exercises.js';
 import { createFeedbackRouter } from './routes/feedback.js';
 import { createCrewsRouter } from './routes/crews.js';
+import { createPoseRouter } from './routes/pose.js';
 import { requireAuth } from './middleware/auth.js';
 import { fileURLToPath } from 'node:url';
 import { serveFrontend } from './config/frontend.js';
 
 const app = express();
 app.use(cors());
+app.use('/api/pose', createPoseRouter(requireAuth));
 app.use(express.json());
 
 app.get('/health', (req, res) => res.json({ ok: true }));

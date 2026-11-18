@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Paths from client/public/crewfit-mark.svg. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <path android:fillColor="#FFFFFF" android:pathData="M0,0h108v108h-108z" />
+    <group android:scaleX="0.3" android:scaleY="0.3" android:translateX="18" android:translateY="18">
+        <path android:pathData="M168,62.9996C135,29.9996 81.0001,34.4996 51.0001,73.4996C24.0001,109.5 33.0001,162 70.5001,190.5C94.5001,210 126,213 156,198"
+            android:strokeColor="#FF4F0F" android:strokeWidth="31.3043" android:strokeLineCap="round" />
+        <path android:pathData="M148.5,56.9997C159.27,56.9997 168,48.2693 168,37.4997C168,26.7302 159.27,17.9997 148.5,17.9997C137.73,17.9997 129,26.7302 129,37.4997C129,48.2693 137.73,56.9997 148.5,56.9997Z"
+            android:fillColor="#1E2229" />
+        <path android:pathData="M117,64.5003H208.5V100.5H157.5L151.5,123H192V157.5H142.5L126,214.5H85.5001L117,64.5003Z"
+            android:fillColor="#1E2229" />
+    </group>
+</vector>

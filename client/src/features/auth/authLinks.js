@@ -18,15 +18,15 @@ export function confirmationRedirect(origin) {
   return new URL('/auth/callback', origin).href;
 }
 
-export async function signupWithEmail(auth, { email, password, nickname, real_name }, origin) {
+export async function signupWithEmail(auth, { email, password, nickname, real_name }, origin, redirect = confirmationRedirect(origin)) {
   const result = await auth.signUp({ email: email.trim(), password,
-    options: { data: { nickname, real_name }, emailRedirectTo: confirmationRedirect(origin) } });
+    options: { data: { nickname, real_name }, emailRedirectTo: redirect } });
   if (result.error) throw result.error;
   return result.data?.session ? 'signed-in' : 'check-email';
 }
 
-export async function resendConfirmation(auth, email, origin) {
+export async function resendConfirmation(auth, email, origin, redirect = confirmationRedirect(origin)) {
   const { error } = await auth.resend({ type: 'signup', email: email.trim(),
-    options: { emailRedirectTo: confirmationRedirect(origin) } });
+    options: { emailRedirectTo: redirect } });
   if (error) throw error;
 }

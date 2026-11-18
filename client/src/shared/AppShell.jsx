@@ -12,6 +12,7 @@ import './device-navigation.css';
 import { isMobileTrackingDevice } from '../features/tracking/device.js';
 import {NotificationLink} from '../features/social/index.js';
 import {MemberAvatar} from './CommunityMedia.jsx';
+import NativeTrackingBanner from '../features/tracking/NativeTrackingBanner.jsx';
 
 const TABS = [
   { to: '/home', paths: ['/home', '/goals'], label: '홈', d: 'M3 11.5 12 4l9 7.5M5 10v10h14V10' },
@@ -65,7 +66,7 @@ export function WorkspaceFrame({ nickname, number,userId }) {
           <span className="ws-account-name">{nickname || '내 계정'}</span>
         </Link>
       </header>
-      <main id="main" className="ws-main" tabIndex={-1}>{((pathname==='/feed'||pathname.startsWith('/feed/'))||pathname.startsWith('/crews'))&&<nav className="community-tabs" aria-label="커뮤니티 메뉴"><Link to="/feed" aria-current={(pathname==='/feed'||pathname.startsWith('/feed/'))?'page':undefined}>피드</Link><Link to="/crews" aria-current={pathname.startsWith('/crews')?'page':undefined}>크루</Link></nav>}<Outlet /></main>
+      <main id="main" className="ws-main" tabIndex={-1}><NativeTrackingBanner key={userId} userId={userId}/>{((pathname==='/feed'||pathname.startsWith('/feed/'))||pathname.startsWith('/crews'))&&<nav className="community-tabs" aria-label="커뮤니티 메뉴"><Link to="/feed" aria-current={(pathname==='/feed'||pathname.startsWith('/feed/'))?'page':undefined}>피드</Link><Link to="/crews" aria-current={pathname.startsWith('/crews')?'page':undefined}>크루</Link></nav>}<Outlet /></main>
     </div>
   );
 }

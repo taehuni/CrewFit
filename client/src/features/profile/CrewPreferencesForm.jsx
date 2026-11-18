@@ -1,3 +1,4 @@
+import {useProfileForm} from './ProfileChanges.jsx';
 import SportIcon from '../../shared/SportIcon.jsx';
 import { useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -12,6 +13,7 @@ export default function CrewPreferencesForm({ userId, profile, settings }) {
   const [form, setForm] = useState({ interested_sports: settings?.interested_sports ?? (profile.main_sport ? [profile.main_sport] : []), level: profile.level || '',
     region_sido: settings?.region_sido || '', region_sigungu: settings?.region_sigungu || '', preferred_days: settings?.preferred_days || [] });
   const [busy, setBusy] = useState(false), [error, setError] = useState(''), [message, setMessage] = useState('');
+  const changes=useProfileForm(form);
   const regions = useQuery({queryKey:queryKeys.regions(userId), queryFn:()=>loadRegions(supabase), retry:false});
   const rows = regions.data || [];
   const change = (key, value) => { setForm(previous => ({...previous, [key]:value})); setMessage(''); setError(''); };
@@ -19,7 +21,7 @@ export default function CrewPreferencesForm({ userId, profile, settings }) {
     event.preventDefault();
     if (running.current) return;
     running.current = true; setBusy(true); setError(''); setMessage('');
-    try { await saveCrewPreferences(supabase, userId, form, rows); setMessage('관심 운동과 활동 지역을 저장했어요.'); }
+    try { await saveCrewPreferences(supabase, userId, form, rows); changes.markSaved(); setMessage('관심 운동과 활동 지역을 저장했어요.'); }
     catch (cause) { setError(cause.message); }
     finally {
       await Promise.all([cache.invalidateQueries({queryKey:queryKeys.me(userId)}), cache.invalidateQueries({queryKey:queryKeys.crewMatches(userId)})]);

@@ -1,3 +1,4 @@
+import useUnsavedForm from '../../shared/useUnsavedForm.js';
 import { useEffect,useRef,useState } from 'react';
 import { Link,useNavigate,useParams,useSearchParams,useLocation } from 'react-router';
 import { useQuery,useQueryClient } from '@tanstack/react-query';
@@ -34,6 +35,7 @@ function EditorForm({userId,crewId,crew,existing}){
   const [form,setForm]=useState({content:existing?.content || '',kind:existing?.kind || 'free',visibility:existing?.visibility || (crewId?'crew':'public'),sport:existing?.sport || crew?.sport || ''});
   const [busy,setBusy]=useState(false),[error,setError]=useState('');const running=useRef(false),cache=useQueryClient(),navigate=useNavigate();
   const [photo,setPhoto]=useState(null),[preview,setPreview]=useState(''),[removed,setRemoved]=useState(false);
+  const {leaveGuard,markSaved}=useUnsavedForm({form,activityId,includeRoute,hasPhoto:!!photo,removedExisting:removed&&!!existing?.image_path});
   const uploaded=useRef(null),fileInput=useRef(null);
   useEffect(()=>{if(!photo){setPreview('');return;}const url=URL.createObjectURL(photo);setPreview(url);return()=>URL.revokeObjectURL(url);},[photo]);
   function choosePhoto(event){const file=event.target.files?.[0];if(!file)return;
@@ -48,9 +50,9 @@ function EditorForm({userId,crewId,crew,existing}){
         if(!uploaded.current)uploaded.current=await uploadPostImage(supabase,userId,await preparePhoto(photo));
         imagePath=uploaded.current;
       }
-      const post=await savePost(supabase,userId,form,crewId,existing,imagePath,activityId,includeRoute);await cache.invalidateQueries({queryKey:queryKeys.postsRoot(userId)});navigate(`/feed/${post.id}`,{replace:true,state:{feedFrom:location.state?.feedFrom}});}
+      const post=await savePost(supabase,userId,form,crewId,existing,imagePath,activityId,includeRoute);await cache.invalidateQueries({queryKey:queryKeys.postsRoot(userId)});markSaved();navigate(`/feed/${post.id}`,{replace:true,state:{feedFrom:location.state?.feedFrom}});}
     catch(cause){setError(cause.message);}finally{running.current=false;setBusy(false);}}
-  return <div className="feed-page post-editor-page"><header className="feed-heading"><h1>{existing?'글 수정':'글 쓰기'}</h1><Link to={existing?`/feed/${existing.id}`:feedBack} state={existing?{feedFrom:feedBack}:{restoreFeed:true}}>취소</Link></header>
+  return <div className="feed-page post-editor-page">{leaveGuard}<header className="feed-heading"><h1>{existing?'글 수정':'글 쓰기'}</h1><Link to={existing?`/feed/${existing.id}`:feedBack} state={existing?{feedFrom:feedBack}:{restoreFeed:true}}>취소</Link></header>
     <p className="post-editor-intro">운동의 결과도, 과정도 좋아요. 오늘의 이야기를 함께 나눠요.</p>
     <form className="post-form" onSubmit={submit}><fieldset disabled={busy}>
       {crew && <p>{crew.name} · 크루는 작성 후 바꿀 수 없어요.</p>}

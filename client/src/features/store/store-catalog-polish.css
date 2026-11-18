@@ -40,3 +40,5 @@
  .store-results-heading h2{font-size:16px}
  .store-results-heading{flex-wrap:wrap;gap:6px}
 }
+
+.store-catalog-notice{padding:16px 20px;margin:18px 0;border-left:3px solid #244b3c;background:#edf3e8;border-radius:0 12px 12px 0;overflow-wrap:anywhere}.store-catalog-notice strong{color:#244b3c;font-size:14px}.store-catalog-notice p{font-size:13px;line-height:1.8;color:#53614e;margin:6px 0 0}
