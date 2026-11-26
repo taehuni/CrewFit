@@ -1,4 +1,6 @@
 .proposal-review{container-type:inline-size;border-top:1px solid var(--line);padding-top:20px;min-width:0}
+.coach-page > .coach-mobile-views[hidden]{display:none}
+.coach-review-panel>div>.proposal-review:first-child{border-top:0;padding-top:0}
 .proposal-review .proposal-review-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .proposal-review-heading span{font-size:10px;font-weight:800;letter-spacing:.12em;color:#667a70}
 .proposal-review .proposal-review-heading h3{margin:5px 0;font-size:18px;line-height:1.4}
@@ -46,3 +48,11 @@
  .proposal-review-footer p{flex-basis:100%}
 }
 @container(max-width:300px){.proposal-review-fields{grid-template-columns:minmax(0,1fr)}}
+/* A review can be narrow inside a wide page; use its editor width. */
+.proposal-review-editor{container-type:inline-size}
+.proposal-review-editor :is(input,select,textarea){font-size:16px;min-height:48px}
+.proposal-review-editor input:is([type=date],[type=time]){display:block;min-inline-size:0;inline-size:100%;max-inline-size:100%}
+.proposal-review-editor input::-webkit-date-and-time-value{min-width:0;text-align:left}
+.proposal-review-editor input::-webkit-datetime-edit{min-width:0;padding:0}
+@container(max-width:460px){.proposal-review-fields{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){.proposal-review-fields{grid-template-columns:minmax(0,1fr)}}

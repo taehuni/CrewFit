@@ -1,11 +1,14 @@
 .pose-page{max-width:1200px;margin:auto;padding:24px 0 48px;color:var(--ink,#203a30)}.pose-back{display:inline-block;margin-bottom:24px;color:inherit}.pose-page h1{font-size:clamp(28px,4vw,42px);margin:12px 0}.pose-page header>p{color:#596a62;margin-bottom:28px}.pose-layout{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(280px,1fr);gap:24px;align-items:start}.pose-studio,.pose-guide{border:1px solid #dce3dc;border-radius:24px;background:#fff;padding:20px;min-width:0}.pose-camera{position:relative;aspect-ratio:4/3;background:#172c24;border-radius:16px;overflow:hidden}.pose-camera video,.pose-camera canvas{position:absolute;width:100%;height:100%;object-fit:contain}.pose-mirror video,.pose-mirror canvas{transform:scaleX(-1)}.pose-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:#e2eddf;text-align:center;padding:20px}.pose-placeholder svg{width:85px;height:120px;fill:none;stroke:#b8d3a6;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}.pose-placeholder span{font-size:13px;color:#bed1c5}.pose-live-status{padding:16px 0;min-height:64px;font-size:14px;line-height:1.6}.pose-metrics{display:grid;grid-template-columns:1fr 1fr;background:#f2f5ef;border-radius:16px;padding:18px;gap:20px}.pose-metrics>div+div{border-left:1px solid #d3ded1;padding-left:20px}.pose-metrics span{display:block;font-size:13px;color:#56675d}.pose-metrics strong{display:block;font-size:36px;font-variant-numeric:tabular-nums}.pose-metrics small{font-size:16px;margin-left:8px}.pose-controls{display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin-top:20px}.pose-controls label{flex:1;min-width:130px;font-size:13px}.pose-controls select{display:block;width:100%;margin-top:6px;min-height:44px}.pose-controls button{min-height:48px}.pose-chip{display:inline-block;background:#eaf0e5;border-radius:99px;padding:8px 12px;font-size:12px;font-weight:700}.pose-guide h2{font-size:23px;margin:22px 0}.pose-guide ol{padding-left:22px}.pose-guide li{padding-left:6px;margin-bottom:22px}.pose-guide p{font-size:14px;line-height:1.75;color:#56675d;margin-top:8px}.pose-note{padding:18px;background:#f2f5ef;border-radius:16px}.pose-limit{font-size:12px!important}.pose-error{color:#a33320;background:#fff0eb;padding:12px;border-radius:12px;line-height:1.6}.coach-hub-pose{display:flex;align-items:center;gap:20px;border:1px solid #d7e2d3;background:#edf3e8;padding:24px;border-radius:24px;text-decoration:none;color:inherit;margin-top:20px}.coach-hub-pose>span:first-child{font-size:30px}.coach-hub-pose h2{margin:5px 0;font-size:21px}.coach-hub-pose p{margin:0;color:#526658;line-height:1.6}.coach-hub-pose>strong{margin-left:auto;white-space:nowrap}.coach-hub-pose small{color:#456044;font-weight:700}@media(max-width:760px){.pose-layout{grid-template-columns:1fr}.pose-page{padding-top:12px}.pose-studio,.pose-guide{padding:16px;border-radius:20px}.pose-controls button{flex:1}.coach-hub-pose{flex-wrap:wrap;padding:20px}.coach-hub-pose>strong{margin-left:0}.pose-placeholder strong{font-size:14px}}
 .pose-stop-overlay{position:absolute;top:12px;right:12px;z-index:2;background:#fff;color:#253d30;border:1px solid #dce3dc;border-radius:12px;min-height:44px;padding:10px 14px;font-weight:700;box-shadow:0 3px 12px #0002}
+.pose-placeholder .btn{background:#fff;color:#203e34;border:1px solid #dce3dc;min-height:44px;font-weight:700}
 .pose-camera{max-height:420px}.pose-page header .section-eyebrow{font-size:11px;letter-spacing:.14em;font-weight:700;color:#526658}.pose-page header{margin-bottom:24px}.pose-page header>p{margin-bottom:0}@media(max-width:760px){.pose-page header{margin-bottom:20px}.pose-page header h1{margin:8px 0}.pose-back{margin-bottom:16px}}
 .pose-selection{background:white;border:1px solid #dce3dc;border-radius:24px;padding:20px;margin-bottom:24px}.pose-exercise-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.pose-exercise-options button{text-align:left;border:1px solid #dce3dc;border-radius:16px;background:#fafcf8;padding:18px;min-width:0;color:#294035;cursor:pointer}.pose-exercise-options button strong{font-size:19px;display:block;margin-bottom:8px}.pose-exercise-options button span{font-size:13px;line-height:1.6;display:block}.pose-exercise-options button[aria-pressed=true]{background:#203e34;color:white;border-color:#203e34;box-shadow:0 0 0 2px #adc2a7}.pose-exercise-options button:disabled{cursor:default}.pose-direction{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:20px}.pose-direction>strong{font-size:13px}.pose-direction>div{display:flex;gap:8px;flex-wrap:wrap}.pose-direction button{min-height:44px;padding:10px 16px;border:1px solid #d8e2d3;border-radius:24px;color:#294035;background:white;cursor:pointer}.pose-direction button[aria-pressed=true]{background:#e4edde;border-color:#819b75;font-weight:700}.pose-direction small{font-size:12px;color:#536655}.pose-selection-caption{font-size:13px;line-height:1.7;color:#536655;margin:16px 0 0}.pose-studio-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.pose-studio-heading span{font-size:12px;color:#536655}.pose-observation-status{background:#f2f5ef;padding:18px;border-radius:16px}.pose-observation-status span{font-size:12px;color:#536655;display:block}.pose-observation-status strong{display:block;font-size:24px;margin:8px 0}.pose-observation-status p{font-size:13px;line-height:1.6;margin:0}.pose-feedback>small{font-size:12px;color:#536655}.pose-direction button:focus-visible,.pose-exercise-options button:focus-visible{outline:3px solid #ec6b32;outline-offset:3px}@media(max-width:600px){.pose-selection{padding:14px;border-radius:20px}.pose-exercise-options{gap:8px}.pose-exercise-options button{padding:14px 8px;text-align:center;min-height:48px}.pose-exercise-options button strong{font-size:15px;margin:0}.pose-exercise-options button span{display:none}.pose-direction{gap:10px}.pose-direction>small{flex-basis:100%}.pose-direction button{font-size:12px;padding:10px 12px}.pose-placeholder svg{width:100px;height:100px}.pose-guide h2{font-size:22px}}
 .pose-feedback{padding-bottom:22px;margin-bottom:24px;border-bottom:1px solid #dce3dc}.pose-feedback article{border:1px solid #dae3d7;border-radius:14px;padding:14px;margin-top:12px;background:#f6f8f3}.pose-feedback article[data-state=observe]{background:#fff4e7;border-color:#e8c392}.pose-feedback article[data-state=unknown]{background:#f5f5f3;border-color:#e0e2dd}.pose-feedback article>div{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.pose-feedback article span{font-size:11px;color:#596653}.pose-feedback article p{margin-bottom:0}.pose-sources{display:grid;gap:10px;font-size:12px;border-top:1px solid #dce3dc;padding-top:16px}.pose-sources a{color:#345c45;text-decoration:underline}
 
 /* Keep the active measurement ahead of setup information. */
 .pose-selection[hidden],.pose-preparation[hidden]{display:none}
+.pose-layout.pose-layout-single,.pose-vision-layout.pose-layout-single{grid-template-columns:minmax(0,1fr);max-width:800px;margin-inline:auto}
+.pose-vision-observations[hidden],.pose-live-status[hidden]{display:none}
 .pose-active>header{display:none}
 .pose-active .pose-camera{max-height:none;aspect-ratio:auto;height:min(62dvh,640px);min-height:240px}
 .pose-active .pose-live-status{font-size:clamp(18px,2vw,24px);font-weight:700;line-height:1.5;padding:16px;background:#edf3e8;border-radius:14px;margin-top:12px;min-height:80px;overflow-wrap:anywhere}
@@ -164,3 +167,70 @@
 @media(max-height:700px){.pose-focused .pose-camera:has(.pose-countdown){height:260px;min-height:260px}.pose-countdown{padding:12px}.pose-countdown>strong{font-size:64px;line-height:1}.pose-countdown>span{font-size:16px;line-height:1.4}.pose-countdown>p{font-size:14px;line-height:1.5;margin:8px 0 12px}.pose-countdown .btn{min-height:48px}}
 .pose-video-consent{display:flex;align-items:flex-start;gap:12px;padding:16px;margin:12px 0;border:1px solid #d9e4dc;border-radius:16px;background:#f5f8f5;line-height:1.6}.pose-video-consent input{width:20px;height:20px;flex:none;margin-top:4px}.pose-video-consent small,.pose-video-box small{display:block;color:#61716b;margin-top:4px}.pose-video-box{display:flex;align-items:flex-start;flex-direction:column;gap:10px;margin-top:16px;padding-top:16px;border-top:1px solid #dce4df;min-width:0}.pose-video-box video{width:100%;max-height:420px;border-radius:14px;background:#16251e}.pose-video-box .btn{min-height:44px;white-space:normal}.pose-record-state{padding:10px 14px;border-radius:12px;background:#edf5ed;color:#254b35;font-size:14px}
 .pose-manual-entry{margin-bottom:16px}.pose-search-panel{padding:20px;border:1px solid #dce4df;border-radius:22px;background:white;margin-bottom:24px}.pose-search-panel label{display:grid;gap:8px}.pose-search-panel input:not([type=radio]){width:100%;min-height:48px;padding:10px 14px;border:1px solid #cad7cf;border-radius:12px;font:inherit;font-size:16px}.pose-direct-local{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}.pose-search-results{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;max-height:360px;overflow:auto;margin-bottom:16px}.pose-exercise-choice{display:grid;gap:5px;text-align:left;min-height:70px;background:#f7f9f7;border:1px solid #dbe4de;border-radius:14px;padding:12px;color:#203c30}.pose-exercise-choice[aria-pressed=true]{border-color:#28513d;background:#e9f1e9}.pose-exercise-choice small{color:#5f7167}.pose-search-panel .pose-other-choice{display:flex;align-items:center;min-height:44px}.pose-vision-layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:24px}.pose-vision-consents{padding:16px;display:grid;gap:12px}.pose-vision-consents small{display:block;margin-top:6px;line-height:1.6}.pose-vision-observations{background:#f6f8f5;padding:24px;border-radius:24px;min-width:0}.pose-vision-observations article{background:white;border:1px solid #dce4df;border-radius:16px;padding:16px;margin:12px 0}.pose-vision-observations article span{display:block;color:#67746c;font-size:13px;margin-top:5px}.pose-vision-time{padding:14px}.pose-vision-time strong{font-size:32px;margin-right:10px}.pose-vision-page .pose-studio>.btn{margin:10px;max-width:calc(100% - 20px)}@media(max-width:760px){.pose-search-results{grid-template-columns:repeat(2,minmax(0,1fr))}.pose-vision-layout{grid-template-columns:minmax(0,1fr)}.pose-vision-observations{padding:18px}.pose-search-panel{padding:14px}.pose-manual-entry{white-space:normal}}
+/* Entry and preparation keep the camera action ahead of reference material. */
+.pose-idle .pose-page-heading{margin-bottom:12px;align-items:center}
+.pose-idle .pose-page-heading h1{font-size:clamp(26px,3vw,34px);margin:0 0 8px}
+.pose-idle .pose-back{margin-bottom:16px}
+.pose-entry-links{display:flex;flex-wrap:wrap;gap:8px 20px;margin:0 0 18px}
+.pose-entry-links a{display:inline-flex;align-items:center;min-height:40px;color:#315a44;font-size:14px;text-underline-offset:4px}
+.pose-idle .pose-camera{height:clamp(160px,24svh,220px);min-height:160px;max-height:220px;aspect-ratio:auto}
+.pose-idle .pose-controls>.btn{flex:1;white-space:normal}
+.pose-idle .pose-placeholder svg{height:60px;width:60px}
+.pose-idle .pose-preparation{padding:18px}
+.pose-idle .pose-preparation h2{font-size:19px;margin:0 0 16px}
+.pose-idle .pose-preparation>.pose-chip{display:none}
+.pose-idle .pose-preparation li{margin-bottom:16px}
+.pose-idle .pose-preparation li:last-child{margin-bottom:0}
+.pose-idle .pose-preparation p{font-size:14px;line-height:1.6}
+.pose-live-status[hidden]{display:none}
+.pose-live-status>strong{display:block;line-height:1.5}
+.pose-live-status>p{margin:6px 0 0;font-size:inherit;font-weight:400}
+.pose-live-status>span{display:block;margin-top:6px;font-size:13px;font-weight:400;line-height:1.6}
+.pose-observation-live{margin-top:14px;padding:16px;border:1px solid #cddccc;border-radius:16px;background:#edf4e9;color:#244b3c;overflow-wrap:anywhere}
+.pose-observation-live strong{display:block;font-size:17px;line-height:1.5}
+.pose-observation-live p{margin:6px 0 0;font-size:14px;line-height:1.7}
+.pose-observation-live[data-paused=true]{background:#fff7ef;border-color:#ead5bf;color:#75452a}
+.pose-observation-updated{font-size:13px;line-height:1.65;color:#5e6c63}
+.pose-preparing .pose-live-status{display:none}
+@media(max-width:760px){.pose-idle .pose-studio{padding:16px}.pose-idle .pose-layout{gap:16px}.pose-idle .pose-camera{height:180px;min-height:160px}.pose-idle .pose-page-heading{display:block}.pose-idle .pose-history-link{display:inline-flex;min-height:40px;align-items:center}.pose-idle .pose-entry-links{margin-bottom:12px}.pose-idle .pose-controls label{min-width:100px}}
+
+/* The first camera action stays above the preview on every device. */
+.pose-camera-entry{margin-bottom:16px;min-width:0}
+.pose-camera-entry .pose-controls{border:0;padding-top:0;margin-top:0}
+.pose-camera-entry>p{margin:10px 0 0;font-size:13px;line-height:1.6;color:#5e6c63;overflow-wrap:anywhere}
+.pose-camera-entry .pose-controls>.btn{white-space:normal;min-height:48px}
+.pose-selected-method{margin:0 0 16px;font-size:13px;line-height:1.65;color:#476153}
+.pose-camera-entry>.pose-selected-method{margin:0 0 16px}
+.pose-layout+.pose-selection{margin-top:20px}
+.pose-entry-settings{margin-top:18px}
+.pose-vision-layout[hidden]{display:none}
+.pose-vision-layout>.pose-studio{scroll-margin-top:100px}
+.pose-vision-layout>.pose-studio:focus-visible{outline:3px solid #ec6b32;outline-offset:4px}
+.pose-idle .pose-placeholder{gap:8px;padding:14px}
+.pose-idle .pose-placeholder::before{inset:14px}
+.pose-idle .pose-placeholder strong{max-width:30ch;line-height:1.5}
+
+/* Keep one exercise entry, with its measurement choices explained together. */
+.pose-measurement-method{margin-top:20px}
+.pose-measurement-method h2{margin:0;font-size:17px;line-height:1.5}
+.pose-measurement-method>p{margin:8px 0 14px;color:#5e6c63;font-size:13px;line-height:1.65;max-width:76ch}
+.pose-local-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.pose-local-choice{display:flex;flex-direction:column;gap:12px;min-width:0;padding:16px;border:1px solid #dce4df;border-radius:16px;background:#f7f9f7;overflow-wrap:anywhere}
+.pose-local-choice h3{font-size:17px;line-height:1.5;margin:0 0 6px}
+.pose-local-choice span{font-size:12px;color:#5e6c63}
+.pose-local-choice p{font-size:13px;line-height:1.65;margin:8px 0 0;color:#476153}
+.pose-local-choice>.btn{margin-top:auto;width:100%;white-space:normal;min-height:48px;text-align:center;background:#244b3c;border-color:#244b3c;color:white}
+.pose-photo-alternative{border-top:1px solid #dce4df;padding-top:10px}
+.pose-photo-alternative p{margin:0 0 8px;font-size:12px}
+.pose-photo-alternative button{width:100%;min-height:44px;padding:8px 10px;border:1px solid #becfbe;border-radius:10px;background:white;color:#315a44;font:inherit;font-size:13px;font-weight:650;cursor:pointer}
+.pose-photo-alternative button[aria-pressed=true]{background:#e7efe3;border-color:#315a44}
+.pose-manual-record-choice{margin-top:20px;padding-top:16px;border-top:1px solid #dce4df}
+.pose-manual-record-choice p,.pose-picker-empty{font-size:13px;line-height:1.65;color:#5e6c63}
+.pose-manual-record-choice a{color:#315a44;text-decoration:underline;text-underline-offset:3px}
+.pose-manual-record-choice .pose-other-choice{font-weight:650;line-height:1.5}
+.pose-manual-record-choice>.btn{margin-top:12px;white-space:normal;min-height:48px}
+.pose-picker-host{scroll-margin-top:100px}
+.pose-vision-page .pose-studio-heading>.btn{font-size:13px;white-space:normal;min-height:44px}
+.pose-other-choice input{width:20px;height:20px;flex:none;accent-color:#244b3c}
+@media(max-width:900px){.pose-local-options{grid-template-columns:1fr}.pose-local-choice{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start}.pose-local-choice>.btn{width:auto;min-width:144px;margin-top:0}.pose-photo-alternative{grid-column:1/-1;display:flex;align-items:center;gap:16px}.pose-photo-alternative p{flex:1;margin:0}.pose-photo-alternative button{width:auto;flex:none}}
+@media(max-width:480px){.pose-idle .pose-back{margin-bottom:8px}.pose-idle .pose-page-heading h1{margin-bottom:6px}.pose-idle .pose-entry-links{gap:4px 16px}.pose-camera-entry .pose-controls{display:grid;grid-template-columns:minmax(100px,.8fr) minmax(0,1.2fr);gap:10px}.pose-camera-entry .pose-controls label,.pose-camera-entry .pose-controls .btn-primary{min-width:0}.pose-local-choice{display:flex;padding:14px}.pose-local-choice>.btn{width:100%;min-width:0}.pose-photo-alternative{display:block}.pose-photo-alternative p{margin-bottom:8px}.pose-photo-alternative button{width:100%}.pose-vision-layout>.pose-studio{scroll-margin-top:128px}}

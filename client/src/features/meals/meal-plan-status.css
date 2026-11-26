@@ -1,0 +1,4 @@
+.nutrition-meal-record { display: grid; justify-items: start; gap: 10px; margin: 16px 0; font-size: 13px; line-height: 1.7; }
+.nutrition-meal-record > p { margin: 0; color: var(--ink-2); }
+.nutrition-meal-record strong { color: #35563d; }
+.nutrition-meal-record .btn { min-height: 44px; height: auto; max-width: 100%; white-space: normal; text-align: center; }

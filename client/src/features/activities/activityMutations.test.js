@@ -61,5 +61,5 @@ test('invalid ids and update with no affected record do not report success', asy
 test('refresh covers detail/list and all weeks for only the current member', async () => {
   const calls=[];
   await invalidateActivityData({invalidateQueries:async arg=>calls.push(arg)},'owner');
-  assert.deepEqual(calls,[{queryKey:queryKeys.activitiesRoot('owner')},{queryKey:queryKeys.dashboardRoot('owner')},{queryKey:['workout-plans','owner']}]);
+  assert.deepEqual(calls,[{queryKey:queryKeys.activitiesRoot('owner')},{queryKey:queryKeys.dashboardRoot('owner')},{queryKey:['workout-plans','owner']},{queryKey:['coach','owner']}]);
 });

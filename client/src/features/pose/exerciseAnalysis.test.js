@@ -37,12 +37,36 @@ test('front angle wrap around 180 degrees does not create a spurious camera rota
 });
 test('lunge locks to the user-selected leg and requires visible split stance and front foot',()=>{
  const rows=lunge();assert.equal(analyzeExercise(rows,1000,1000,'lunge','left').side,'left');
+ assert.equal(analyzeExercise(rows,1000,1000,'lunge','left','right').side,'left');
  assert.equal(analyzeExercise(rows,1000,1000,'lunge','right').valid,false);
  const closed=lunge();closed[28].x=.41;assert.equal(analyzeExercise(closed,1000,1000,'lunge','left').valid,false);
  const foot=lunge();foot[31].visibility=.2;assert.equal(analyzeExercise(foot,1000,1000,'lunge','left').valid,false);
  const back=lunge();back[28].x=.7;assert.equal(analyzeExercise(back,1000,1000,'lunge','left').valid,false);
  const ambiguous=lunge();ambiguous[31].x=ambiguous[29].x+.001;assert.equal(analyzeExercise(ambiguous,1000,1000,'lunge','left').valid,false);
  const mirrored=lunge().map(p=>({...p,x:1-p.x}));assert.equal(analyzeExercise(mirrored,1000,1000,'lunge','left').valid,true);
+});
+
+test('pushup feedback keeps the incoming selected side while the other side flickers',()=>{
+ const rows=pushup();for(const left of [11,13,15,23,27])rows[left+1]={...rows[left]};
+ const engine=createExerciseFeedback('pushup','side');let selected='right',feedback;
+ for(let n=1;n<=20;n++){
+  rows[13].visibility=n%2?.69:.71;
+  const pose=analyzeExercise(rows,1000,1000,'pushup','side',selected);selected=pose.side;
+  assert.equal(selected,'right');
+  feedback=engine.update(pose,rows,1000,1000,n*120);
+ }
+ assert.equal(feedback.ready,true);
+ rows[13].visibility=.95;rows[14].visibility=.2;
+ const fallback=analyzeExercise(rows,1000,1000,'pushup','side',selected);
+ assert.equal(fallback.side,'left');
+ assert.equal(engine.update(fallback,rows,1000,1000,21*120).ready,false);
+});
+
+test('side squat forwards the selected side to joint analysis',()=>{
+ const rows=lunge();for(const left of [11,23,25,27])rows[left+1]={...rows[left]};
+ assert.equal(analyzeExercise(rows,1000,1000,'squat','side','right').side,'right');
+ rows[24].visibility=.2;
+ assert.equal(analyzeExercise(rows,1000,1000,'squat','side','right').side,'left');
 });
 test('lunge requires split-stance calibration before showing foot cues and clears on missing foot',()=>{
  const s=session('lunge','left');assert.equal(s.repeat(lunge()).ready,true);

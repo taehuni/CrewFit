@@ -2,6 +2,7 @@
 export const FRAME_COUNT = 4;
 export const MAX_FRAME_BYTES = 120 * 1024;
 import {GYM_EXERCISE_CRITERIA} from '../../shared/gymCriteria.js';
+import {requestPoseDecision} from './poseProvider.js';
 export const LOCAL_CRITERIA = {squat:'bodyweight_squat',lunge:'forward_lunge',pushup:'floor_pushup'};
 const localIds = Object.fromEntries(Object.entries(LOCAL_CRITERIA).map(([a,b])=>[b,a]));
 export const EXERCISE_CHOICES = [
@@ -101,14 +102,8 @@ export function createPoseClassifier({fetchImpl = globalThis.fetch, apiKey = () 
     state.active = true;
     state.calls.push(time);
     users.set(userId, state);
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const response = await fetchImpl('https://api.openai.com/v1/decisions', {method: 'POST', headers: {'Content-Type': 'application/json', Authorization: `Bearer ${key}`}, body: JSON.stringify(decisionRequest(frames)), signal: controller.signal});
-      if (!response.ok) throw new Error('provider_error');
-      return interpretDecision(await response.json());
-    } catch {
-      throw poseError(502, 'classification_failed', '운동을 인식하지 못했어요. 잠시 후 다시 촬영해 주세요.');
-    } finally {clearTimeout(timeout); state.active = false;}
+      return interpretDecision(await requestPoseDecision({payload: decisionRequest(frames), key, fetchImpl, timeoutMs}));
+    } finally {state.active = false;}
   };
 }

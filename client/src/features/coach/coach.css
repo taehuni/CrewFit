@@ -57,3 +57,10 @@
 .conversation-plan-request label{display:grid;gap:6px;font-size:12px;min-width:0}
 .conversation-plan-request input,.conversation-plan-request select{box-sizing:border-box;width:100%;min-width:0;max-width:100%;min-height:44px;border:1px solid var(--line);border-radius:10px;background:white;padding:8px;font:inherit}
 .conversation-plan-request .btn{width:100%;margin-top:14px;white-space:normal;line-height:1.5}
+/* Conversation-to-plan uses the same mobile controls as the plan editor. */
+.conversation-plan-request{container-type:inline-size;min-width:0}
+.conversation-plan-request :is(input,select){display:block;font-size:16px;min-height:48px;line-height:1.5}
+.conversation-plan-request input:is([type=date],[type=time]){appearance:none;-webkit-appearance:none;min-inline-size:0;inline-size:100%;max-inline-size:100%}
+.conversation-plan-request input::-webkit-date-and-time-value{min-width:0;text-align:left}
+.conversation-plan-request input::-webkit-datetime-edit{min-width:0;padding:0}
+@container(max-width:460px){.conversation-plan-request .coach-fields{grid-template-columns:minmax(0,1fr)}}

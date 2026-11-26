@@ -45,3 +45,46 @@ test('starter phase totals are validated before accepting a proposal',async()=>{
  assert.match(result.proposals[0].note,/본운동 14분/);
  await assert.rejects(askCoach({message},{apiKey:'fake',fetchImpl:response(16)}));
 });
+
+function chatDb(turns,owner){
+ const calls=[];
+ return {calls,from(table){
+  const filters=[],query={table,filters};calls.push(query);
+  let inserted=null;
+  const resolve=()=>{
+   if(inserted)return {data:inserted};
+   if(table!=='coach_turns')return {data:['user_settings','nutrition_preferences'].includes(table)?null:[]};
+   let rows=turns.filter(row=>filters.every(([key,value])=>key==='in'?value.includes(row.id):row[key]===value));
+   if(query.recent)rows=rows.slice().reverse().slice(0,8);
+   return {data:query.single?rows[0]||null:rows};
+  };
+  return {select(){return this;},eq(key,value){filters.push([key,value]);return this;},in(key,value){assert.equal(key,'id');filters.push(['in',value]);return this;},gte(){return this;},lte(){return this;},order(){query.recent=true;return this;},limit(){return this;},insert(row){inserted=row;return this;},maybeSingle(){query.single=true;return Promise.resolve(resolve());},single(){query.single=true;return Promise.resolve(resolve());},then(a,b){return Promise.resolve(resolve()).then(a,b);}};
+ }};
+}
+const oldTurnId='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',newTurnId='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',requestId='cccccccc-cccc-4ccc-8ccc-cccccccccccc';
+test('continuing a selected conversation uses only verified branch turns in supplied order',async()=>{
+ const user='selected-history-user';
+ const old={id:oldTurnId,user_id:user,message:'오래전 걷기 질문',answer:'걷기 답변'};
+ const followup={id:newTurnId,user_id:user,message:'이어서 질문',answer:'이어서 답변'};
+ const unrelated={id:'dddddddd-dddd-4ddd-8ddd-dddddddddddd',user_id:user,message:'다른 식단 대화',answer:'관련 없는 답변'};
+ const db=chatDb([followup,old,unrelated]);let received;
+ const result=await chat(db,user,{id:requestId,message:'다음 단계는?',context_turn_ids:[oldTurnId,newTurnId]},async context=>{received=context;return {answer:'다음 단계',proposals:[],meal_proposals:[]};});
+ assert.deepEqual(received.history,[old,followup].map(({message,answer})=>({message,answer})));
+ assert.equal(result.message,'다음 단계는?');
+ assert.ok(db.calls.filter(call=>call.table==='coach_turns').every(call=>call.filters.some(([key,value])=>key==='user_id'&&value===user)||call.filters.length===0));
+ assert.equal(db.calls.some(call=>call.table==='coach_turns'&&call.recent),false);
+});
+test('missing, foreign, invalid and repeated context IDs fail before generation',async()=>{
+ const db=chatDb([{id:oldTurnId,user_id:'another-user',message:'private',answer:'private'}]);
+ let generated=false;
+ const generate=async()=>{generated=true;return {};};
+ await assert.rejects(chat(db,'context-owner',{id:requestId,message:'질문',context_turn_ids:[oldTurnId]},generate),{status:404});
+ for(const ids of [[],['invalid'],[oldTurnId,oldTurnId],Array(9).fill(oldTurnId)])await assert.rejects(chat(db,'context-owner',{id:requestId,message:'질문',context_turn_ids:ids},generate),{status:400});
+ assert.equal(generated,false);
+});
+test('ordinary recent conversation still uses recent turns in chronological order',async()=>{
+ const user='recent-history-user',turns=[{id:oldTurnId,user_id:user,message:'첫 질문',answer:'첫 답변'},{id:newTurnId,user_id:user,message:'다음 질문',answer:'다음 답변'}];
+ let received;
+ await chat(chatDb(turns),user,{id:requestId,message:'최근 대화'},async context=>{received=context;return {answer:'답변',proposals:[],meal_proposals:[]};});
+ assert.deepEqual(received.history.map(row=>row.id),[oldTurnId,newTurnId]);
+});

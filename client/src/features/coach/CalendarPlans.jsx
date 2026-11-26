@@ -4,18 +4,21 @@ import {useAuth} from '../auth/index.js';
 import {Link} from 'react-router';
 import {api} from '../../shared/api.js';
 import {calendarPlanAccess} from './calendarPlanAccess.js';
+import {useCalendarStatus} from '../auth/useCalendarStatus.js';
 export function useCalendarPlans(){
  const {user,token,session}=useAuth(),cache=useQueryClient(),lock=useRef(false);
+ const connection=useCalendarStatus();
  const [error,setError]=useState(''),[busy,setBusy]=useState(null),[confirm,setConfirm]=useState(null);
  const exports=useQuery({queryKey:['calendar-exports',user.id],queryFn:()=>api('/calendar/exports',{token}),retry:false});
  async function add(plan){if(lock.current)return;lock.current=true;setBusy(plan.id);setError('');
-  try{await api('/calendar/plans/'+plan.id,{token,body:{providerToken:session?.provider_token}});await cache.invalidateQueries({queryKey:['calendar-exports',user.id]});setConfirm(null);}catch(e){setError(e.message);}finally{lock.current=false;setBusy(null);}
+  try{await api('/calendar/plans/'+plan.id,{token,body:{providerToken:session?.provider_token}});await cache.invalidateQueries({queryKey:['calendar-exports',user.id]});setConfirm(null);}catch(e){setError(e.message);if([401,403].includes(e.status))connection.recheck();}finally{lock.current=false;setBusy(null);}
  }
- return {exports,error,busy,confirm,setConfirm,add,hasToken:!!session?.provider_token};
+ return {exports,error,busy,confirm,setConfirm,add,hasToken:connection.connected,connection};
 }
 export function CalendarPlanAction({plan,calendar}){
  const access=calendarPlanAccess(plan,calendar.exports.data,calendar.hasToken);
  if(access.mode==='saved')return <a className="btn btn-ghost calendar-added" href={access.saved.event_url} target="_blank" rel="noreferrer">✓ 캘린더에 추가됨 · 열기 ↗</a>;
+ if(calendar.connection?.checking)return <span role="status">캘린더 연결 확인 중…</span>;
  if(access.mode==='connect')return <Link className="btn btn-ghost calendar-settings-link" to="/me/settings?calendar=settings#profile-connections">캘린더 연결 설정 ↗</Link>;
  return <div className="calendar-action">{calendar.confirm===plan.id?<div><p>{plan.scheduled_on} {plan.start_time.slice(0,5)} · {plan.minutes}분<br/>이 계획을 구글 캘린더에 추가할까요?</p><button className="btn btn-primary" disabled={!!calendar.busy} onClick={()=>calendar.add(plan)}>{calendar.busy===plan.id?'추가 중…':'일정 추가 확인'}</button><button className="btn btn-ghost" disabled={!!calendar.busy} onClick={()=>calendar.setConfirm(null)}>취소</button></div>:<button className="btn btn-ghost" disabled={!!calendar.busy} onClick={()=>calendar.setConfirm(plan.id)}>구글 캘린더에 추가</button>}</div>;
 }

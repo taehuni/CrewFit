@@ -1,0 +1,24 @@
+.ai-data-notice{min-width:0;margin:4px 0 0}
+.ai-data-trigger{display:flex;align-items:center;gap:6px;flex-wrap:wrap;max-width:100%;min-height:40px;padding:4px 0;border:0;background:transparent;color:#426153;font:inherit;font-size:12px;line-height:1.5;text-align:left;cursor:pointer}
+.ai-data-trigger>span:first-child{font-size:16px;line-height:1}
+.ai-data-trigger>span:nth-child(2){text-decoration:underline;text-underline-offset:3px}
+.ai-data-provider{color:#66736c;font-size:11px}
+.coach-page .coach-composer-heading .coach-composer-meta{display:inline;min-width:0;font-size:11px;overflow-wrap:anywhere}
+.coach-page .coach-composer .coach-composer-actions{flex-wrap:nowrap;gap:12px}
+.coach-page .coach-composer-actions .ai-data-notice{flex:1;min-width:0;margin:0}
+.ai-data-trigger:focus-visible,.ai-data-dialog button:focus-visible{outline:3px solid #ec6b32;outline-offset:3px}
+.ai-data-dialog{width:min(560px,calc(100% - 32px));max-width:none;max-height:calc(100dvh - 32px);margin:auto;padding:0;border:1px solid #d8e2da;border-radius:20px;background:white;color:#203b32;box-sizing:border-box;overflow:auto;box-shadow:0 20px 70px #142c2433}
+.ai-data-dialog::backdrop{background:#15261f80}
+.ai-data-dialog>header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0;padding:18px 20px;border-bottom:1px solid #e1e7e1;background:white;position:sticky;top:0;z-index:1}
+.ai-data-dialog h2{margin:0;font-size:19px;line-height:1.5;letter-spacing:-.025em}
+.ai-data-dialog>header>button{flex:none;min-width:48px;min-height:44px;border:1px solid #d5dfd7;border-radius:10px;background:#f7f9f7;color:#315a44;font:inherit;font-size:13px;font-weight:650;cursor:pointer}
+.ai-data-content{padding:18px 20px 22px;font-size:14px;line-height:1.75;overflow-wrap:anywhere}
+.ai-data-content p{margin:0 0 14px;font-size:14px;line-height:1.75}
+.ai-data-content ul{padding:0;margin:16px 0;list-style:none;display:grid;gap:16px}
+.ai-data-content li>strong,.ai-data-content li>span{display:block}
+.ai-data-content li>span{margin-top:4px;color:#52655a}
+.ai-data-input-note{padding:16px;border:1px solid #dbe5d8;border-radius:14px;background:#f4f8f0}
+.ai-data-input-note>strong{display:block;margin-bottom:8px}
+.ai-data-input-note p:last-child{margin-bottom:0}
+.feedback-page .ai-data-notice{margin:0 0 18px}
+@media(max-width:480px){.ai-data-dialog{width:calc(100% - 24px);max-height:calc(100dvh - 24px);border-radius:16px}.ai-data-dialog>header{padding:14px 16px;gap:12px}.ai-data-dialog h2{font-size:18px}.ai-data-content{padding:16px}.ai-data-trigger{min-height:44px}}

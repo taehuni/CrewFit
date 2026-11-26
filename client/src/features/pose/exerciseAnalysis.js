@@ -16,10 +16,10 @@ function frontPoints(rows,w,h){const points={};for(const side of ['left','right'
 const mid=(a,b)=>({x:(a.x+b.x)/2,y:(a.y+b.y)/2});
 function sideGate(rows,w,h,p){const l=point(rows,11,w,h),r=point(rows,12,w,h);return !l||!r||Math.abs(l.x-r.x)/distance(p.shoulder,p.hip)<=.45;}
 
-export function analyzeExercise(rows,w,h,exercise,view){
+export function analyzeExercise(rows,w,h,exercise,view,preferredSide=null){
  if(!Number.isFinite(w)||!Number.isFinite(h)||w<=0||h<=0||!Array.isArray(rows))return bad('카메라에서 전신을 확인하고 있어요.');
  const config=EXERCISES.find(p=>p.id===exercise);if(!config?.views.some(p=>p.id===view))return bad('운동과 촬영 방향을 다시 선택해 주세요.');
- if(exercise==='squat'&&view==='side')return analyzePose(rows,w,h);
+ if(exercise==='squat'&&view==='side')return analyzePose(rows,w,h,preferredSide);
  if(exercise==='squat'){
   const p=frontPoints(rows,w,h);if(!p)return bad('정면에서 양쪽 어깨·골반·무릎·발목이 모두 보이도록 서 주세요.');
   const torso=distance(mid(p.leftShoulder,p.rightShoulder),mid(p.leftHip,p.rightHip));
@@ -36,7 +36,7 @@ export function analyzeExercise(rows,w,h,exercise,view){
   if(Math.abs(footDirection)<.02*leg||Math.sign(footDirection)*(p.ankle.x-other.x)<=0)return bad('선택한 다리가 앞에 있는지 확인해 주세요. 앞발의 뒤꿈치와 발끝이 옆에서 구분되어야 해요.');
   return {valid:true,angle:a,side:view,points:{...p,otherAnkle:other},segments:[['shoulder','hip'],['hip','knee'],['knee','ankle'],['heel','toe']],message:'선택한 앞다리의 움직임을 관찰하고 있어요.'};
  }
- for(const side of ['left','right']){
+ for(const side of preferredSide==='right'?['right','left']:['left','right']){
   const p=sidePoints(rows,w,h,side,['shoulder','elbow','wrist','hip','ankle']);if(!p)continue;
   const a=angle(p.shoulder,p.elbow,p.wrist),body=angle(p.shoulder,p.hip,p.ankle);
   if(a===null||body===null||Math.abs(p.shoulder.x-p.hip.x)<=Math.abs(p.shoulder.y-p.hip.y)||distance(p.shoulder,p.ankle)<1)continue;
@@ -62,7 +62,7 @@ export function createExerciseFeedback(exercise,view){
  function reset(){baseline=null;samples=[];last=null;side=null;streaks={};return empty('시작 자세를 유지해 기준을 확인해 주세요.');}
  function observe(key,label,condition,message,quiet){const s=streaks[key]||{high:0,low:0};s.high=condition?s.high+1:0;s.low=condition?0:s.low+1;streaks[key]=s;return s.high>=5?status(key,label,'observe',message):s.low>=5?status(key,label,'steady',quiet):unknown(key,label,'몇 프레임 더 관찰하고 있어요.');}
  return {reset,update(_pose,rows,w,h,time){
-  const pose=analyzeExercise(rows,w,h,exercise,view);
+  const pose=analyzeExercise(rows,w,h,exercise,view,_pose?.side);
   if(mode==='invalid'||!_pose?.valid||!pose.valid||!Number.isFinite(time)||time<0){reset();return empty(pose.message||'전신이 보이도록 다시 준비해 주세요.');}
   if((last!==null&&(time<=last||time-last>700))||(side!==null&&side!==pose.side)){reset();last=time;side=pose.side;return empty('추적 조건이 바뀌었어요. 시작 자세부터 다시 확인해 주세요.');}
   last=time;side=pose.side;const p=pose.points;let values,standing;

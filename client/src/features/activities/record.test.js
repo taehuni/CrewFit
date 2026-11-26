@@ -44,12 +44,12 @@ test('gym validates sets and numbers each exercise case-insensitively', () => {
 });
 test('running uses own-user insert; gym uses single transaction RPC; errors propagate', async () => {
   let inserted, rpc;
-  const db = { from: table => { assert.equal(table, 'activities'); return {insert: async row => { inserted = row; return {}; }}; },
+  const db = { from: table => { assert.equal(table, 'activities'); return {insert: row => { inserted = row; return {select: columns => {assert.equal(columns,'id');return {single:async()=>({data:{id:42}})};}}; }}; },
     rpc: async (...args) => { rpc = args; return {data:1}; } };
-  await saveActivity(db, 'user-a', activityPayload(base));
+  assert.equal(await saveActivity(db, 'user-a', activityPayload(base)),42);
   assert.equal(inserted.user_id, 'user-a');
   const gym = activityPayload({...base, sport:'gym', sets:[{name:'Squat',reps:'10',weight:'0'}]});
-  await saveActivity(db, 'user-a', gym);
+  assert.equal(await saveActivity(db, 'user-a', gym),1);
   assert.equal(rpc[0], 'save_gym_activity');
   assert.equal(rpc[1].p_sets.length, 1);
   await assert.rejects(saveActivity({rpc:async()=>({error:new Error('offline')})}, 'user-a', gym), /offline/);

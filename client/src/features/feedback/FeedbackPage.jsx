@@ -11,6 +11,7 @@ import { supabase } from '../../shared/supabaseClient.js';
 import { FEEDBACK_PERIODS, feedbackError, feedbackPeriodLabel, feedbackPeriodStart, loadSavedFeedback, kstToday } from './feedback.js';
 import './feedback.css';
 import FeedbackHistory from './FeedbackHistory.jsx';
+import AiDataNotice from '../../shared/AiDataNotice.jsx';
 
 function requestFeedback(token, period, date, force = false) {
   return api('/feedback/generate', { token, body: { period, date, force } });
@@ -86,6 +87,7 @@ export default function FeedbackPage() {
         <button type="button" className="btn btn-primary" disabled={busy || feedback.isFetching || !!feedback.error}
           onClick={() => request()}>{busy ? '분석 중…' : result ? '최신 기록 반영하기' : '리포트 만들기'}</button>
       </div>
+      <AiDataNotice mode="report"/>
       {result && feedback.error && <div className="feedback-state-error" role="alert">
         <p>저장된 결과를 다시 확인하지 못했어요. 화면에는 이전 조회 결과를 유지했어요.</p>
         <button type="button" className="btn btn-ghost" disabled={feedback.isFetching} onClick={() => feedback.refetch()}>저장된 결과 다시 조회</button>

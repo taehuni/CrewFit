@@ -26,6 +26,18 @@ test('prefers a fixed side over confidence differences and falls back only when 
  assert.equal(analyzePose(rows,1000,500).side,'left');rows[23].visibility=.2;
  assert.equal(analyzePose(rows,1000,500).side,'right');
 });
+
+test('keeps the previously selected valid side when the other side crosses its visibility threshold',()=>{
+ const rows=pose(),right=pose(1000,500,'right');for(const i of [12,24,26,28])rows[i]=right[i];
+ let selected='right';
+ for(let n=0;n<20;n++){
+  rows[23].visibility=n%2?.64:.66;
+  selected=analyzePose(rows,1000,500,selected).side;
+  assert.equal(selected,'right');
+ }
+ rows[23].visibility=.66;rows[24].visibility=.2;
+ assert.equal(analyzePose(rows,1000,500,selected).side,'left');
+});
 test('rejects coincident knee joints rather than inventing an angle',()=>{const rows=pose();rows[23]={...rows[25]};assert.equal(analyzePose(rows,1000,500).valid,false);});
 
 function tracker(){const counter=createRepCounter();let time=0;return {counter,frame(angle,delta=100){time+=delta;return counter.update(angle,time);},frames(angles,delta=100){let value;for(const angle of angles)value=this.frame(angle,delta);return value;}};}

@@ -35,11 +35,21 @@ export function checked(result){if(result.error)throw fail(503,'코치 저장 �
 const limiter=createRateLimiter({minuteLimit:4,dayLimit:30}),running=new Set();
 export async function chat(db,userId,input,generate=askCoach){
  if(!uuid(input?.id)||typeof input.message!=='string'||!input.message.trim()||input.message.length>2000)throw fail(400,'메시지는 1~2,000자로 입력해 주세요.');
+ const contextIds=input.context_turn_ids;
+ if(contextIds!==undefined&&(!Array.isArray(contextIds)||!contextIds.length||contextIds.length>8||contextIds.some(id=>!uuid(id))||new Set(contextIds).size!==contextIds.length))throw fail(400,'이어갈 대화를 다시 선택해 주세요.');
  if(running.has(userId))throw fail(409,'이전 답변을 기다려 주세요.');
  running.add(userId);
  try{
  const existing=checked(await db.from('coach_turns').select('*').eq('user_id',userId).eq('id',input.id).maybeSingle());
  if(existing){if(existing.message!==input.message.trim())throw fail(409,'다른 메시지에는 새 요청이 필요해요.');return existing;}
+ // A selected conversation is an explicit branch. Never mix newer, unrelated
+ // turns into it, and never accept client-supplied message/answer content.
+ let selectedHistory=null;
+ if(contextIds){
+  const owned=checked(await db.from('coach_turns').select('id,message,answer').eq('user_id',userId).in('id',contextIds));
+  if(owned.length!==contextIds.length)throw fail(404,'이어갈 대화를 찾을 수 없어요. 대화를 다시 선택해 주세요.');
+  selectedHistory=contextIds.map(id=>{const turn=owned.find(row=>row.id===id);return {message:turn.message,answer:turn.answer};});
+ }
  limiter.take(userId);
  const today=new Date(Date.now()+9*3600000).toISOString().slice(0,10),from=new Date(Date.now()+9*3600000-27*86400000).toISOString().slice(0,10);
  const results=await Promise.all([
@@ -48,10 +58,10 @@ export async function chat(db,userId,input,generate=askCoach){
  db.from('goals').select('type,sport,target,period').eq('user_id',userId).eq('is_active',true).limit(20),
  db.from('user_settings').select('interested_sports,goal_note').eq('user_id',userId).maybeSingle(),
  db.from('nutrition_preferences').select('goal,allergies,avoid,preference').eq('user_id',userId).maybeSingle(),
- db.from('coach_turns').select('message,answer').eq('user_id',userId).order('created_at',{ascending:false}).limit(8)
+ selectedHistory?Promise.resolve({data:selectedHistory}):db.from('coach_turns').select('message,answer').eq('user_id',userId).order('created_at',{ascending:false}).limit(8)
  ]);
  const [activities,meals,goals,preferences,nutrition,history]=results.map(checked);
- const context={today,timezone:'Asia/Seoul',range:{from,to:today},activities,meals,goals,preferences,nutrition,history:history.reverse(),message:input.message.trim()};
+ const context={today,timezone:'Asia/Seoul',range:{from,to:today},activities,meals,goals,preferences,nutrition,history:selectedHistory?history:history.reverse(),message:input.message.trim()};
  if(JSON.stringify(context).length>90000)throw fail(400,'참고할 기록이 너무 길어요. 긴 기록 메모를 정리한 뒤 다시 요청해 주세요.');
  const reply=await generate(context);
  const row={id:input.id,user_id:userId,message:input.message.trim(),...reply};

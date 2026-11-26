@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import express from 'express';
 import {request} from 'node:http';
 import {createPoseRouter} from '../routes/pose.js';
+import {POSE_CONSENT_VERSION} from '../../shared/poseConsent.js';
 import {EXERCISE_CHOICES, MEASUREMENT_VIEWS, createPoseClassifier, interpretDecision, validatePoseFrames, MAX_FRAME_BYTES} from './poseClassification.js';
 
 const jpeg = `data:image/jpeg;base64,${Buffer.from([255,216,255,224,0,0,255,217]).toString('base64')}`;
@@ -109,7 +110,7 @@ test('single inflight and upstream failures do not expose provider messages', as
   const first = classify('u', body());
   await assert.rejects(classify('u', body()), {status: 429});
   release({ok: false});
-  await assert.rejects(first, {status: 502, code: 'classification_failed'});
+  await assert.rejects(first, {status: 502, code: 'analysis_temporary_failure'});
   const missing = createPoseClassifier({apiKey: () => ''});
   await assert.rejects(missing('u', body()), {status: 503});
 });
@@ -123,13 +124,22 @@ test('provider timeout aborts and releases inflight state', async () => {
   await assert.rejects(classify('u', body()), {status: 502});
   assert.equal(calls, 2);
 });
+
+test('classifier reports service configuration/schema failures without asking users to change their movement', async () => {
+  const unavailable = createPoseClassifier({apiKey: () => 'mock-only', fetchImpl: async () => ({ok: false, status: 401, json: async () => ({error: {message: 'private-key'}})})});
+  await assert.rejects(unavailable('u', body()), {status: 503, code: 'analysis_unavailable'});
+  let calls = 0;
+  const malformed = createPoseClassifier({apiKey: () => 'mock-only', fetchImpl: async () => ({ok: true, json: async () => ++calls === 1 ? {output: []} : decision()})});
+  await assert.rejects(malformed('u', body()), {status: 502, code: 'analysis_invalid_response'});
+  assert.equal((await malformed('u', body())).supported, true);
+});
 test('route authenticates before photo parser, scopes errors and accepts authenticated payload', async t => {
   let calls = 0;
   const app = express();
   app.use('/api/pose', createPoseRouter((req, res, next) => {
     if (req.headers.authorization !== 'Bearer test') return res.status(401).json({error: 'unauthorized'});
     req.user = {id: 'u'}; next();
-  }, {classify: async (id, input) => {calls++; assert.equal(id, 'u'); validatePoseFrames(input); return interpretDecision(decision());}}));
+  }, {consents:{require:async(db,id,scope)=>{assert.equal(id,'u');assert.equal(scope,'recognition');}},classify: async (id, input) => {calls++; assert.equal(id, 'u'); validatePoseFrames(input); return interpretDecision(decision());}}));
   app.use(express.json());
   const server = app.listen(0, '127.0.0.1');
   await new Promise(resolve => server.once('listening', resolve));
@@ -151,4 +161,29 @@ test('route authenticates before photo parser, scopes errors and accepts authent
   const response = await send(JSON.stringify(input));
   assert.equal(response.status, 200); assert.equal(response.headers.get('cache-control'), 'no-store');
   assert.equal((await response.json()).supported, true); assert.equal(calls, 1);
+});
+
+test('classification HTTP blocks provider calls without current owner recognition consent',async t=>{
+  const accepted={user_id:'owner',scope:'recognition',version:POSE_CONSENT_VERSION,accepted_at:'2026-11-21T00:00:00Z',revoked_at:null};
+  let rows=[],dbError=null,providerCalls=0;
+  const db={from(table){assert.equal(table,'pose_analysis_consents');const filters=[];const query={select(){return query;},eq(key,value){filters.push([key,value]);return query;},then(resolve){return Promise.resolve({data:rows.filter(row=>filters.every(([key,value])=>row[key]===value)),error:dbError}).then(resolve);}};return query;}};
+  const classify=createPoseClassifier({apiKey:()=> 'mock-only',fetchImpl:async()=>{providerCalls++;return provider();}});
+  const app=express();
+  app.use('/api/pose',createPoseRouter((req,res,next)=>{req.user={id:'owner'};req.db=db;next();},{classify}));
+  const server=app.listen(0,'127.0.0.1');await new Promise(resolve=>server.once('listening',resolve));
+  t.after(()=>new Promise(resolve=>server.close(resolve)));
+  const send=()=>new Promise((resolve,reject)=>{
+    const req=request(`http://127.0.0.1:${server.address().port}/api/pose/classify`,{method:'POST',headers:{'Content-Type':'application/json'}},res=>{
+      let text='';res.on('data',chunk=>text+=chunk);res.on('end',()=>resolve({status:res.statusCode,cache:res.headers['cache-control'],body:JSON.parse(text)}));
+    });req.on('error',reject);req.end(JSON.stringify(body()));
+  });
+  for(const invalidRows of [[],[{...accepted,revoked_at:'2026-11-21T01:00:00Z'}],[{...accepted,scope:'observation'}],[{...accepted,version:'old'}],[{...accepted,user_id:'other'}]]){
+    rows=invalidRows;const response=await send();
+    assert.equal(response.status,403);assert.equal(response.body.error.code,'consent_required');assert.equal(response.cache,'no-store');
+    assert.equal(providerCalls,0);
+  }
+  rows=[accepted];dbError={code:'42P01',message:'private database details'};
+  const unavailable=await send();assert.equal(unavailable.status,503);assert.equal(unavailable.body.error.code,'consent_unavailable');
+  assert.doesNotMatch(JSON.stringify(unavailable.body),/private database/);assert.equal(providerCalls,0);
+  dbError=null;const allowed=await send();assert.equal(allowed.status,200);assert.equal(providerCalls,1);
 });

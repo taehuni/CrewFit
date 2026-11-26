@@ -18,6 +18,7 @@ export default function ActivityDetailView({ detail, onDelete }) {
       <Link to={returnTo || '/home'} state={activity ? { performedOn: activity.performed_on } : undefined} className="activity-back">{returnTo === "/me?view=records" ? "내 프로필 기록으로" : returnTo ? "운동 목록으로" : "홈으로"}</Link>
       <h1>{activity ? (SPORT_LABEL[activity.sport] || '운동') + ' 기록' : '운동 기록 상세'}</h1>
       {activity && <time dateTime={activity.performed_on}>{activity.performed_on.replaceAll('-', '.')}</time>}
+      {activity && String(location.state?.recordedActivityId)===String(activity.id) && <p role="status">운동 기록을 저장했어요.</p>}
       {activity && <p className="muted">{recordSource(activity)}</p>}
       {activity && <div className="activity-detail-actions">
         {ACTIVITY_SPORTS.includes(activity.sport) && <Link to={`/activities/${activity.id}/edit`} state={location.state} className="btn btn-ghost">수정</Link>}

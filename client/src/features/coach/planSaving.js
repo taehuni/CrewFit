@@ -14,3 +14,16 @@ export async function persistWorkoutPlans(request, turn_id, items, timeoutMs = 3
   throw error;
  } finally { clearTimeout(timer); }
 }
+
+export function refreshSavedWorkoutPlans(cache, userId, key, saved) {
+ cache.setQueryData(key, old => ({ ...old,
+  plans: [...(old?.plans || []).filter(plan => !saved.some(row => row.id === plan.id)), ...saved]
+   .sort((a, b) => b.scheduled_on.localeCompare(a.scheduled_on)),
+ }));
+ // Review and recent conversation use different keys. Mark both stale so going
+ // back cannot retain the pre-save count during the normal 30-second cache age.
+ return Promise.all([
+  cache.invalidateQueries({queryKey:['coach', userId]}),
+  cache.invalidateQueries({queryKey:['workout-plans', userId]}),
+ ]);
+}

@@ -3,8 +3,10 @@
 MediaPipe Pose Landmarker 1.2.0 estimates landmarks locally. `exerciseAnalysis.js`
 selects an exercise-specific geometry and observation engine. Measurement runs
 locally; model and WASM downloads use Google Storage and jsDelivr. The default
-flow recognizes a movement before starting feedback. It sends four images to
-OpenAI only after the user explicitly agrees and starts that recognition.
+flow asks the user to choose an exercise. Local measurement does not call the
+movement classifier or send analysis photos. Optional automatic finding remains
+at `?view=auto`; it sends four images to OpenAI only after explicit consent and start.
+Other catalog exercises use the existing consented photo-observation flow.
 
 ## Supported scope
 
@@ -26,7 +28,13 @@ cutoffs, scores, a diagnosis, or proof of correct/safe form.
 - https://www.nasm.org/resource-center/exercise-library/push-up
 - https://www.acefitness.org/resources/everyone/exercise-library/94/forward-lunge/
 
-Calibration requires 12 consecutive eligible observations. A movement signal must
+Calibration requires 12 consecutive eligible observations. Squat-side torso and
+heel baselines are independent: unavailable foot landmarks leave heel feedback
+unknown, while visible joints and the torso baseline can enable repetition tracking.
+The heel baseline still requires 12 standing observations with visible feet.
+An already valid anatomical side stays selected; another side is used only when
+the preferred side is unavailable. Actual side changes reset calibration.
+A movement signal must
 persist for 5 observations; unreliable landmarks, changed side, or time gaps reset
 calibration. Front view suppresses angle and repetition UI entirely. Other views
 count only after calibration. Before a measurement starts, manual selection can
@@ -38,8 +46,10 @@ session as correct form.
 
 `startPoseRecognition.js` and its synthetic tests remain as a local starting-pose
 helper, but the current screen does not expose it as automatic movement recognition.
-An upright stance is not evidence of a squat. The primary flow uses the consented
-movement classifier below; direct exercise selection is only a fallback.
+An upright stance is not evidence of a squat. The primary flow uses the user's
+explicit exercise choice. The consented movement classifier below is optional.
+Existing manual/local links still work; saved results have `?view=history` and
+legacy `#pose-history-title` support. Repeating a local exercise keeps local mode.
 
 ## AI exercise classification contract
 
@@ -47,7 +57,8 @@ The consent-based AI flow uses OpenAI Decisions (`POST /v1/decisions`,
 `gpt-6-luna`) to choose among named movement categories, with `other` and
 `unknown` fallbacks. This is classification, not posture scoring or a universal
 exercise evaluator. A catalog entry alone does not implement its measurement
-rules. Only the three supported exercise variants above can proceed to measurement.
+rules. The three supported variants above use local measurement; referenced catalog
+exercises offer a separate photo-observation start step and consent.
 
 After consent, the client samples four JPEG frames over about three seconds,
 resized to at most 512 pixels on their longest edge. It sends them to the
@@ -59,8 +70,10 @@ in any proxy, monitoring, or deployment configuration.
 
 Classification needs the existing server-only `OPENAI_API_KEY` and access to
 Decisions. It incurs API usage charges and does not reuse the coaching model
-setting. Failure or missing access shows a retryable recognition error; the server
-does not substitute a guessed exercise or tell the user to select one manually.
+setting. Configuration/access failures, temporary failures and malformed provider
+responses have distinct safe errors. None is converted to an ambiguous exercise.
+The user can retry, choose an exercise, or directly record an activity; the server
+never substitutes a guessed exercise.
 The server validates authentication, explicit consent, four bounded JPEG inputs,
 and applies per-user rate/concurrency limits and a provider timeout. It never
 accepts remote image URLs. Raw provider errors are not exposed to the client.
@@ -166,12 +179,20 @@ validates that pair against its evaluator allowlist; missing/mismatched/unsuppor
 pairs never silently become squat or side view. Lunge left/right must be supplied
 by the server, not guessed or selected by the user.
 
-After a valid selection, a cancellable three-second baseline preparation begins
-automatically, then measurement starts with no confirmation click. Local baseline
-validity and minimum valid frames remain required for observations and saving.
+After a valid local selection, actual landmark calibration begins. Twelve eligible
+consecutive observations and a prepared repetition endpoint (except front squat)
+are required before measurement, its timer and optional video recording start.
+The same feedback engine and repetition counter are retained across that transition.
+Tracking loss pauses observations, preserves completed repetitions and requires a
+new baseline; a partial repetition cannot bridge the gap. The UI distinguishes
+preparing, observing and interrupted tracking. Model loading after camera preview
+has a 30-second timeout; late model instances are closed after cancellation.
 Uncertain/unsupported results stay in the camera screen with retry and direct
-selection fallback. Each retry requires fresh consent; there is no background or
-continuous AI upload. Cancellation cannot retract an already transmitted request.
+selection fallback. Consent choices are remembered per account and purpose, with
+the current consent version checked before transmission. Recognition is explicitly
+started each time; it does not continuously upload photos. A recognized catalog
+exercise instead shows its photo-observation CTA above the recognition retry panel.
+Cancellation cannot retract an already transmitted request.
 
 During measurement the exercise and view stay fixed. The user ends the current
 measurement before recognizing another movement, with a result/save step and an
@@ -204,12 +225,26 @@ Real Android/WebView encoding and physical camera capture remain device checks.
 
 ## Catalog and custom exercise observation
 
+The default `/pose` entry uses a body-region picker (all, lower body, back,
+chest, shoulders, arms, core, full body) and exercise/equipment search.
+`poseCatalog.js` retains 51 distinct choices: three local landmark exercises,
+47 repeated-photo observations, and one name/time-only entry. Exercise selection
+does not imply that every exercise supports repetitions or an overall form score.
+Search and region are held in `PosePage` for the current account so returning
+from a local measurement preserves the selection context. Refreshing the page
+starts a new search. Four exact-exercise thumbnails accompany the back category;
+other rows use the licensed body-region artwork rather than an unrelated photo.
+Picker UI evidence and platform limitations are in the root `design-qa.md`.
+
 `/pose?view=manual` offers catalog search and free-text exercise names. Existing
 three local exercises retain their deterministic landmark flow. Source-backed
 catalog exercises use `/pose/feedback` only after a separate repeated-photo
 consent: four frames, at least 35 seconds between attempts, no overlapping call.
-Failures, exercise mismatch and quota limits pause automatic requests while the
-camera/time recording remains available. Explicit retry resumes the gate.
+Temporary connection failures get at most two automatic retries, still respecting
+the 35-second interval. Persistent failures, malformed responses, configuration
+errors, exercise mismatch and daily limits pause automatic requests while camera/time
+recording remains available. Explicit retry resumes the gate. Capture, analysis,
+waiting and paused states are distinct; previous results show their observation time.
 Custom names/pending entries are record-only (name/time), never sent as criteria.
 Catalog sessions have no repetition count, no local squat fallback, and only
 observable-item feedback. These are limited visual observations, not safety or

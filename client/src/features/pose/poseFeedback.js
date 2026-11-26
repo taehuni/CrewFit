@@ -7,8 +7,8 @@ const unknown=(key,label,message)=>item(key,label,'unknown',message);
 function empty(summary){return {ready:false,items:[unknown('heel','뒤꿈치','발의 위치를 확인할 수 없어요.'),unknown('torso','상체 기울기','기준 자세를 먼저 확인해 주세요.'),unknown('depth','무릎 각도','각도를 확인할 수 없어요.')],summary};}
 
 export function createFormFeedback(){
- let side=null,lastTime=null,samples=[],baseline=null,heelHigh=0,heelLow=0,torsoHigh=0,torsoLow=0;
- function clear(){side=null;samples=[];baseline=null;heelHigh=heelLow=torsoHigh=torsoLow=0;}
+ let side=null,lastTime=null,samples=[],baseline=null,heelSamples=[],heelBaseline=null,heelHigh=0,heelLow=0,torsoHigh=0,torsoLow=0;
+ function clear(){side=null;samples=[];baseline=null;heelSamples=[];heelBaseline=null;heelHigh=heelLow=torsoHigh=torsoLow=0;}
  function reset(){clear();lastTime=null;return empty('옆으로 서서 전신과 발이 보이도록 준비해 주세요.');}
  return {reset,update(pose,landmarks,width,height,timeMs){
   if(!Number.isFinite(timeMs)||timeMs<0||!pose?.valid||!FOOT[pose.side]||!Number.isFinite(pose.angle)||pose.angle<0||pose.angle>180||!Number.isFinite(width)||!Number.isFinite(height)||width<=0||height<=0){reset();return empty('추적이 끊겼어요. 옆으로 서서 기준 자세를 다시 확인해 주세요.');}
@@ -31,17 +31,24 @@ export function createFormFeedback(){
    if(length>=1)relativeHeel=(toe.y-heel.y)*height/length;
   }
   const depth=item('depth','무릎 각도','observe',Math.round(pose.angle)+'°로 관찰돼요. 각도만으로 자세의 안전성을 판단할 수 없어요.');
-  if(!baseline){
-   if(pose.angle>=160&&relativeHeel!==null){samples.push({heel:relativeHeel,torso});}
-   else samples=[];
-   if(samples.length<12)return {ready:false,items:[unknown('heel','뒤꿈치','발 전체가 보이도록 서 주세요.'),unknown('torso','상체 기울기','서 있는 자세를 기준으로 비교할 준비 중이에요.'),depth],summary:'서 있는 자세를 유지해 주세요. 기준 자세 확인 '+samples.length+'/12'};
-   baseline={heel:samples.reduce((sum,p)=>sum+p.heel,0)/samples.length,torso:samples.reduce((sum,p)=>sum+p.torso,0)/samples.length};samples=[];
+  // Foot cues have their own standing baseline; missing feet do not block joint tracking.
+  if(heelBaseline===null){
+   if(pose.angle>=160&&relativeHeel!==null)heelSamples.push(relativeHeel);else heelSamples=[];
+   if(heelSamples.length>=12){heelBaseline=heelSamples.reduce((sum,value)=>sum+value,0)/heelSamples.length;heelSamples=[];}
   }
-  if(pose.angle>=145){heelHigh=heelLow=torsoHigh=torsoLow=0;return {ready:true,items:[unknown('heel','뒤꿈치','무릎을 굽히는 동안 발의 변화를 살펴봐요.'),unknown('torso','상체 기울기','무릎을 굽히는 동안 기준 자세와 비교해요.'),depth],summary:'기준 자세를 확인했어요. 편안한 범위에서 움직여 보세요.'};}
+  const pendingHeel=unknown('heel','뒤꿈치',relativeHeel===null?'뒤꿈치 기준을 확인하지 못했어요. 발 전체가 보이도록 서 주세요.':'뒤꿈치 기준을 확인하려면 발 전체가 보이는 선 자세를 잠시 유지해 주세요.');
+  if(!baseline){
+   if(pose.angle>=160){samples.push(torso);}
+   else samples=[];
+   if(samples.length<12)return {ready:false,items:[pendingHeel,unknown('torso','상체 기울기','서 있는 자세를 기준으로 비교할 준비 중이에요.'),depth],summary:'서 있는 자세를 유지해 주세요. 기준 자세 확인 '+samples.length+'/12'};
+   baseline={torso:samples.reduce((sum,value)=>sum+value,0)/samples.length};samples=[];
+  }
+  if(pose.angle>=145){heelHigh=heelLow=torsoHigh=torsoLow=0;return {ready:true,items:[heelBaseline===null?pendingHeel:unknown('heel','뒤꿈치','무릎을 굽히는 동안 발의 변화를 살펴봐요.'),unknown('torso','상체 기울기','무릎을 굽히는 동안 기준 자세와 비교해요.'),depth],summary:'기준 자세를 확인했어요. 편안한 범위에서 움직여 보세요.'};}
   let heelItem;
-  if(relativeHeel===null){heelHigh=heelLow=0;heelItem=unknown('heel','뒤꿈치','발이 가려져 있어요. 뒤꿈치와 발끝이 보이는지 확인해 주세요.');}
+  if(heelBaseline===null){heelHigh=heelLow=0;heelItem=pendingHeel;}
+  else if(relativeHeel===null){heelHigh=heelLow=0;heelItem=unknown('heel','뒤꿈치','발이 가려져 있어요. 뒤꿈치와 발끝이 보이는지 확인해 주세요.');}
   else{
-   const high=relativeHeel-baseline.heel>.18;heelHigh=high?heelHigh+1:0;heelLow=high?0:heelLow+1;
+   const high=relativeHeel-heelBaseline>.18;heelHigh=high?heelHigh+1:0;heelLow=high?0:heelLow+1;
    heelItem=heelHigh>=5?item('heel','뒤꿈치','observe','뒤꿈치가 들리는 모습이 반복돼요. 발바닥 접촉을 확인해 주세요.'):heelLow>=5?item('heel','뒤꿈치','steady','뚜렷한 들림 신호는 관찰되지 않았어요.'):unknown('heel','뒤꿈치','몇 프레임 더 관찰하고 있어요.');
   }
   const leaning=torso-baseline.torso>45&&torso>55;torsoHigh=leaning?torsoHigh+1:0;torsoLow=leaning?0:torsoLow+1;

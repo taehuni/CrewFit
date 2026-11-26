@@ -11,10 +11,27 @@ function frame({angle=170,heelRise=0,lean=0,side='left',footVisibility=.95,front
 }
 function session(){const engine=createFormFeedback();let time=0;return {engine,send(options={},delta=33){time+=delta;const f=frame(options);return engine.update(f.pose,f.landmarks,1000,1000,time);},repeat(options={},count=12){let result;for(let i=0;i<count;i++)result=this.send(options);return result;},lost(){time+=33;return engine.update({valid:false},[],1000,1000,time);}};}
 const state=(result,key)=>result.items.find(i=>i.key===key).state;
-test('calibrates only after 12 consecutive standing frames with visible feet',()=>{
+test('calibrates the torso after 12 consecutive standing frames independently of foot visibility',()=>{
  const s=session();assert.equal(s.repeat({},11).ready,false);assert.equal(s.send().ready,true);
- const missing=session();missing.repeat({},6);missing.send({footVisibility:.69});assert.equal(missing.repeat({},11).ready,false);assert.equal(missing.send().ready,true);
+ const missing=session();assert.equal(missing.repeat({footVisibility:.69},11).ready,false);
+ const ready=missing.send({footVisibility:.69});assert.equal(ready.ready,true);assert.equal(state(ready,'heel'),'unknown');assert.match(ready.items[0].message,/기준/);
  const bent=session();bent.repeat({},6);bent.send({angle:140});assert.equal(bent.repeat({},11).ready,false);
+});
+
+test('missing heel baseline stays unknown while torso observations continue',()=>{
+ const s=session();assert.equal(s.repeat({footVisibility:.2}).ready,true);
+ const moved=s.repeat({angle:100,heelRise:.04,lean:70},12);
+ assert.equal(moved.ready,true);assert.equal(state(moved,'heel'),'unknown');assert.equal(state(moved,'torso'),'observe');
+ assert.match(moved.items[0].message,/선 자세/);
+});
+
+test('a late heel baseline requires 12 consecutive visible-foot standing frames',()=>{
+ const s=session();s.repeat({footVisibility:.2});
+ s.repeat({},6);s.send({footVisibility:.2});s.repeat({},11);
+ assert.equal(state(s.repeat({angle:100,heelRise:.04},5),'heel'),'unknown');
+ s.repeat({},12);
+ assert.equal(state(s.repeat({angle:100,heelRise:.04},4),'heel'),'unknown');
+ assert.equal(state(s.send({angle:100,heelRise:.04}),'heel'),'observe');
 });
 test('heel observation requires five consecutive frames and clears immediately when the foot is lost',()=>{
  const s=session();s.repeat();assert.equal(state(s.repeat({angle:100,heelRise:.04},4),'heel'),'unknown');
@@ -37,6 +54,16 @@ test('side changes, pose loss and long frame gaps discard calibration and old fe
  s.repeat({side:'right'});assert.equal(s.lost().ready,false);assert.equal(s.send({side:'right',angle:100}).ready,false);
  s.repeat();assert.equal(s.send({},701).ready,false);assert.equal(s.send({angle:100}).ready,false);
  assert.equal(s.engine.reset().ready,false);
+});
+
+test('tracking resets clear both torso and heel baselines',()=>{
+ for(const interrupt of [s=>s.lost(),s=>s.send({side:'right'}),s=>s.send({},701)]){
+  const s=session();s.repeat();assert.equal(state(s.repeat({angle:100,heelRise:.04},5),'heel'),'observe');
+  assert.equal(interrupt(s).ready,false);
+  assert.equal(s.repeat({footVisibility:.2},14).ready,true);
+  const result=s.repeat({angle:100,heelRise:.04},5);
+  assert.equal(result.ready,true);assert.equal(state(result,'heel'),'unknown');
+ }
 });
 test('front-facing gate needs both shoulders but permits an occluded far shoulder',()=>{
  const s=session();assert.equal(s.repeat({front:true}).ready,false);

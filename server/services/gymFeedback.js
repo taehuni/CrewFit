@@ -1,5 +1,6 @@
 import {GYM_EXERCISE_CRITERIA} from '../../shared/gymCriteria.js';
 import {LOCAL_CRITERIA,validatePoseFrames,poseError,trustedChoice,trustedPredicate} from './poseClassification.js';
+import {requestPoseDecision} from './poseProvider.js';
 
 const STATES = new Set(['confirmed','improve','uncertain']);
 export function findGymCriterion(exercise) {
@@ -38,14 +39,11 @@ export function createGymFeedback({fetchImpl=globalThis.fetch,apiKey=()=>process
     const time=now();
     for(const [id,value] of users) if(!value.active && value.calls.every(t=>t<=time-86400000))users.delete(id);
     const state=users.get(userId)||{active:false,calls:[]};state.calls=state.calls.filter(t=>t>time-86400000);
-    if(state.active || state.calls.length>=60 || state.calls.some(t=>t>time-35000))throw poseError(429,'rate_limited','관찰 요청 사이에 잠시 쉬어 주세요. 측정은 계속되고 있어요.');
+    if(state.calls.length>=60)throw poseError(429,'daily_limit','오늘의 사진 관찰 횟수를 모두 사용했어요. 카메라와 시간 기록은 계속할 수 있어요.');
+    if(state.active || state.calls.some(t=>t>time-35000))throw poseError(429,'rate_limited','다음 관찰을 잠시 기다리고 있어요. 측정은 계속돼요.');
     state.active=true;state.calls.push(time);users.set(userId,state);
-    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeoutMs);
     try {
-      const response=await fetchImpl('https://api.openai.com/v1/decisions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${key}`},body:JSON.stringify(gymFeedbackRequest(criterion,frames)),signal:controller.signal});
-      if(!response.ok)throw new Error('provider_error');
-      return interpretGymFeedback(criterion,await response.json());
-    } catch {throw poseError(502,'feedback_failed','이번 구간을 확인하지 못했어요. 측정은 유지되며 잠시 후 다시 관찰할 수 있어요.');}
-    finally {clearTimeout(timer);state.active=false;}
+      return interpretGymFeedback(criterion,await requestPoseDecision({payload:gymFeedbackRequest(criterion,frames),key,fetchImpl,timeoutMs}));
+    } finally {state.active=false;}
   };
 }

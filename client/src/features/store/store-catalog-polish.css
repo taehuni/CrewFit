@@ -2,7 +2,7 @@
 .store-page>.store-meal-context{padding:16px 20px;margin-bottom:18px;border-radius:16px;gap:12px}
 .store-page>.store-meal-context h2{font-size:16px;margin:0 0 4px}
 .store-page>.store-meal-context p{font-size:12px}
-.store-discovery{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,390px);gap:24px;align-items:center;background:#edf2e8;border:1px solid #e1e8dc;border-radius:20px;padding:20px 24px}
+.store-discovery{min-width:0;max-width:680px}
 .store-discovery>div{min-width:0}
 .store-discovery h2{font-size:20px;letter-spacing:-.5px;line-height:1.5;margin:0 0 6px;color:#233d30}
 .store-discovery p{font-size:12px;line-height:1.7;color:#586b54;margin:0;overflow-wrap:anywhere}
@@ -26,7 +26,7 @@
 .store-catalog-polished :is(a,button,input):focus-visible{outline:3px solid #a34225;outline-offset:3px}
 .store-catalog-polished .store-empty{margin-top:16px;border:1px dashed #cbd7c8}
 @media(max-width:760px){
- .store-discovery{grid-template-columns:minmax(0,1fr);gap:14px;padding:18px}
+ .store-discovery{max-width:none}
  .store-discovery h2{font-size:18px}
  .store-catalog-polished .store-filters{gap:6px}
  .store-catalog-polished .store-filters button{padding:8px 12px;font-size:12px}
@@ -41,4 +41,5 @@
  .store-results-heading{flex-wrap:wrap;gap:6px}
 }
 
-.store-catalog-notice{padding:16px 20px;margin:18px 0;border-left:3px solid #244b3c;background:#edf3e8;border-radius:0 12px 12px 0;overflow-wrap:anywhere}.store-catalog-notice strong{color:#244b3c;font-size:14px}.store-catalog-notice p{font-size:13px;line-height:1.8;color:#53614e;margin:6px 0 0}
+.store-catalog-notice{margin:12px 0 0;font-size:13px;line-height:1.7;color:#53614e;overflow-wrap:anywhere}
+.store-tabs{flex-wrap:wrap;column-gap:24px;row-gap:0}

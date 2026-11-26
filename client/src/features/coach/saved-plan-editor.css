@@ -16,3 +16,13 @@
 .saved-plan-editor input,.saved-plan-editor select,.saved-plan-editor textarea,.nutrition-preferences input,.nutrition-preferences select{font-size:16px}
 @media(max-width:959px){.nutrition-saved .saved-plan-layout{display:flex;flex-direction:column;gap:16px}.nutrition-saved .saved-plan-calendar,.nutrition-saved .saved-plan-day{width:100%}}
 @media(max-width:420px){.saved-plan-editor{padding:14px}.saved-plan-editor-fields{grid-template-columns:minmax(0,1fr)}}
+/* Editors must fit their card, not just the device viewport. */
+.saved-plan-editor{container-type:inline-size}
+.saved-plan-editor :is(input,select,textarea){display:block;min-height:48px;padding:12px;border:1px solid #d4ded7;border-radius:12px;background:#fff;color:var(--ink);font:inherit;font-size:16px;line-height:1.5}
+.saved-plan-editor textarea{resize:vertical}
+.saved-plan-editor :is(input[type=date],input[type=time]){appearance:none;-webkit-appearance:none;min-inline-size:0;inline-size:100%;max-inline-size:100%}
+.saved-plan-editor input::-webkit-date-and-time-value{min-width:0;text-align:left}
+.saved-plan-editor input::-webkit-datetime-edit{min-width:0;padding:0}
+.saved-plan-editor-actions>.btn{min-height:44px;white-space:normal}
+@container(max-width:460px){.saved-plan-editor-fields{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){.saved-plan-editor-fields{grid-template-columns:minmax(0,1fr)}.saved-plan-editor-actions>.btn{flex:1 1 100px}.saved-plan-editor{padding:14px}}

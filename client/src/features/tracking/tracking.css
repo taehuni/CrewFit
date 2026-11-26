@@ -45,11 +45,9 @@
 .tracking-page .tracking-sports label[data-selected="true"]{background:#eaf1e7;border:2px solid #345842;box-shadow:0 4px 14px #2647320a}
 .tracking-page .tracking-sports input{position:absolute;opacity:0;width:1px;height:1px}
 .tracking-page .tracking-sports label:focus-within{outline:3px solid #ed9772;outline-offset:3px}
-.measurement-prep{padding:24px;background:#fff;border:1px solid #e0e7de;border-radius:24px;display:grid;gap:12px}
+.measurement-prep{padding:18px;background:#fff;border:1px solid #e0e7de;border-radius:20px;display:grid;gap:8px}
 .measurement-prep h2{font-size:19px;margin:0;line-height:1.45;letter-spacing:-.03em}
 .measurement-prep p{font-size:14px;color:#657269}
-.measurement-capabilities{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
-.measurement-capabilities span{padding:7px 11px;border-radius:20px;background:#f1f4ef;font-size:12px;color:#4f6656}
 .tracking-page>.btn{border-radius:16px;min-height:54px;font-size:15px}
 .tracking-page .tracking-metrics{padding:28px;border-radius:24px;background:#fff;border:1px solid #dce4dc;gap:24px}
 .tracking-metrics dt{font-size:13px;color:#64776a}
@@ -61,6 +59,10 @@
 .tracking-page>label small{font-weight:400;color:#758176}
 .tracking-page>label textarea{font-weight:400;border-color:#dce4dc;border-radius:16px;min-height:110px}
 .tracking-page>.tracking-secondary{font-size:14px;color:#617367;text-decoration:none}
+.tracking-page .tracking-help{font-size:13px;color:#657269}
+.tracking-page .tracking-actions{display:flex;flex-wrap:wrap;gap:12px;width:100%}
+.tracking-page .tracking-actions>*{flex:1;min-width:140px}
+.tracking-page .measurement-save-actions .btn{min-height:52px;border-radius:14px;white-space:normal}
 .tracking-page.tracking-active{max-width:720px;min-height:100dvh;background:#182e25;color:#fff;align-items:stretch;justify-content:flex-start;text-align:left;padding-top:40px}
 .tracking-active .measurement-eyebrow,.tracking-active .measurement-subtitle{color:#b6cbbb}
 .tracking-active .tracking-metrics{background:#213d30;border-color:#3b5546;padding:32px 24px;gap:32px;margin:12px 0}

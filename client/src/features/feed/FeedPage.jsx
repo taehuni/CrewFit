@@ -35,7 +35,7 @@ export default function FeedPage({embeddedCrewId=null}){
     {!embedded && crewId && <p className="feed-links"><Link to={`/crews/${crewId}`}>크루 상세</Link><Link to="/feed">전체 피드</Link></p>}
     {crewId && <div className="feed-toolbar"><span className="muted small">크루의 새로운 이야기</span><button className="subtle-button" disabled={query.isFetching} onClick={()=>{query.refetch();summaries.refetch();}}>새로고침</button></div>}
     {context.isError && <div role="alert"><p>{context.error.message}</p><button className="btn btn-ghost" onClick={()=>context.refetch()}>권한 다시 조회</button></div>}
-    {!embedded && context.data && !context.data.canWrite && <p className="feed-note">크루 글은 크루장 또는 글 작성 권한을 받은 크루원만 쓸 수 있어요.</p>}
+    {crewId && context.isSuccess && !context.data.canWrite && <p className="feed-note">크루 글 작성은 크루장의 허용이 필요해요.</p>}
     <div className="feed-filters" role="group" aria-label="글 종류">{[['','전체'],...Object.entries(KINDS)].map(([value,label])=><button key={value} aria-pressed={kind===value} onClick={()=>{const next=new URLSearchParams(params);value?next.set('kind',value):next.delete('kind');setParams(next);}}>{label}</button>)}</div>
     {query.isPending && <div className="feed-skeleton" role="status" aria-label="글을 불러오고 있어요"><span/><span/><span/></div>}
     {query.isError && <div role="alert"><p>{query.error.message}</p><button className="btn btn-ghost" disabled={query.isFetching} onClick={()=>query.isFetchNextPageError?query.fetchNextPage():query.refetch()}>다시 조회</button></div>}

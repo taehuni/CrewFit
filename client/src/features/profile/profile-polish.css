@@ -1,4 +1,7 @@
 .profile-page .page-head { align-items:flex-start; margin-bottom:28px; }
+.profile-page .page-head > .btn { flex-shrink:0; white-space:nowrap; }
+.profile-layout.is-settings { grid-template-columns:minmax(0,1fr); }
+.profile-layout.is-settings .profile-settings-column { gap:28px; }
 .profile-page .page-head p { margin-top:8px; }
 .profile-layout { display:grid; grid-template-columns:minmax(0,1fr); gap:28px; }
 .profile-summary { min-width:0; }

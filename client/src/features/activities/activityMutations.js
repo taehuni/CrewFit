@@ -41,5 +41,6 @@ export async function invalidateActivityData(cache, userId) {
     cache.invalidateQueries({ queryKey: queryKeys.activitiesRoot(userId) }),
     cache.invalidateQueries({ queryKey: queryKeys.dashboardRoot(userId) }),
     cache.invalidateQueries({ queryKey: ['workout-plans',userId] }),
+    cache.invalidateQueries({ queryKey: ['coach',userId] }),
   ]);
 }

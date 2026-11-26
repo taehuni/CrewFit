@@ -1,0 +1,5 @@
+.home-today-plan li .home-plan-progress{grid-column:2/-1;display:flex;align-items:center;flex-wrap:wrap;gap:4px 14px;min-width:0;font-size:12px;color:#687560;overflow-wrap:anywhere}
+.home-today-plan .home-plan-progress .home-plan-complete{color:#315c46;font-weight:650}
+.home-today-plan .home-plan-progress a{display:inline-flex;align-items:center;min-height:44px;color:#315c46;font-weight:650;text-decoration:underline;text-underline-offset:3px}
+.home-today-plan .home-plan-connection-error{margin-top:8px;flex-wrap:wrap}
+.home-today-plan .home-plan-connection-error button{white-space:normal;text-align:left}

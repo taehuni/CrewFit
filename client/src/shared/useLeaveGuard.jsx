@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useLayoutEffect, useRef } from 'react';
 import {createLeaveGuardRegistry} from './leaveGuardRegistry.js';
+import {listenForLeaveGuardBack} from './leaveGuardBack.js';
 import { createPortal } from 'react-dom';
 import { useBlocker, useBeforeUnload } from 'react-router';
 import './leave-guard.css';
@@ -13,7 +14,7 @@ export function LeaveGuardProvider({children}) {
   const cancel = useRef(null);
   const shouldGuard = () => registry.current.active().length > 0;
   const blocker = useBlocker(({ currentLocation, nextLocation }) => shouldGuard() &&
-    (currentLocation.pathname !== nextLocation.pathname || currentLocation.search !== nextLocation.search));
+    (currentLocation.pathname !== nextLocation.pathname || currentLocation.search !== nextLocation.search || currentLocation.state?.coachReviewId !== nextLocation.state?.coachReviewId));
   const messages = registry.current.active();
   const message = messages.length > 1 ? '여러 항목에 저장하지 않은 변경이 있어요. 저장하지 않고 나갈까요?' : messages[0];
   const pending = blocker.state === 'blocked';
@@ -31,8 +32,9 @@ export function LeaveGuardProvider({children}) {
         if (buttons?.length === 2) { event.preventDefault(); (document.activeElement === buttons[0] ? buttons[1] : buttons[0]).focus(); }
       }
     };
+    const releaseBack = listenForLeaveGuardBack(window, () => blocker.reset());
     document.addEventListener('keydown', trap);
-    return () => { document.removeEventListener('keydown', trap); document.body.style.overflow = previousOverflow; previous?.focus?.({ preventScroll: true }); };
+    return () => { releaseBack(); document.removeEventListener('keydown', trap); document.body.style.overflow = previousOverflow; previous?.focus?.({ preventScroll: true }); };
   }, [pending, blocker]);
   const dialog = pending ? createPortal(<div className="leave-guard-overlay"><section className="leave-guard" role="alertdialog" aria-modal="true" aria-labelledby="leave-guard-title" aria-describedby="leave-guard-message">
     <h2 id="leave-guard-title">이 화면에서 나갈까요?</h2><p id="leave-guard-message">{message}</p>

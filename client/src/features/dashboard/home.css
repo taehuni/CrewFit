@@ -1,6 +1,13 @@
 .home-heading { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 32px; }
 .home-heading h1 { margin: 0; font-size: 2rem; letter-spacing: -.04em; line-height: 1.2; }
 .home-record-link { gap: 8px; white-space: nowrap; }
+.home-week-empty { padding: 24px; border: 1px solid var(--line); border-radius: var(--radius) var(--radius) 0 0; background: var(--surface); }
+.home-week-empty h3 { margin: 0; font-size: 1.125rem; line-height: 1.5; }
+.home-week-empty p { margin: 8px 0 18px; color: var(--ink-2); font-size: .875rem; line-height: 1.7; }
+.home-empty-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.home-empty-actions .btn { min-height: 44px; height: auto; white-space: normal; }
+.home-empty-goal { display: inline-block; margin-top: 16px; color: var(--ink-2); font-size: .8125rem; text-decoration: underline; text-underline-offset: 4px; }
+.home-week-empty :is(a,button):focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
 .home-section-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
 .home-section-head > div:first-child { display: flex; align-items: baseline; gap: 16px; }
 .home-section-head h2, .home-records h2 { margin: 0; font-size: 1.125rem; }
@@ -68,7 +75,8 @@
 .home-record-row > p > span { display: flex; align-items: baseline; gap: 5px; font: 600 2rem var(--font-num); }
 .home-record-list small { font: 400 .8125rem var(--font-body); color: var(--ink-2); }
 @media (max-width: 639px) {
-  .home-heading { gap: 12px; margin-bottom: 28px; }
+  .home-heading { gap: 12px; margin-bottom: 28px; flex-wrap: wrap; }
+  .home-week-empty { padding: 20px 16px; }
   .home-heading h1 { font-size: 1.75rem; }
   .home-record-link { padding: 0 12px; font-size: .875rem; }
   .home-section-head > div:first-child { flex-direction: column; gap: 2px; }

@@ -53,7 +53,7 @@ com.crewfit.app://auth/email
 com.crewfit.app://auth/recovery
 ```
 
-이 값은 Android Manifest의 scheme `com.crewfit.app`, host `auth`, 각 path와 일치한다. 앱 복귀 경로를 와일드카드로 넓히지 않는다. Google 제공자 자체의 콜백은 기존 Supabase `/auth/v1/callback`이며, 위 주소는 Supabase에서 앱으로 돌아오는 주소다. 이 저장소 변경만으로 대시보드 허용 목록이 자동 변경되지는 않는다. **2026-11-18 추가된 email/recovery 두 주소의 허용 목록 등록은 아직 별도 확인이 필요하다.** Supabase의 기본 확인/복구 이메일 템플릿이 `ConfirmationURL` 또는 전달된 RedirectTo를 유지하는지도 확인한다. 커스텀 템플릿이 Site URL을 고정하면 앱 복귀가 되지 않는다.
+이 값은 Android Manifest의 scheme `com.crewfit.app`, host `auth`, 각 path와 일치한다. 앱 복귀 경로를 와일드카드로 넓히지 않는다. Google 제공자 자체의 콜백은 기존 Supabase `/auth/v1/callback`이며, 위 주소는 Supabase에서 앱으로 돌아오는 주소다. 이 저장소 변경만으로 대시보드 허용 목록이 자동 변경되지는 않는다. **사용자가 email/recovery 두 주소 추가 완료를 확인했다. 실제 메일 왕복 성공과는 별도다.** Supabase의 기본 확인/복구 이메일 템플릿이 `ConfirmationURL` 또는 전달된 RedirectTo를 유지하는지도 확인한다. 커스텀 템플릿이 Site URL을 고정하면 앱 복귀가 되지 않는다.
 
 실제 계정 테스트 전에는 인증 정보가 없는 위 URI를 열어 CrewFit이 선택되는지 확인할 수 있다. 이 점검은 링크 연결만 검증하며 Google 인증 성공을 의미하지 않는다. 앱이 이미 열린 경우와 완전히 종료된 경우 모두 확인한다. 반환 URL의 코드·토큰을 로그나 스크린샷에 남기지 않는다.
 
@@ -63,7 +63,7 @@ com.crewfit.app://auth/recovery
 
 2026-11-06 UX 정리: Android에서 viewport-fit=cover를 해제하고 SystemBars native insets로 상태바·제스처 영역을 WebView 밖에 확보한다. 웹의 safe-area 처리는 유지한다. 새 페이지 이동/뒤로가기/해시 이동은 공통 NavigationExperience에서 처리하며, 자세 및 GPS 미저장 이탈은 데이터 라우터의 useBlocker로 보호한다. 촬영 전 기본 동영상 재생 UI를 숨기고, 자세/GPS 화면의 구현 설명은 사용자 행동·저장 상태 중심으로 정리했다.
 
-검증: 클라이언트 238개 테스트 통과, 웹/Android 빌드 통과. 운영 DB를 사용하지 않는 임시 화면에서 실제 이탈 가드의 링크 이동 취소, 저장 후 이동, 브라우저 뒤로가기 확인·확정을 검증한 뒤 임시 파일을 제거했다. 에뮬레이터에서 로그인 유지, 시스템 영역 분리, Android 뒤로가기와 입력란 포커스를 확인했다. 에뮬레이터는 물리 키보드 입력 모드라 휴대폰 전체 가상 키보드와 실제 카메라·GPS·측정 저장은 별도 검증 대상이다. 화면을 꺼도 이어지는 GPS 기록은 아직 구현되지 않았다.
+당시 검증: 클라이언트 238개 테스트 통과, 웹/Android 빌드 통과. 운영 DB를 사용하지 않는 임시 화면에서 실제 이탈 가드의 링크 이동 취소, 저장 후 이동, 브라우저 뒤로가기 확인·확정을 검증한 뒤 임시 파일을 제거했다. 에뮬레이터에서 로그인 유지, 시스템 영역 분리, Android 뒤로가기와 입력란 포커스를 확인했다. 에뮬레이터는 물리 키보드 입력 모드라 휴대폰 전체 가상 키보드와 실제 카메라·GPS·측정 저장은 별도 검증 대상이다. 이후 Android 네이티브 GPS 지속 수집이 구현됐으며, 위의 현재 동작과 아래 후속 검증을 기준으로 한다. 웹은 화면 잠금 중 지속 수집을 보장하지 않는다.
 
 시스템 영역 처리 근거: [Android WebView window insets](https://developer.android.com/develop/ui/views/layout/webapps/understand-window-insets) 및 설치된 Capacitor 8.6 SystemBars 구현.
 

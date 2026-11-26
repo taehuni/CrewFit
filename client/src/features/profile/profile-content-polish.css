@@ -3,7 +3,7 @@
 .profile-home .profile-post-media{width:100%;aspect-ratio:4/3;overflow:hidden;background:#edf2eb}
 .profile-home .profile-post-media>img{width:100%;height:100%;object-fit:cover;display:block}
 .profile-home .profile-text-cover{position:relative;width:100%;height:100%;aspect-ratio:auto;box-sizing:border-box;overflow:hidden;padding:24px;background:linear-gradient(135deg,#eaf0e7,#f8f9f2);justify-content:flex-start;gap:16px}
-.profile-home .profile-text-cover>span:first-child{font-size:10px;letter-spacing:.08em;color:#5e7766;font-weight:700}
+.profile-home .profile-text-cover>span:first-child{font-size:12px;letter-spacing:.04em;color:#5e7766;font-weight:700}
 .profile-home .profile-text-cover p{position:relative;z-index:1;font-size:clamp(16px,1.6vw,22px);line-height:1.65;font-weight:650;margin:0;overflow-wrap:anywhere;-webkit-line-clamp:4;white-space:pre-wrap}
 .profile-home .profile-text-cover .profile-story-mark{position:absolute;right:18px;bottom:-60px;font-family:Georgia,serif;font-size:180px;line-height:1;color:#dbe5d8;letter-spacing:0;pointer-events:none}
 .profile-home .profile-tile-caption{display:flex;flex-direction:column;flex:1;gap:12px;padding:18px;min-width:0;min-height:152px}
@@ -40,8 +40,8 @@
  .profile-home .profile-tile-caption{padding:12px;min-height:140px;gap:9px}
  .profile-home .profile-post-context{font-size:11px}
  .profile-home .profile-tile-caption .profile-post-excerpt{font-size:12px}
- .profile-home .profile-post-meta{font-size:10px;gap:4px}
- .profile-home .profile-post-meta time{font-size:10px}
+ .profile-home .profile-post-meta{font-size:12px;gap:4px}
+ .profile-home .profile-post-meta time{font-size:12px}
  .profile-home .profile-crew-card h3{min-height:0}
  .profile-home .profile-crew-card-heading{margin-bottom:14px}
  .profile-home .profile-activity-metrics{margin:18px 0}

@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { routeSegments } from './tracking.js';
 import {roundedDisplaySegments as displaySegments} from './routeDisplay.js';
 import './tracking.css';
 let sdkPromise;
@@ -23,8 +22,8 @@ function loadMapSdk() {
   }).catch(error => { sdkPromise = null; throw error; });
   return sdkPromise;
 }
-function RouteOutline({ points, simplified }) {
-  const segments = simplified?displaySegments(points):routeSegments(points), all = segments.flat();
+function RouteOutline({ points }) {
+  const segments = displaySegments(points), all = segments.flat();
   if (!all.length) return null;
   const xs = all.map(p => p[1] * Math.cos(all[0][0] * Math.PI / 180)), ys = all.map(p => -p[0]);
   const minX = Math.min(...xs), minY = Math.min(...ys), scale = 260 / Math.max(Math.max(...xs) - minX, Math.max(...ys) - minY, 0.00001);
@@ -33,10 +32,9 @@ function RouteOutline({ points, simplified }) {
 }
 export default function RouteMap({ points }) {
   const target = useRef(null), [error, setError] = useState(false), [attempt, setAttempt] = useState(0);
-  const [simplified,setSimplified]=useState(true);
   useEffect(() => {
     let cancelled = false, observer, map; const overlays = []; setError(false);
-    const segments = simplified?displaySegments(points):routeSegments(points); if (!segments.length) { setError(true); return; }
+    const segments = displaySegments(points); if (!segments.length) { setError(true); return; }
     loadMapSdk().then(maps => {
       if (cancelled) return;
       const first = segments[0][0]; map = new maps.Map(target.current, {
@@ -51,6 +49,6 @@ export default function RouteMap({ points }) {
       observer = new ResizeObserver(fit); observer.observe(target.current);
     }).catch(() => { if (!cancelled) setError(true); });
     return () => { cancelled = true; observer?.disconnect(); overlays.forEach(overlay => overlay.setMap(null)); map?.destroy(); };
-  }, [points, attempt,simplified]);
-  return <div className="route-preview"><label className="route-display-toggle"><input type="checkbox" checked={simplified} onChange={e=>setSimplified(e.target.checked)}/>잔흔들림 줄여 보기</label><div ref={target} className="route-map" hidden={error} role="img" aria-label="GPS 운동 경로 지도" />{error && <><p>지도를 불러올 수 없어 경로 모양을 표시합니다.</p><RouteOutline points={points} simplified={simplified}/><button type="button" className="btn btn-ghost" onClick={() => setAttempt(n => n + 1)}>지도 다시 불러오기</button></>}<p className="muted">{simplified?'작은 굴곡을 약 8m 기준으로 단순화한 경로예요. 저장된 원본과 거리는 그대로 유지됩니다. ':''}수신이 30초 넘게 끊긴 구간은 연결하지 않습니다.</p></div>;
+  }, [points, attempt]);
+  return <div className="route-preview"><div ref={target} className="route-map" hidden={error} role="img" aria-label="GPS 운동 경로 지도" />{error && <><p>지도를 불러오지 못해 경로만 표시해요.</p><RouteOutline points={points}/><button type="button" className="btn btn-ghost" onClick={() => setAttempt(n => n + 1)}>지도 다시 불러오기</button></>}</div>;
 }

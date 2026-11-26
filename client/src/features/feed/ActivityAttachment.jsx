@@ -19,7 +19,7 @@ export function ActivityPicker({value,onChange,disabled}) {
     {list.isPending && <p role="status">내 기록을 불러오고 있어요.</p>}
     {(list.isError || selected.isError) && <div role="alert"><p>기록을 불러오지 못했어요. 삭제된 기록이면 첨부를 해제해 주세요.</p><button type="button" className="btn btn-ghost" disabled={disabled} onClick={()=>{list.refetch();if(value)selected.refetch();}}>기록 다시 조회</button></div>}
     {list.hasNextPage && <button type="button" className="btn btn-ghost" disabled={disabled || list.isFetching} onClick={()=>list.fetchNextPage()}>이전 기록 더 보기</button>}
-    {value && <p className="feed-note">첨부하면 프로필의 기록 공개 설정과 별개로 이 글을 볼 수 있는 회원에게 해당 기록(메모·세트 포함)을 공유합니다. 원본 수정은 글에 반영되고 삭제하면 첨부가 해제됩니다. GPS 경로는 ‘GPS 경로도 공유하기’를 켤 때만 공유합니다.</p>}
+    {value && <p className="feed-note">프로필 설정과 별개로, 이 글을 보는 회원에게 운동 기록(메모·세트 포함)이 공개돼요. 원본 수정도 반영돼요. GPS 경로는 따로 선택할 때만 공유해요.</p>}
   </section>;
 }
 export default function ActivityAttachment({postId}) {

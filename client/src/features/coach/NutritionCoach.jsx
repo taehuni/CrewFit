@@ -4,13 +4,17 @@ import PlanCalendar from './PlanCalendar.jsx';
 import {koreaToday} from '../../shared/calendar.js';
 import './saved-plan-editor.css';
 import './plan-delete.css';
-import {useRef,useState,useId} from 'react';
-import {Link} from 'react-router';
+import {useEffect,useRef,useState} from 'react';
+import {Link,useLocation,useSearchParams} from 'react-router';
 import {useQuery,useQueryClient} from '@tanstack/react-query';
 import {useAuth} from '../auth/index.js';
 import {api} from '../../shared/api.js';
+import {supabase} from '../../shared/supabaseClient.js';
+import {loadMealPlanRecords} from '../meals/index.js';
+import {ingredientStoreLink,mealDate,mealPosition,proposalMealReturn,savedMealReturn} from './mealReturn.js';
 import './nutrition.css';
 import './nutrition-proposals.css';
+import '../meals/meal-plan-status.css';
 const labels={breakfast:'아침',lunch:'점심',dinner:'저녁',snack:'간식'};
 export function useNutrition(turnId){const {user,token}=useAuth();return useQuery({queryKey:['nutrition',user.id,turnId||'preferences'],queryFn:()=>api('/coach/nutrition'+(turnId?'?turn_id='+encodeURIComponent(turnId):''),{token}),retry:false});}
 function PreferencesForm({initial}){
@@ -21,17 +25,40 @@ function PreferencesForm({initial}){
 }
 export function NutritionPreferences(){const query=useNutrition();if(query.isPending)return <p role="status">식사 선호를 불러오는 중…</p>;if(query.isError)return <p role="alert">식단 코치 설정을 불러오지 못했어요. <button onClick={()=>query.refetch()}>다시 시도</button></p>;return <PreferencesForm initial={query.data.preferences}/>;}
 function Foods({plan}){return <><ul className="nutrition-foods">{plan.items.map((item,i)=><li key={i}><strong>{item.name}</strong><span>{item.amount}</span>{item.alternative&&<small>대체 아이디어 · {item.alternative}</small>}</li>)}</ul>{plan.note&&<p className="nutrition-note">{plan.note}</p>}<p className="nutrition-caution">AI가 제안한 구성으로, 영양성분을 검증한 식단은 아니에요. 알레르기가 있다면 제품의 원재료 표시도 확인해 주세요.</p></>;}
-function IngredientLinks({plan}) {
+function useMealReturnFocus(id,ready){
+ const location=useLocation();
+ useEffect(()=>{
+  if(!ready||location.hash!=='#'+id)return;
+  const frame=requestAnimationFrame(()=>{const card=document.getElementById(id);card?.scrollIntoView({block:'start'});card?.focus({preventScroll:true});});
+  return()=>cancelAnimationFrame(frame);
+ },[id,ready,location.hash,location.key]);
+}
+function IngredientLinks({plan,returnTo}) {
  const names=[...new Set(plan.items.map(item=>item.name).filter(Boolean))];
- return <div className="nutrition-shopping"><strong>필요한 식품 찾아보기</strong><p>준비할 음식의 상품 정보와 가격을 살펴보세요.</p><div>{names.map(name=><Link key={name} to={'/store?source=meal&q='+encodeURIComponent(name)}>{name} <span aria-hidden="true">↗</span></Link>)}</div></div>;
+ return <div className="nutrition-shopping"><strong>필요한 식품 찾아보기</strong><p>준비할 음식의 상품 정보와 가격을 살펴보세요. 돌아오면 이 식단을 이어서 볼 수 있어요.</p><div>{names.map(name=><Link key={name} to={ingredientStoreLink(name,returnTo)}>{name} <span aria-hidden="true">↗</span></Link>)}</div></div>;
 }
 function PlanHeading({plan}) {
  return <div className="nutrition-plan-heading"><span className="nutrition-meal-badge">{labels[plan.meal_type]}</span><time dateTime={plan.scheduled_on}>{plan.scheduled_on}</time></div>;
 }
-export function MealProposals({turn}){
+function useMealPlanRecords(plans){
+ const {user}=useAuth(),ids=(plans||[]).map(plan=>plan.id).sort();
+ return useQuery({queryKey:['meal-plan-record',user.id,'status',ids],enabled:ids.length>0,retry:false,
+  queryFn:({signal})=>loadMealPlanRecords(supabase,user.id,ids,signal)});
+}
+function MealRecordAction({plan,records}){
+ if(records.isPending)return <p className="nutrition-meal-record" role="status">먹은 식단으로 기록했는지 확인하고 있어요.</p>;
+ if(records.isError)return <div className="nutrition-meal-record" role="alert"><p>식단 기록 상태를 확인하지 못했어요.</p><button type="button" className="btn btn-ghost" onClick={()=>records.refetch()}>기록 상태 다시 확인</button></div>;
+ const recorded=records.data?.[plan.id];
+ return <div className="nutrition-meal-record">{recorded?<><p><strong>기록 완료</strong>{recorded.eaten_on&&<> · <time dateTime={recorded.eaten_on}>{recorded.eaten_on}</time></>}</p><Link className="btn btn-ghost" to={'/meals/'+recorded.id}>기록 확인·수정</Link></>:<Link className="btn btn-primary" to={'/meals/new?plan='+plan.id}>먹은 식단으로 기록</Link>}</div>;
+}
+export function MealProposals({turn,active=true}){
  const query=useNutrition(turn.id),{user,token}=useAuth(),cache=useQueryClient(),lock=useRef(false);
- const [busy,setBusy]=useState(null),[error,setError]=useState(''),[activePosition,setActivePosition]=useState(0);
- const detailId=useId();
+ const location=useLocation(),[search,setSearch]=useSearchParams();
+ const records=useMealPlanRecords(query.data?.plans);
+ const [busy,setBusy]=useState(null),[error,setError]=useState(''),[activePosition,setActivePosition]=useState(()=>location.state?.coachMealSelection?.turnId===turn.id?mealPosition(location.state.coachMealSelection.position):search.get('review')===turn.id?mealPosition(search.get('meal')):0);
+ const detailId='meal-proposal-'+turn.id;
+ useMealReturnFocus(detailId,active);
+ function choosePosition(index){setActivePosition(index);setSearch(search,{replace:true,state:{...location.state,coachMealSelection:{turnId:turn.id,position:index}}});}
  async function save(position){if(lock.current)return;lock.current=true;setBusy(position);setError('');try{await api('/coach/meal-plans',{token,body:{turn_id:turn.id,position}});await Promise.all([cache.invalidateQueries({queryKey:['nutrition',user.id]}),cache.invalidateQueries({queryKey:['meal-plans',user.id]})]);}catch(e){setError('끼니 '+(position+1)+' 저장: '+e.message);}finally{lock.current=false;setBusy(null);}}
  if(!turn.meal_proposals?.length)return null;
  const position=activePosition<turn.meal_proposals.length?activePosition:0;
@@ -41,25 +68,31 @@ export function MealProposals({turn}){
  return <section className="nutrition-proposals nutrition-proposal-review">
   <div className="nutrition-proposal-heading"><h3>제안받은 식단</h3><span>{turn.meal_proposals.length}개 끼니</span></div>
   <p>끼니를 선택해 구성을 확인하고, 마음에 드는 계획을 저장하세요.</p>
-  <div className="nutrition-proposal-options" role="group" aria-label="제안된 끼니 선택">{turn.meal_proposals.map((item,index)=><button type="button" key={index} disabled={busy!==null} aria-pressed={position===index} aria-controls={detailId} onClick={()=>setActivePosition(index)}><span>{item.scheduled_on} · {labels[item.meal_type]}{savedAt(index)&&<em>저장됨</em>}</span><strong>{item.title}</strong></button>)}</div>
+  <div className="nutrition-proposal-options" role="group" aria-label="제안된 끼니 선택">{turn.meal_proposals.map((item,index)=><button type="button" key={index} disabled={busy!==null} aria-pressed={position===index} aria-controls={detailId} onClick={()=>choosePosition(index)}><span>{item.scheduled_on} · {labels[item.meal_type]}{savedAt(index)&&<em>저장됨</em>}</span><strong>{item.title}</strong></button>)}</div>
   {query.isPending&&<p role="status">식단 저장 내역을 확인하고 있어요.</p>}
   {query.isError&&<p role="alert">저장 내역을 불러오지 못했어요. <button type="button" onClick={()=>query.refetch()}>다시 확인</button></p>}
-  <article className="nutrition-plan nutrition-proposal-detail" id={detailId}>
+  <article className="nutrition-plan nutrition-proposal-detail" id={detailId} tabIndex={-1}>
    <PlanHeading plan={plan}/><h4>{plan.title}</h4><Foods plan={plan}/>
    {error&&<p role="alert">{error}</p>}
-   {saved?<p role="status">식단 계획에 저장했어요. <Link to="/meals?view=plans">저장한 계획 보기 ↗</Link> · <Link to={'/meals/new?plan='+saved.id}>먹은 식단으로 기록 ↗</Link></p>:<button type="button" className="btn btn-primary" disabled={busy!==null||!query.isSuccess} onClick={()=>save(position)}>{busy===position?'저장 중…':'이 끼니를 식단 계획에 저장'}</button>}
-   <IngredientLinks plan={plan}/>
+   {saved?<><p role="status">식단 계획에 저장했어요. <Link to={savedMealReturn(saved.scheduled_on,saved.id)}>저장한 계획 보기 ↗</Link></p><MealRecordAction plan={saved} records={records}/></>:<button type="button" className="btn btn-primary" disabled={busy!==null||!query.isSuccess} onClick={()=>save(position)}>{busy===position?'저장 중…':'이 끼니를 식단 계획에 저장'}</button>}
+   <IngredientLinks plan={plan} returnTo={proposalMealReturn(turn.id,position)}/>
   </article>
  </section>;
 }
 export function SavedMealPlans(){
  const {user,token}=useAuth(),cache=useQueryClient(),lock=useRef(false);
- const [date,setDate]=useState(koreaToday()),[confirm,setConfirm]=useState(null),[busy,setBusy]=useState(false),[error,setError]=useState('');
+ const [params,setParams]=useSearchParams(),location=useLocation();
+ const date=mealDate(params.get('date'),koreaToday());
+ function setDate(next){const search=new URLSearchParams(params);search.set('view','plans');search.set('date',next);setParams(search,{replace:true});}
+ const [confirm,setConfirm]=useState(null),[busy,setBusy]=useState(false),[error,setError]=useState('');
  const month=date.slice(0,7);
  const query=useQuery({queryKey:['meal-plans',user.id,month],queryFn:({signal})=>fetchPlanMonth((path,options)=>api(path,{token,...options}),month,signal,'/coach/meal-plans'),retry:false});
  const plans=query.data||[],dayPlans=plans.filter(plan=>plan.scheduled_on===date).sort((a,b)=>Object.keys(labels).indexOf(a.meal_type)-Object.keys(labels).indexOf(b.meal_type));
+ const records=useMealPlanRecords(dayPlans);
+ const returnCard=dayPlans.find(plan=>location.hash==='#meal-plan-'+plan.id);
+ useMealReturnFocus(returnCard?'meal-plan-'+returnCard.id:'',query.isSuccess&&!!returnCard);
  async function remove(id){if(lock.current)return;lock.current=true;setBusy(true);setError('');try{await api('/coach/meal-plans/'+id,{token,method:'DELETE'});await Promise.all([cache.invalidateQueries({queryKey:['nutrition',user.id]}),cache.invalidateQueries({queryKey:['meal-plans',user.id]})]);setConfirm(null);}catch(e){setError(e.message);}finally{lock.current=false;setBusy(false);}}
  return <section className="nutrition-saved"><h2>저장한 식단 계획</h2><p className="muted small">날짜를 선택해 그날의 끼니를 확인하세요. 계획을 지워도 먹은 기록은 유지돼요.</p>
  <div className="saved-plan-layout"><div className="saved-plan-calendar"><PlanCalendar label="식단 계획" plans={plans} selected={date} onSelect={setDate} month={month} onMonthChange={next=>setDate(next+'-01')}/></div><div className="saved-plan-day"><div className="plan-day-heading"><h3>{Number(date.slice(5,7))}월 {Number(date.slice(8))}일</h3><span>{dayPlans.length}개 끼니</span></div>
- {query.isPending?<p role="status">이달의 식단 계획을 불러오는 중…</p>:query.isError?<p role="alert">계획을 불러오지 못했어요. <button className="btn btn-ghost" onClick={()=>query.refetch()}>다시 시도</button></p>:!dayPlans.length?<div className="plan-day-empty"><strong>이날 저장한 식단이 없어요</strong><p>점이 있는 날짜를 선택하거나 코칭 대화에서 끼니를 제안받아 보세요.</p><Link className="btn btn-ghost" to="/coach?view=chat">식단 상담하기</Link></div>:<div className="nutrition-plan-grid nutrition-day-plans">{dayPlans.map(plan=><article className="nutrition-saved-card" key={plan.id}><PlanHeading plan={plan}/><h3>{plan.title}</h3><Foods plan={plan}/><Link className="btn btn-primary" to={'/meals/new?plan='+plan.id}>먹은 식단으로 기록</Link><IngredientLinks plan={plan}/><div className="plan-delete-footer">{confirm===plan.id?<div className="plan-delete-confirm"><p>이 식단 계획을 삭제할까요?<small>이미 기록한 식사는 유지돼요.</small></p><div><button className="btn btn-ghost" disabled={busy} onClick={()=>remove(plan.id)}>삭제 확인</button><button className="btn btn-ghost" disabled={busy} onClick={()=>setConfirm(null)}>취소</button></div></div>:<button className="btn btn-ghost coach-delete" disabled={busy} onClick={()=>setConfirm(plan.id)}>계획 삭제</button>}</div></article>)}</div>}{error&&<p role="alert">{error}</p>}</div></div></section>;
+ {query.isPending?<p role="status">이달의 식단 계획을 불러오는 중…</p>:query.isError?<p role="alert">계획을 불러오지 못했어요. <button className="btn btn-ghost" onClick={()=>query.refetch()}>다시 시도</button></p>:!dayPlans.length?<div className="plan-day-empty"><strong>이날 저장한 식단이 없어요</strong><p>점이 있는 날짜를 선택하거나 코칭 대화에서 끼니를 제안받아 보세요.</p><Link className="btn btn-ghost" to="/coach?view=chat">식단 상담하기</Link></div>:<div className="nutrition-plan-grid nutrition-day-plans">{dayPlans.map(plan=><article className="nutrition-saved-card" key={plan.id} id={'meal-plan-'+plan.id} tabIndex={-1}><PlanHeading plan={plan}/><h3>{plan.title}</h3><Foods plan={plan}/><MealRecordAction plan={plan} records={records}/><IngredientLinks plan={plan} returnTo={savedMealReturn(date,plan.id)}/><div className="plan-delete-footer">{confirm===plan.id?<div className="plan-delete-confirm"><p>이 식단 계획을 삭제할까요?<small>이미 기록한 식사는 유지돼요.</small></p><div><button className="btn btn-ghost" disabled={busy} onClick={()=>remove(plan.id)}>삭제 확인</button><button className="btn btn-ghost" disabled={busy} onClick={()=>setConfirm(null)}>취소</button></div></div>:<button className="btn btn-ghost coach-delete" disabled={busy} onClick={()=>setConfirm(plan.id)}>계획 삭제</button>}</div></article>)}</div>}{error&&<p role="alert">{error}</p>}</div></div></section>;
 }

@@ -11,6 +11,7 @@ import { uploadPostImage } from './postImages.js';
 import {preparePhoto,validatePhoto} from '../../shared/community.js';
 import StoredPostImage from './PostImage.jsx';
 import { ActivityPicker } from './ActivityAttachment.jsx';
+import { hasOwnAttachmentRoute } from './postActivities.js';
 import './feed.css';
 import './feed-polish.css';
 
@@ -30,10 +31,13 @@ function EditorForm({userId,crewId,crew,existing}){
   const location=useLocation();
   const from=location.state?.feedFrom;
   const feedBack=typeof from==='string'&&/^\/(crews\/[1-9]\d*|feed|me)(\?[^#]*)?$/.test(from)?from:crewId?`/crews/${crewId}`:'/feed';
-  const [includeRoute,setIncludeRoute]=useState(existing?.include_route===true);
+  const [includeRoute,setIncludeRoute]=useState(existing?.include_route===true&&!!existing?.activity_id);
   const [activityId,setActivityId]=useState(existing?.activity_id?String(existing.activity_id):null);
   const [form,setForm]=useState({content:existing?.content || '',kind:existing?.kind || 'free',visibility:existing?.visibility || (crewId?'crew':'public'),sport:existing?.sport || crew?.sport || ''});
   const [busy,setBusy]=useState(false),[error,setError]=useState('');const running=useRef(false),cache=useQueryClient(),navigate=useNavigate();
+  const route=useQuery({queryKey:[...queryKeys.attachmentOwn(userId,String(activityId)),'has-route'],queryFn:()=>hasOwnAttachmentRoute(supabase,userId,activityId),enabled:!!activityId,retry:false,gcTime:0});
+  const canShareRoute=!!activityId&&route.isSuccess&&route.data===true;
+  const routeUnconfirmed=includeRoute&&!canShareRoute;
   const [photo,setPhoto]=useState(null),[preview,setPreview]=useState(''),[removed,setRemoved]=useState(false);
   const {leaveGuard,markSaved}=useUnsavedForm({form,activityId,includeRoute,hasPhoto:!!photo,removedExisting:removed&&!!existing?.image_path});
   const uploaded=useRef(null),fileInput=useRef(null);
@@ -42,7 +46,7 @@ function EditorForm({userId,crewId,crew,existing}){
     try{validatePhoto(file);setPhoto(file);setRemoved(false);uploaded.current=null;setError('');}
     catch(cause){setError(cause.message);}event.target.value='';}
   const change=event=>setForm(previous=>({...previous,[event.target.name]:event.target.value}));
-  async function submit(event){event.preventDefault();if(running.current)return;running.current=true;setBusy(true);setError('');
+  async function submit(event){event.preventDefault();if(running.current||routeUnconfirmed)return;running.current=true;setBusy(true);setError('');
     try{
       postInput(form,crewId);
       let imagePath=removed?null:undefined;
@@ -55,10 +59,10 @@ function EditorForm({userId,crewId,crew,existing}){
   return <div className="feed-page post-editor-page">{leaveGuard}<header className="feed-heading"><h1>{existing?'글 수정':'글 쓰기'}</h1><Link to={existing?`/feed/${existing.id}`:feedBack} state={existing?{feedFrom:feedBack}:{restoreFeed:true}}>취소</Link></header>
     <p className="post-editor-intro">운동의 결과도, 과정도 좋아요. 오늘의 이야기를 함께 나눠요.</p>
     <form className="post-form" onSubmit={submit}><fieldset disabled={busy}>
-      {crew && <p>{crew.name} · 크루는 작성 후 바꿀 수 없어요.</p>}
+      {crew && <p>{crew.name}에 올리는 글</p>}
       <label>오늘 운동은 어땠나요?<textarea placeholder="함께 나누고 싶은 오늘의 운동 이야기를 적어 주세요." name="content" required maxLength={5000} rows={6} value={form.content} onChange={change}/></label><small>{form.content.length.toLocaleString()} / 5,000자</small>
       <div className="post-photo-editor"><div className="post-photo-heading"><div><h2>오늘의 한 장</h2><p>운동 풍경이나 식사를 사진으로 남겨 보세요.</p></div><span>선택 사항</span></div><input ref={fileInput} type="file" aria-label="게시물 사진 선택" hidden accept="image/jpeg,image/png,image/webp" onChange={choosePhoto}/><button type="button" className={'post-photo-select'+(preview||(!removed&&existing?.image_path)?' has-photo':'')} onClick={()=>fileInput.current?.click()}><span aria-hidden="true">＋</span>{preview||(!removed&&existing?.image_path)?'다른 사진 선택':'사진 추가하기'}</button>
-        <p className="feed-note">JPG·PNG·WebP · 최대 20MB. 사진 크기를 줄이고 위치 메타데이터를 제거해 저장해요.</p>
+        <p className="feed-note">JPG·PNG·WebP · 최대 20MB · 사진의 위치 정보는 제외해요.</p>
         {preview?<img className="post-image" src={preview} alt="첨부할 사진 미리보기"/>:!photo && !removed && existing?.image_path?<StoredPostImage path={existing.image_path}/>:null}
         {(photo || (!removed && existing?.image_path)) && <button type="button" className="btn btn-ghost" onClick={()=>{setPhoto(null);setRemoved(true);uploaded.current=null;if(fileInput.current)fileInput.current.value='';}}>사진 제거</button>}
         {removed && existing?.image_path && <><p className="feed-note">수정 저장 시 사진 첨부가 해제됩니다.</p><button type="button" className="btn btn-ghost" onClick={()=>setRemoved(false)}>기존 사진 유지</button></>}
@@ -68,12 +72,15 @@ function EditorForm({userId,crewId,crew,existing}){
       <label>공개 범위<select name="visibility" value={form.visibility} onChange={change}><option value="public">전체 공개 · 로그인한 모든 회원</option>{crewId && <option value="crew">크루 전용 · 승인된 크루원</option>}</select></label>
       {crewId && form.visibility==='public' && <p className="feed-note">크루 밖 회원도 전체 피드에서 이 글을 볼 수 있어요.</p>}
       <ActivityPicker value={activityId} disabled={busy} onChange={activity=>{setIncludeRoute(false);setActivityId(activity?String(activity.id):null);if(activity)setForm(previous=>({...previous,kind:'log',sport:activity.sport}));}}/>
-      {activityId && <label><input type="checkbox" checked={includeRoute} onChange={event=>setIncludeRoute(event.target.checked)}/>GPS 경로도 공유하기</label>}
-      {includeRoute && <p className="feed-note" role="status">{form.visibility==='public'?'전체 공개 글이므로 크루 밖 회원도 경로와 출발·도착 위치를 볼 수 있어요.':'승인된 크루원이 경로와 출발·도착 위치를 볼 수 있어요.'} GPS로 측정한 기록만 경로를 첨부할 수 있어요.</p>}
+      {activityId&&route.isPending&&<p className="feed-note" role="status">GPS 경로를 확인하고 있어요.</p>}
+      {activityId&&route.isError&&<div role="alert"><p className="feed-note">GPS 경로를 확인하지 못했어요.</p><button type="button" className="btn btn-ghost" disabled={busy||route.isFetching} onClick={()=>route.refetch()}>경로 다시 확인</button></div>}
+      {canShareRoute&&<label className="post-route-choice"><input type="checkbox" checked={includeRoute} onChange={event=>setIncludeRoute(event.target.checked)}/><span>GPS 경로도 공유하기</span></label>}
+      {routeUnconfirmed&&!route.isPending&&<div><p className="feed-note">경로를 확인하거나 공유에서 제외한 뒤 저장해 주세요.</p><button type="button" className="btn btn-ghost" onClick={()=>setIncludeRoute(false)}>경로 공유 제외</button></div>}
+      {includeRoute&&<p className="feed-note" role="status">{form.visibility==='public'?'로그인한 모든 회원에게':'승인된 크루원에게'} 경로와 출발·도착 위치가 공개돼요.</p>}
       <label>종목 · 선택<select name="sport" value={form.sport} disabled={!!activityId} onChange={change}><option value="">선택 안 함</option>{Object.entries(SPORTS).map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label>
 
       </div></section>
       {error && <p role="alert" className="feed-error">{error}</p>}
-      <div className="post-publish-bar"><p><strong>{form.visibility==='crew'?'크루 전용':'전체 공개'}</strong><span>{form.visibility==='crew'?'승인된 크루원에게 보여요.':'로그인한 모든 회원에게 보여요.'}</span></p><button className="btn btn-primary" type="submit">{busy?'저장 중…':existing?'수정 저장':'게시하기'}</button></div>
+      <div className="post-publish-bar"><p><strong>{form.visibility==='crew'?'크루 전용':'전체 공개'}</strong><span>{form.visibility==='crew'?'승인된 크루원에게 보여요.':'로그인한 모든 회원에게 보여요.'}</span></p><button className="btn btn-primary" type="submit" disabled={routeUnconfirmed}>{busy?'저장 중…':existing?'수정 저장':'게시하기'}</button></div>
     </fieldset></form></div>;
 }

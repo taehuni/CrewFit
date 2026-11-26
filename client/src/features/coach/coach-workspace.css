@@ -5,7 +5,7 @@
 .coach-page[data-coach-view=plans] > .coach-layout > .coach-conversation { display:none; }
 .coach-page > .page-head { margin-bottom:18px; }
 .coach-page > .coach-entry-back { margin-bottom:8px; }
-.coach-page .coach-conversation { height:clamp(620px,calc(100dvh - 190px),1000px); min-height:0; background:#f6f8f5; }
+.coach-page .coach-conversation { height:var(--coach-conversation-height,calc(100dvh - 300px)); min-height:0; max-height:none; background:#f6f8f5; }
 .coach-page .coach-history { padding:24px max(24px,calc((100% - 850px)/2)); }
 .coach-page .coach-history-toolbar { padding:16px 24px; }
 .coach-page .coach-history .coach-intro { border:0; background:#edf2ed; box-shadow:none; }
@@ -21,7 +21,7 @@
 .coach-page .coach-composer-heading span { font-size:11px; color:#526959; }
 .coach-page .coach-context-note { font-size:11px; color:#586b5e; line-height:1.6; margin:5px 0 0; }
 .coach-page .coach-composer textarea { margin:8px 0; border-radius:14px; }
-.coach-page .coach-composer .btn-primary { background:var(--accent-ink); }
+.workspace .coach-page .coach-composer .btn-primary { background:var(--accent-ink); color:#fff; }
 .coach-page[data-coach-view=plans] .coach-saved { border-radius:24px; padding:28px; }
 .coach-page[data-coach-view=plans] .saved-plan-layout { display:grid; grid-template-columns:minmax(0,1fr) minmax(290px,340px); align-items:start; gap:28px; }
 .coach-page[data-coach-view=plans] .saved-plan-calendar { grid-column:2; grid-row:1; position:static; }
@@ -58,7 +58,6 @@
 .coach-proposal-summary .btn { flex-shrink:0; background:white; font-size:13px; min-height:44px; }
 @media(max-width:760px) {
  .coach-page > .coach-mobile-views { max-width:none; }
- .coach-page .coach-conversation { height:clamp(380px,calc(100dvh - 250px),760px); min-height:0; max-height:none; }
  .coach-page .coach-history { padding:14px; }
  .coach-page .coach-history-toolbar { padding:12px; flex-wrap:wrap; gap:8px; }
  .coach-page .coach-history-toolbar > div { flex:1 1 110px; min-width:0; }
@@ -80,4 +79,45 @@
  .coach-review-panel { padding:16px; }
  .coach-review-panel > header { align-items:flex-start; flex-direction:column; }
  .coach-proposal-summary { flex-direction:column; align-items:stretch; padding:14px; }
+}
+/* Controls stay inside the visible viewport, including keyboard resizing. */
+.coach-page .coach-composer-heading{flex-wrap:wrap}
+.coach-page .coach-composer>div>small{min-width:0;overflow-wrap:anywhere}
+@media(max-width:959px){
+ .coach-page[data-coach-view=plans] .saved-plan-layout{display:flex;flex-direction:column;gap:20px}
+ .coach-page[data-coach-view=plans] :is(.saved-plan-calendar,.saved-plan-day){width:100%;min-width:0}
+ .coach-page[data-coach-view=plans] .plan-calendar{max-width:none}
+}
+@media(max-width:760px){
+ .coach-page .coach-history-toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:6px}
+ .coach-page .coach-history-toolbar strong{font-size:13px;overflow-wrap:anywhere}
+ .coach-page .coach-history-toolbar button{font-size:12px;padding:8px}
+ .coach-page .coach-composer-heading span{display:none}
+ .coach-page .coach-composer textarea{min-height:72px;max-height:120px}
+ .coach-page .coach-context-note{line-height:1.5}
+ .coach-page[data-coach-view=plans] .coach-saved{padding:14px}
+}
+
+.coach-page[data-coach-view=conversation]:not(.coach-settings-active) > .page-head{align-items:center;flex-direction:row;gap:12px;margin-bottom:12px}
+.coach-page[data-coach-view=conversation]:not(.coach-settings-active) > .page-head h1{font-size:clamp(24px,3vw,32px);margin:0;line-height:1.25}
+.coach-page[data-coach-view=conversation]:not(.coach-settings-active) > .page-head :is(.section-eyebrow,p){display:none}
+.coach-page[data-coach-view=conversation] > .coach-mobile-views{margin-bottom:12px}
+.coach-page[data-coach-view=conversation] .coach-page-actions{display:flex;width:auto;flex-shrink:0}
+.coach-page .coach-composer p[role=status]{margin:4px 0 0;font-size:12px;line-height:1.5}
+.coach-page .coach-composer p[role=alert]{margin:6px 0 0;max-height:70px;overflow:auto;font-size:13px}
+.coach-page .coach-composer textarea{min-height:60px;margin:6px 0;line-height:1.4}
+.coach-plan-request-trigger{border:0;background:transparent;color:#315c46;font:inherit;font-size:13px;min-height:44px;padding:10px 0;margin-top:12px;text-align:left;text-decoration:underline;cursor:pointer}
+.conversation-plan-request-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.conversation-plan-request-heading h3{font-size:16px;margin:0}
+.conversation-plan-request-heading button{background:transparent;border:0;min-height:44px;padding:8px;color:#315c46;font:inherit;font-size:13px;cursor:pointer}
+.saved-plan-pending{font-size:12px;color:#53685b}
+.coach-page[data-keyboard-open=true] > :is(.page-head,.coach-entry-back,.coach-mobile-views){display:none!important}
+.coach-page[data-keyboard-open=true] .coach-history-toolbar{display:none}
+.coach-page[data-keyboard-open=true] .coach-composer-heading{display:none}
+.coach-page[data-keyboard-open=true] .coach-composer textarea{min-height:44px;max-height:70px}
+@media(max-width:760px){
+ .coach-page .coach-history-toolbar{padding:8px 10px}
+ .workspace .coach-page .coach-conversation .coach-composer{padding:8px 12px}
+ .coach-page .coach-page-actions>.btn{font-size:12px;padding:8px 10px}
+ .coach-page .coach-composer textarea{min-height:58px}
 }

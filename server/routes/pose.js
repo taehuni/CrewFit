@@ -2,8 +2,9 @@ import express from 'express';
 import {createPoseClassifier} from '../services/poseClassification.js';
 import {createPoseVideos, MAX_VIDEO_BYTES} from '../services/poseVideos.js';
 import {createGymFeedback} from '../services/gymFeedback.js';
+import {createPoseConsents} from '../services/poseConsents.js';
 
-export function createPoseRouter(auth, {classify = createPoseClassifier(), videos = createPoseVideos(), feedback = createGymFeedback()} = {}) {
+export function createPoseRouter(auth, {classify = createPoseClassifier(), videos = createPoseVideos(), feedback = createGymFeedback(), consents = createPoseConsents()} = {}) {
   const router = express.Router();
   const uploads = new Set();
   const videoError = (res,error) => {
@@ -15,6 +16,12 @@ export function createPoseRouter(auth, {classify = createPoseClassifier(), video
     if (!req.user?.id) return res.status(401).json({error:{code:'unauthorized',message:'로그인 후 이용해 주세요.'}});
     next();
   };
+  router.get('/consents',auth,videoAuth,async(req,res)=>{
+    try{res.json(await consents.list(req.db,req.user.id));}catch(error){videoError(res,error);}
+  });
+  router.put('/consents',auth,videoAuth,express.json({limit:'2kb',inflate:false}),async(req,res)=>{
+    try{res.json(await consents.set(req.db,req.user.id,req.body));}catch(error){videoError(res,error);}
+  });
   router.put('/sessions/:id/video',auth,videoAuth,async (req,res,next) => {
     if (uploads.size >= 4 || uploads.has(req.user.id)) return res.status(429).json({error:{code:'upload_busy',message:'진행 중인 영상 보관이 끝난 뒤 다시 시도해 주세요.'}});
     uploads.add(req.user.id);
@@ -38,17 +45,17 @@ export function createPoseRouter(auth, {classify = createPoseClassifier(), video
   router.post('/classify', auth, express.json({limit: '1mb', inflate: false}), async (req, res) => {
     res.set('Cache-Control', 'no-store');
     if (!req.user?.id) return res.status(401).json({error: {code: 'unauthorized', message: '로그인 후 이용해 주세요.'}});
-    try {res.json(await classify(req.user.id, req.body));}
+    try {await consents.require(req.db,req.user.id,'recognition');res.json(await classify(req.user.id, req.body));}
     catch (error) {
-      const known = [400, 429, 502, 503].includes(error.status);
+      const known = [400, 403, 429, 502, 503].includes(error.status);
       res.status(known ? error.status : 502).json({error: {code: known ? error.code : 'classification_failed', message: known ? error.message : '운동을 인식하지 못했어요. 잠시 후 다시 시도해 주세요.'}});
     }
   });
   router.post('/feedback',auth,express.json({limit:'1mb',inflate:false}),async(req,res)=>{
     res.set('Cache-Control','no-store');
     if(!req.user?.id)return res.status(401).json({error:{code:'unauthorized',message:'로그인 후 이용해 주세요.'}});
-    try {res.json(await feedback(req.user.id,req.body));}
-    catch(error){const known=[400,429,502,503].includes(error.status);res.status(known?error.status:502).json({error:{code:known?error.code:'feedback_failed',message:known?error.message:'이번 구간을 확인하지 못했어요. 측정과 기록은 계속할 수 있어요.'}});}
+    try {await consents.require(req.db,req.user.id,'observation');res.json(await feedback(req.user.id,req.body));}
+    catch(error){const known=[400,403,429,502,503].includes(error.status);res.status(known?error.status:502).json({error:{code:known?error.code:'feedback_failed',message:known?error.message:'이번 구간을 확인하지 못했어요. 측정과 기록은 계속할 수 있어요.'}});}
   });
   router.use((error, req, res, next) => {
     res.set('Cache-Control', 'no-store');

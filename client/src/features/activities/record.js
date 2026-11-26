@@ -77,6 +77,7 @@ export async function saveActivity(db, userId, payload) {
       p_performed_on: activity.performed_on, p_duration_sec: activity.duration_sec,
       p_note: activity.note, p_sets: sets,
     })
-    : await db.from('activities').insert({ ...activity, user_id: userId });
+    : await db.from('activities').insert({ ...activity, user_id: userId }).select('id').single();
   if (result.error) throw result.error;
+  return activity.sport === 'gym' ? result.data : result.data?.id;
 }

@@ -52,8 +52,8 @@ test('editing preserves seconds, null distance and unrelated details; clearing l
 test('four added sports save through one own-user activities insert, never a gym RPC', async () => {
   for (const sport of ['walking', 'cycling', 'swimming', 'other']) {
     let inserted;
-    const db = { from(table) { assert.equal(table, 'activities'); return { insert: async row => { inserted = row; return {}; } }; } };
-    await saveActivity(db, 'owner', activityPayload({ ...base, sport, distance: '1000', lapCount: '20' }));
+    const db = { from(table) { assert.equal(table, 'activities'); return { insert: row => { inserted = row; return {select: columns=>{assert.equal(columns,'id');return {single:async()=>({data:{id:12}})};}}; } }; } };
+    assert.equal(await saveActivity(db, 'owner', activityPayload({ ...base, sport, distance: '1000', lapCount: '20' })),12);
     assert.equal(inserted.user_id, 'owner'); assert.equal(inserted.sport, sport);
     if (sport === 'swimming') assert.equal(inserted.details.lap_count, 20);
   }

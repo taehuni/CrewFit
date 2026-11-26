@@ -2,12 +2,14 @@ const SIDES={left:{shoulder:11,hip:23,knee:25,ankle:27},right:{shoulder:12,hip:2
 const invalid=message=>({valid:false,angle:null,side:null,points:null,message});
 
 /** Geometry only: this angle is not an assessment of exercise safety or form. */
-export function analyzePose(landmarks,width,height){
+export function analyzePose(landmarks,width,height,preferredSide=null){
  if(!Number.isFinite(width)||!Number.isFinite(height)||width<=0||height<=0)return invalid('카메라 화면을 준비하고 있어요.');
  if(!Array.isArray(landmarks))return invalid('옆모습과 전신이 화면에 보이도록 서 주세요.');
- // Deterministic preference avoids flipping sides as confidence scores fluctuate.
+ // Keep a previously selected side while it remains valid, then fall back.
  // The caller should reset tracking if the selected side changes between frames.
- for(const [side,indexes] of Object.entries(SIDES)){
+ const sides=preferredSide==='right'?['right','left']:['left','right'];
+ for(const side of sides){
+  const indexes=SIDES[side];
   const points={};let valid=true;
   for(const [name,index] of Object.entries(indexes)){
    const point=landmarks[index];

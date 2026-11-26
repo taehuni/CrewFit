@@ -1,0 +1,4 @@
+.coach-composer .coach-incoming-prompt{display:block;padding:10px 12px;margin-bottom:8px;border:1px solid #d7e2d3;border-radius:12px;background:#f3f7ef}
+.coach-incoming-prompt p{font-size:12px;line-height:1.5;margin:0 0 6px}
+.coach-incoming-prompt>div{display:flex;flex-wrap:wrap;gap:6px}
+.coach-incoming-prompt .btn{font-size:12px;min-height:44px;white-space:normal;padding:8px 12px}

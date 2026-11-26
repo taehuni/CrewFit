@@ -13,16 +13,24 @@ export default function PostInteractions({post}) {
   const [confirmation,setConfirmation]=useState(null),[busy,setBusy]=useState(false),[error,setError]=useState(''),[message,setMessage]=useState('');
   const lock=useRef(false);
   const section=useRef(null);
+  const commentRows=useRef(new Map()),deleteButtons=useRef(new Map()),cancelDelete=useRef(null);
   useEffect(()=>{if(window.location.hash==='#comments')section.current?.scrollIntoView({block:'start'});},[]);
+  useEffect(()=>{if(confirmation)cancelDelete.current?.focus();},[confirmation?.id]);
   const key=type=>queryKeys.postInteraction(user.id,String(post.id),type);
   const likes=useQuery({queryKey:key('summary'),queryFn:()=>likeSummary(supabase,user.id,post.id),retry:false,gcTime:0});
   const comments=useInfiniteQuery({queryKey:key('comments'),initialPageParam:null,queryFn:({pageParam})=>interactionPage(supabase,post.id,'comments',pageParam),getNextPageParam:page=>page.next,retry:false,gcTime:0});
   const people=useInfiniteQuery({queryKey:key('likes'),initialPageParam:null,queryFn:({pageParam})=>interactionPage(supabase,post.id,'likes',pageParam),getNextPageParam:page=>page.next,retry:false,gcTime:0,enabled:showLikes});
   async function refresh(){await Promise.all([cache.invalidateQueries({queryKey:queryKeys.postInteractionRoot(user.id,String(post.id))}),cache.invalidateQueries({queryKey:queryKeys.socialSummaryRoot(user.id)})]);}
   async function act(work,success){if(lock.current)return;lock.current=true;setBusy(true);setError('');setMessage('');
-    try{await work();success?.();await refresh();}catch(cause){setError(cause.message);}finally{lock.current=false;setBusy(false);}}
+    try{await work();success?.();await refresh();return true;}catch(cause){setError(cause.message);return false;}finally{lock.current=false;setBusy(false);}}
   const rows=comments.data?.pages.flatMap(page=>page.rows) || [];
-  return <section ref={section} id="comments" className="post-interactions" aria-label="댓글과 좋아요" aria-busy={busy}>
+  function closeDelete(){const id=confirmation.id;setConfirmation(null);requestAnimationFrame(()=>deleteButtons.current.get(id)?.focus());}
+  async function confirmDelete(){
+    const deleting=confirmation,index=rows.findIndex(comment=>comment.id===deleting.id),nextId=rows[index+1]?.id??rows[index-1]?.id;
+    const deleted=await act(()=>deleteComment(supabase,user.id,post.id,deleting),()=>{setConfirmation(null);setMessage('댓글을 삭제했어요.');});
+    if(deleted)requestAnimationFrame(()=>(commentRows.current.get(nextId)||section.current)?.focus({preventScroll:true}));
+  }
+  return <section ref={section} id="comments" tabIndex={-1} className="post-interactions" aria-label="댓글과 좋아요" aria-busy={busy}>
     <div className="feed-actions">
       <button className="btn btn-ghost like-toggle" disabled={busy || likes.isFetching || !likes.data || likes.isError} aria-pressed={likes.data?.liked || false} onClick={()=>act(()=>setLike(supabase,user.id,post.id,!likes.data.liked))}>{likes.data?.liked?'좋아요 취소':'좋아요'}{!likes.isError && likes.data?` · ${likes.data.count}`:''}</button>
       <button className="btn btn-ghost" aria-expanded={showLikes} onClick={()=>setShowLikes(value=>!value)}>좋아요한 회원</button>
@@ -38,18 +46,19 @@ export default function PostInteractions({post}) {
     </form>
     {error && <p role="alert" className="feed-error">{error}</p>}{message && <p role="status">{message}</p>}
     {comments.isPending?<p role="status">댓글을 불러오고 있어요.</p>:comments.isError?<p role="alert">댓글을 불러오지 못했어요. 새로고침해 주세요.</p>:!rows.length?<p>첫 댓글을 남겨보세요.</p>:null}
-    <ul className="comment-list">{rows.map(comment=><li key={comment.id}>
+    <ul className="comment-list">{rows.map(comment=><li key={comment.id} tabIndex={-1} ref={node=>{if(node)commentRows.current.set(comment.id,node);else commentRows.current.delete(comment.id);}}>
       <PostAuthor authorId={comment.author_id} nickname={comment.profiles?.nickname || '회원'} createdAt={comment.created_at} comment isAuthor={comment.author_id===post.author_id}/>
       {editing?.id===comment.id?<form className="comment-edit" onSubmit={event=>{event.preventDefault();act(()=>saveComment(supabase,user.id,post.id,draft,editing),()=>{setEditing(null);setMessage('댓글을 수정했어요.');});}}>
         <label>댓글 수정<textarea value={draft} onChange={event=>setDraft(event.target.value)} required maxLength={1000} rows={3} disabled={busy}/></label>
         <button className="btn btn-primary" disabled={busy}>수정 저장</button><button type="button" className="btn btn-ghost" disabled={busy} onClick={()=>setEditing(null)}>취소</button>
       </form>:<><p className="comment-content">{comment.content}</p><div className="feed-actions">
         {comment.author_id===user.id && <button className="btn btn-ghost" disabled={busy} onClick={()=>{setEditing(comment);setDraft(comment.content);setConfirmation(null);}}>댓글 수정</button>}
-        {(comment.author_id===user.id || post.crews?.owner_id===user.id) && <button className="btn btn-ghost" disabled={busy} onClick={()=>setConfirmation(comment)}>댓글 삭제</button>}
+        {(comment.author_id===user.id || post.crews?.owner_id===user.id) && <button type="button" className="btn btn-ghost" ref={node=>{if(node)deleteButtons.current.set(comment.id,node);else deleteButtons.current.delete(comment.id);}} disabled={busy} onClick={()=>setConfirmation(comment)}>댓글 삭제</button>}
       </div></>}
+      {confirmation?.id===comment.id&&<div className="comment-confirm" role="group" aria-label="댓글 삭제 확인" onKeyDown={event=>{if(event.key==='Escape'&&!busy){event.preventDefault();event.stopPropagation();closeDelete();}}}><p>이 댓글을 삭제할까요? 삭제하면 되돌릴 수 없어요.</p>
+        <button type="button" ref={cancelDelete} className="btn btn-ghost" disabled={busy} onClick={closeDelete}>취소</button><button type="button" className="btn btn-primary" disabled={busy} onClick={confirmDelete}>{busy?'삭제 중…':'댓글 삭제 확인'}</button>
+      </div>}
     </li>)}</ul>
     {comments.hasNextPage && <button className="btn btn-ghost" disabled={comments.isFetching || busy} onClick={()=>comments.fetchNextPage()}>댓글 더 보기</button>}
-    {confirmation && <div className="comment-confirm" role="group" aria-label="댓글 삭제 확인"><p>댓글을 삭제할까요? 삭제하면 복구할 수 없어요.</p>
-      <button className="btn btn-ghost" disabled={busy} onClick={()=>setConfirmation(null)}>취소</button><button className="btn btn-primary" disabled={busy} onClick={()=>act(()=>deleteComment(supabase,user.id,post.id,confirmation),()=>{setConfirmation(null);setMessage('댓글을 삭제했어요.');})}>댓글 삭제 확인</button></div>}
   </section>;
 }

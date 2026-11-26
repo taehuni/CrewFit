@@ -126,27 +126,25 @@ export default function NativeTrackingPage() {
   const seconds = Math.floor(track.elapsed / 1000), canSave = track.status === 'done' && track.points.length >= 2 && track.elapsed >= 1000;
   return <section className={`tracking-page native-tracking ${active ? 'tracking-active' : ''}`}>
     {guardDialog}
-    <header className="measurement-heading"><p className="measurement-eyebrow">GPS 운동 기록</p><h1>{track.status === 'idle' ? '오늘은 어떻게 움직일까요?' : active ? `${SPORT_LABEL[track.sport]} 측정 중` : '오늘의 움직임'}</h1><p className="measurement-subtitle">{track.status === 'idle' ? '운동을 고르면 이동한 경로와 시간을 담아드려요.' : active ? '내 페이스에 맞춰 움직여 보세요.' : '이동 경로를 확인하고 기록을 남겨보세요.'}</p></header>
+    <header className="measurement-heading"><h1>{track.status === 'idle' ? 'GPS 측정' : `${SPORT_LABEL[track.sport]} ${active ? '측정 중' : '측정 결과'}`}</h1></header>
     {!ready && <p role="status">{error ? '측정 상태를 다시 확인해 주세요.' : '기기에 남은 측정을 확인하고 있어요…'}</p>}
     {track.status === 'idle' && <>
       <fieldset className="tracking-sports" disabled={busy || !ready}><legend>운동 선택</legend>{TRACKING_SPORTS.map(value => <label key={value} data-selected={sport === value}><input type="radio" name="native-tracking-sport" checked={sport === value} onChange={() => setSport(value)}/><SportIcon sport={value}/><strong>{SPORT_LABEL[value]}</strong></label>)}</fieldset>
-      <div className="measurement-prep"><span className="measurement-eyebrow">시작하기 전에</span><h2>탁 트인 야외에서 시작해 주세요</h2><p>정확한 위치를 허용하면 준비 완료.<br/>첫 위치를 잡으면 시간이 시작돼요.</p><div className="measurement-capabilities"><span>이동 경로</span><span>운동 시간</span><span>이동 거리</span></div></div>
+      <div className="measurement-prep"><p>야외에서 정확한 위치를 허용해 주세요. 첫 위치를 찾으면 측정이 시작돼요.</p><p><strong>화면을 잠그거나 다른 앱으로 이동해도 위치를 수집해요.</strong> 운동을 마치면 측정을 종료해 주세요.</p></div>
       <button className="btn btn-primary" disabled={!sport || busy || !ready} onClick={() => action('start')}>{busy ? '시작 중…' : sport ? `${SPORT_LABEL[sport]} 측정 시작` : '종목을 선택해 주세요'}</button>
     </>}
     {track.status !== 'idle' && <dl className="tracking-metrics"><div><dt>운동 시간</dt><dd>{String(Math.floor(seconds / 3600)).padStart(2, '0')}:{String(Math.floor(seconds / 60) % 60).padStart(2, '0')}:{String(seconds % 60).padStart(2, '0')}</dd></div><div><dt>이동 거리</dt><dd>{(track.distance / 1000).toFixed(2)} <small>km</small></dd></div></dl>}
-    {track.message && <p role="status">{track.message}</p>}
-    {active && <><p className="tracking-status">{track.notificationsEnabled ? '화면을 꺼도 측정을 이어가요. 알림에서도 종료할 수 있어요.' : '화면을 꺼도 측정을 이어가요. 종료할 때 이 화면으로 돌아와 주세요.'}</p><button className="btn btn-primary" disabled={busy || !ready} onClick={() => action('stop')}>{busy ? '종료 중…' : '측정 종료'}</button><Link className="tracking-secondary" to="/home">측정은 계속하고 홈으로</Link></>}
+    {track.message && !['GPS 수집 중','측정을 종료했어요. 기록을 저장해 주세요.'].includes(track.message) && <p role="status">{track.message}</p>}
+    {active && <><p className="tracking-status">{track.notificationsEnabled ? '화면을 꺼도 위치를 수집해요. 알림에서도 종료할 수 있어요.' : '화면을 꺼도 위치를 수집해요. 종료할 때 이 화면으로 돌아와 주세요.'}</p><button className="btn btn-primary" disabled={busy || !ready} onClick={() => action('stop')}>{busy ? '종료 중…' : '측정 종료'}</button><Link className="tracking-secondary" to="/home">측정은 계속하고 홈으로</Link></>}
     {track.status === 'done' && <>
-      <h2 className="measurement-section-title">이동 경로</h2>
-      <p className="tracking-notice">{kept.current ? '측정 결과는 계정에 보관했어요. 저장을 다시 시도하면 이어서 완료합니다.' : '경로는 기기에 보관 중이에요. 저장하면 내 기록에서 볼 수 있어요.'}</p>
+      <p className="tracking-notice">{kept.current ? '계정에 보관했어요. 저장을 다시 시도해 주세요.' : '기기에 보관 중이에요. 저장하면 내 기록에 남아요.'}</p>
       <RouteMap points={track.points}/>
       {restoredSession !== track.sessionId && <div role={restoreError ? 'alert' : 'status'}><p>{restoreError ? '계정에 보관한 메모를 확인하지 못했어요. 확인 후 저장을 이어갈 수 있어요.' : '계정에 보관한 측정과 메모를 확인하고 있어요…'}</p>{restoreError && <button className="btn btn-ghost" onClick={() => setRestoreAttempt(value => value + 1)}>보관 상태 다시 확인</button>}</div>}
-      <label>운동 메모 <small>선택</small><textarea placeholder="오늘의 컨디션이나 기억하고 싶은 순간" value={note} maxLength={1000} disabled={busy || kept.current || restoredSession !== track.sessionId} onChange={event => setNote(event.target.value)}/></label>
-      <p>저장 전 작성한 메모는 이 화면을 나가면 사라져요.</p>
+      <label>운동 메모 <small>선택 · 저장 전 나가면 메모는 사라져요.</small><textarea value={note} maxLength={1000} disabled={busy || kept.current || restoredSession !== track.sessionId} onChange={event => setNote(event.target.value)}/></label>
       <div className="tracking-actions measurement-save-actions"><button className="btn btn-primary" disabled={busy || !canSave || !ready || restoredSession !== track.sessionId} onClick={() => save(false)}>{busy ? '처리 중…' : '운동 기록으로 저장'}</button><button className="btn btn-ghost" disabled={busy || Boolean(savedId.current) || !canSave || !ready || restoredSession !== track.sessionId} onClick={() => save(true)}>측정 결과만 보관</button></div>
-      <p>나중에 작성하려면 결과만 보관하세요. 운동 기록으로 저장하면 통계에 반영돼요.</p>
-      {!canSave && <p className="tracking-notice">저장할 만큼 충분한 이동 경로가 없어요. 야외에서 잠시 이동하며 다시 측정해 주세요.</p>}
-      <p>저장한 경로는 기본적으로 나만 볼 수 있어요. 피드에서 경로 공유를 켠 글에 첨부하면 글의 공개 범위를 따릅니다.</p>
+      <p className="tracking-help">결과만 보관하면 나중에 작성할 수 있어요. 운동 기록으로 저장해야 목표·통계에 반영돼요.</p>
+      {!canSave && <p className="tracking-notice">이동 경로가 부족해 저장할 수 없어요. 야외에서 다시 측정해 주세요.</p>}
+      <p className="tracking-help">경로는 나만 볼 수 있어요. 경로 공유를 켠 게시글에서는 글의 공개 범위를 따라요.</p>
       <button className="btn measurement-discard" disabled={busy} onClick={() => setDiscard(true)}>기기에서 측정 삭제</button>
       {discard && <div role="group" aria-label="기기 측정 삭제 확인"><p>기기에 남은 경로와 메모를 삭제할까요? 이미 계정에 저장한 기록은 유지돼요.</p><div className="tracking-actions"><button className="btn btn-ghost" disabled={busy} onClick={() => setDiscard(false)}>계속 보기</button><button className="btn btn-ghost" disabled={busy} onClick={discardLocal}>기기에서 삭제</button></div></div>}
     </>}

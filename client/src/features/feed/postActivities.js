@@ -1,10 +1,18 @@
 import { validActivityId } from '../activities/activityDetail.js';
+import { TRACKING_SPORTS } from '../tracking/tracking.js';
 const FIELDS='id,sport,performed_on,duration_sec,distance_m';
 export async function ownAttachment(db,userId,id) {
   if(!userId || !validActivityId(String(id)))throw new Error('올바른 본인 기록을 선택해 주세요.');
   const {data,error}=await db.from('activities').select(FIELDS).eq('id',id).eq('user_id',userId).maybeSingle();
   if(error || !data)throw new Error('기록이 삭제되었거나 본인 기록이 아니에요. 다시 선택해 주세요.');
   return data;
+}
+export async function hasOwnAttachmentRoute(db,userId,id) {
+  const activity=await ownAttachment(db,userId,id);
+  if(!TRACKING_SPORTS.includes(activity.sport))return false;
+  const {data,error}=await db.from('activity_routes').select('activity_id').eq('activity_id',activity.id).maybeSingle();
+  if(error)throw new Error('GPS 경로를 확인하지 못했어요.');
+  return String(data?.activity_id)===String(activity.id);
 }
 export async function attachmentChoices(db,userId,cursor=null) {
   if(!userId)throw new Error('로그인이 필요해요.');

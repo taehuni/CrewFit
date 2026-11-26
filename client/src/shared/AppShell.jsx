@@ -36,7 +36,7 @@ export function Wordmark() {
 export default function AppShell() {
   const { user, token } = useAuth();
   const me = useQuery({ queryKey: queryKeys.me(user.id), queryFn: () => api('/me', { token }) });
-  return <WorkspaceFrame nickname={me.data?.profile?.nickname} userId={user.id} number={bibNumber(user.id)} />;
+  return <WorkspaceFrame key={user.id} nickname={me.data?.profile?.nickname} userId={user.id} number={bibNumber(user.id)} />;
 }
 
 // 하나의 nav를 데스크톱 상단 / 모바일 하단에 배치.

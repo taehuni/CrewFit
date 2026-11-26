@@ -23,6 +23,9 @@
 .post-form { background:var(--surface); border:1px solid var(--line); padding:24px; }
 .post-form fieldset { border:0; padding:0; min-width:0; display:grid; gap:18px; }
 .post-form label { display:grid; gap:8px; font-size:.875rem; }
+.post-editor-page .post-form label.post-route-choice { display:inline-flex; align-items:center; gap:10px; min-height:44px; cursor:pointer; }
+.post-editor-page .post-form .post-route-choice > input[type=checkbox] { flex:0 0 18px; width:18px; min-width:18px; max-width:18px; height:18px; min-height:18px; max-height:18px; margin:0; padding:0; box-sizing:border-box; accent-color:var(--accent); }
+.post-route-choice > span { min-width:0; overflow-wrap:anywhere; }
 .post-form select,.post-form textarea { width:100%; min-width:0; padding:12px; border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:var(--radius); font:inherit; }
 .post-form textarea { resize:vertical; }
 .feed-error { color:var(--danger); }
